@@ -60,7 +60,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        PDFBoxResourceLoader.init(this@MainActivity)
         setContent {
             var transcript = remember {
                 mutableStateOf<Transcript?>(null)

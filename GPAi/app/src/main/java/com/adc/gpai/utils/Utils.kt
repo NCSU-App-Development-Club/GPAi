@@ -5,14 +5,25 @@ import android.net.Uri
 import com.adc.gpai.models.Course
 import com.adc.gpai.models.Term
 import com.adc.gpai.models.Transcript
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import java.io.InputStream
 
+/**
+ * Utils class containing pdf parsing and utility functions for the application.
+ */
 public class Utils {
     companion object {
 
+        /**
+         * Reads text from a PDF file located at the given URI.
+         * @param context The application context.
+         * @param pdfUri The URI of the PDF file.
+         * @return The extracted text from the PDF file, or null if an error occurred.
+         */
         fun readTextFromPdf(context: Context, pdfUri: Uri): String? {
+            PDFBoxResourceLoader.init(context)
             var document: PDDocument? = null
             return try {
                 // Open the PDF file as an InputStream
@@ -31,6 +42,11 @@ public class Utils {
             }
         }
 
+        /**
+         * Parses a transcript text into a Transcript object.
+         * @param transcriptText The text representing the transcript.
+         * @return The parsed Transcript object.
+         */
         fun parseTranscript(transcriptText: String): Transcript {
             val termPattern = Regex("""\d{4} \w+ Term""") // Pattern to identify terms (e.g., "2021 Fall Term")
             val coursePattern = Regex("""([A-Z]{1,4}\s+\d{3}\**)\s+([\w\s\-&]+)\s+(\d+\.\d{3})\s+(\d+\.\d{3})\s+([A-Z\+\-]*)\s+(\d+\.\d{3})""")
