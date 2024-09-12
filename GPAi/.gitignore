@@ -13,3 +13,53 @@
 .externalNativeBuild
 .cxx
 local.properties
+
+# Gradle files
+.gradle/
+build/
+
+# Gradle Wrapper files
+gradle-wrapper.jar
+gradle-wrapper.properties
+
+# Local configuration file (sdk path, etc)
+local.properties
+
+# Log and database files
+*.log
+*.sqlite
+*.hprof
+
+# Android Studio specific files
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# User-specific configuration files
+*.keystore
+.DS_Store
+
+# Mac OS and Linux files
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/.name
+.idea/codeStyles/
+
+# Windows files
+Thumbs.db
+desktop.ini
+
+# Proguard and Logs
+proguard/
+proguard-rules.pro
+lint/intermediates/
+lint/generated/
+
+# Compiled files
+*.class
+*.jar
+*.war
+
