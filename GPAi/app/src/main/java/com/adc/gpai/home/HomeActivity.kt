@@ -56,6 +56,13 @@ import com.adc.gpai.ui.theme.GPAiTheme
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 /**
+ * Enum class representing the possible states of the home view (Forecaster or Advisor).
+ */
+enum class HomeViewState {
+    FORECASTER, ADVISOR
+}
+
+/**
  * Main activity of the application that sets up the layout and navigation using Jetpack Compose.
  */
 class HomeActivity : ComponentActivity() {
@@ -104,7 +111,7 @@ class HomeActivity : ComponentActivity() {
                             .padding(innerPadding) // Adjusts for inner padding of the scaffold
                     ) {
                         // Navigation graph for handling screen transitions based on homeState
-                        NavGraph(
+                        HomeNavGraph(
                             navController = navController,
                             homeState = homeState.value,
                             modifier = Modifier
@@ -139,7 +146,7 @@ class HomeActivity : ComponentActivity() {
  * @param modifier Modifier to apply to the NavGraph container.
  */
 @Composable
-fun NavGraph(
+fun HomeNavGraph(
     navController: NavHostController, homeState: HomeViewState, modifier: Modifier = Modifier
 ) {
     // Determine the start destination based on the current home state
@@ -295,18 +302,11 @@ fun ToggleButton(
 }
 
 /**
- * Enum class representing the possible states of the home view (Forecaster or Advisor).
- */
-enum class HomeViewState {
-    FORECASTER, ADVISOR
-}
-
-/**
  * A preview function for displaying the toggle button and navigation content in Android Studio's preview.
  */
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview2() {
+fun HomePreview() {
     GPAiTheme {
         // Mock state for the preview
         var homeState = remember { mutableStateOf(HomeViewState.FORECASTER) }
@@ -315,7 +315,7 @@ fun GreetingPreview2() {
         // Column layout for the preview
         Column {
             // Display the NavGraph and HomeViewToggle for preview purposes
-            NavGraph(
+            HomeNavGraph(
                 navController = navController,
                 homeState = homeState.value,
                 modifier = Modifier.weight(0.1f) // Takes 10% of the preview screen height

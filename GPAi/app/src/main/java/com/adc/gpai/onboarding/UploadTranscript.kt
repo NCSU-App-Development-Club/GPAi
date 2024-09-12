@@ -268,7 +268,7 @@ val sampleTranscript = Transcript(
  */
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun UploadTranscriptPreview() {
     GPAiTheme {
         RequestFileButton(onFileSelected = { fileUri -> {} })
     }
