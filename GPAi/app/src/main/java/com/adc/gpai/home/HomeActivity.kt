@@ -1,9 +1,11 @@
 package com.adc.gpai.home
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
@@ -25,7 +27,12 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -33,6 +40,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -50,6 +59,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.adc.gpai.onboarding.OnboardingActivity
 import com.adc.gpai.ui.theme.BrandDarkPurple
 import com.adc.gpai.ui.theme.BrandPurple
 import com.adc.gpai.ui.theme.GPAiTheme
@@ -67,6 +77,9 @@ enum class HomeViewState {
  */
 class HomeActivity : ComponentActivity() {
 
+    // Instantiate the ViewModel
+    private val homeViewModel: HomeViewModel by viewModels()
+
     /**
      * Called when the activity is starting. Sets up the UI, navigation controller, and
      * manages the state of the home screen.
@@ -79,60 +92,7 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // Enables edge-to-edge mode for better UI experience on modern devices
         setContent {
-            // Sets the theme for the app's UI
-            GPAiTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    topBar = {
-                        // Defines the top app bar with a centered title
-                        TopAppBar(
-                            title = {
-                                Text(
-                                    text = "GPAi",
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 40.sp,
-                                    textAlign = TextAlign.Center
-                                )
-                            },
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    }
-                ) { innerPadding ->
-                    // Manages the state of the current home view (Forecaster or Advisor)
-                    var homeState = remember { mutableStateOf(HomeViewState.FORECASTER) }
-
-                    // Create a NavController for navigating between screens with animations
-                    val navController = rememberAnimatedNavController()
-
-                    // Layout for the home screen content
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize() // Ensures the column takes up the whole screen
-                            .padding(innerPadding) // Adjusts for inner padding of the scaffold
-                    ) {
-                        // Navigation graph for handling screen transitions based on homeState
-                        HomeNavGraph(
-                            navController = navController,
-                            homeState = homeState.value,
-                            modifier = Modifier
-                                .weight(0.9f) // Takes up 90% of the screen height
-                                .fillMaxSize()
-                        )
-                        Spacer(modifier = Modifier.padding(bottom = 16.dp)) // Adds space below the NavGraph
-
-                        // Toggle button at the bottom of the screen to switch between views
-                        HomeViewToggle(
-                            mutableState = homeState,
-                            navController = navController,
-                            modifier = Modifier
-                                .fillMaxWidth() // Takes full width
-                                .weight(0.1f) // Takes up 10% of the screen height
-                        )
-
-                        Spacer(modifier = Modifier.padding(bottom = 16.dp)) // Adds space below the toggle
-                    }
-                }
-            }
+            HomeScreen(homeViewModel = homeViewModel)
         }
     }
 }
@@ -144,6 +104,100 @@ class HomeActivity : ComponentActivity() {
  * @param navController The navigation controller used to manage navigation between composables.
  * @param homeState The current state of the home view, which determines the start destination.
  * @param modifier Modifier to apply to the NavGraph container.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GPAiAppBar() {
+    val context = LocalContext.current
+    TopAppBar(
+        title = {
+            Text(
+                text = "GPAi",
+                fontWeight = FontWeight.Black,
+                fontSize = 40.sp,
+                textAlign = TextAlign.Center
+            )
+        },
+        actions = {
+            IconButton(
+                onClick = {
+                    context.startActivity(Intent(context, OnboardingActivity::class.java))
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Refresh,
+                    contentDescription = "Refresh", // Provide a content description
+                )
+            }
+        },
+        modifier = Modifier.padding(8.dp)
+    )
+}
+
+/**
+ * HomeScreen is the main Composable function that represents the home screen of the app.
+ * It includes a top bar, a navigation graph, and a toggle button to switch between
+ * Forecaster and Advisor views.
+ *
+ * @param homeViewModel The ViewModel that provides the state for the home screen.
+ */
+@OptIn(ExperimentalAnimationApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun HomeScreen(homeViewModel: HomeViewModel) {
+    val context = LocalContext.current
+    // Sets the theme for the app's UI
+    GPAiTheme {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = { GPAiAppBar() }
+        ) { innerPadding ->
+            // Manages the state of the current home view (Forecaster or Advisor)
+            val homeState by homeViewModel.homeState.observeAsState(HomeViewState.FORECASTER)
+
+            // Create a NavController for navigating between screens with animations
+            val navController = rememberAnimatedNavController()
+
+            // Layout for the home screen content
+            Column(
+                modifier = Modifier
+                    .fillMaxSize() // Ensures the column takes up the whole screen
+                    .padding(innerPadding) // Adjusts for inner padding of the scaffold
+            ) {
+                // Navigation graph for handling screen transitions based on homeState
+                HomeNavGraph(
+                    navController = navController,
+                    homeState = homeState,
+                    modifier = Modifier
+                        .weight(0.9f) // Takes up 90% of the screen height
+                        .fillMaxSize()
+                )
+                Spacer(modifier = Modifier.padding(bottom = 16.dp)) // Adds space below the NavGraph
+
+                // Toggle button at the bottom of the screen to switch between views
+                HomeViewToggle(
+                    homeState = homeState,
+                    navController = navController,
+                    onToggleState = { newState ->
+                        homeViewModel.setHomeState(newState) // Update the state in ViewModel
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth() // Takes full width
+                        .weight(0.1f) // Takes up 10% of the screen height
+                )
+
+                Spacer(modifier = Modifier.padding(bottom = 16.dp)) // Adds space below the toggle
+            }
+        }
+    }
+}
+
+/**
+ * HomeNavGraph manages navigation within the home screen based on the current state
+ * (Forecaster or Advisor). It uses animated transitions for navigating between screens.
+ *
+ * @param navController The NavController used to manage screen navigation.
+ * @param homeState The current state that determines the initial screen (Forecaster or Advisor).
+ * @param modifier The modifier applied to the NavHost composable.
  */
 @Composable
 fun HomeNavGraph(
@@ -186,24 +240,24 @@ fun HomeNavGraph(
     }
 }
 
+
 /**
  * A composable function for the toggle button at the bottom of the screen that allows switching
  * between the Forecaster and Advisor views.
  *
- * @param mutableState The current state of the home view, which determines the toggle's position.
+ * @param homeState The current state of the home view, which determines the toggle's position.
  * @param navController The navigation controller used to navigate between composables based on the toggle.
  * @param modifier Modifier to apply to the toggle button container.
  */
 @Composable
 fun HomeViewToggle(
-    mutableState: MutableState<HomeViewState>,
-    navController: NavController, // Pass NavController here to navigate on toggle
+    homeState: HomeViewState,
+    onToggleState: (HomeViewState) -> Unit, // Use this to update state in ViewModel
+    navController: NavController,
     modifier: Modifier = Modifier
 ) {
-    // Animation transition between Forecaster and Advisor states
-    val transition = updateTransition(mutableState.value, label = "state transition")
+    val transition = updateTransition(homeState, label = "state transition")
 
-    // Animate the X offset of the toggle button based on the selected state
     val offsetX by transition.animateDp(label = "offset animation") { state ->
         when (state) {
             HomeViewState.FORECASTER -> 0.dp
@@ -211,13 +265,9 @@ fun HomeViewToggle(
         }
     }
 
-    // Common modifier for toggle buttons
     val commonModifier = Modifier.fillMaxSize()
-
-    // Calculate the width of each toggle button based on screen width
     val boxWidth = LocalConfiguration.current.screenWidthDp.dp / 2 - 16.dp
 
-    // Main container for the toggle, with rounded corners and background color
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -226,34 +276,32 @@ fun HomeViewToggle(
             .background(BrandDarkPurple)
             .height(75.dp)
     ) {
-        // Movable box that represents the active state (Forecaster or Advisor)
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .offset(x = offsetX) // Position based on the animated offset
+                .offset(x = offsetX)
                 .clip(RoundedCornerShape(12.dp))
                 .background(BrandPurple)
                 .fillMaxHeight()
-                .width(boxWidth) // Width based on screen size
+                .width(boxWidth)
         ) {}
 
-        // Row containing the toggle buttons for switching between states
         Row(modifier = Modifier.fillMaxSize()) {
-            // Toggle button for the Forecaster view
             ToggleButton(
                 text = "Forecaster",
-                commonModifier.weight(1f),
-                mutableState,
-                HomeViewState.FORECASTER,
-                navController
+                modifier = commonModifier.weight(1f),
+                currentState = homeState,
+                targetState = HomeViewState.FORECASTER,
+                onToggleState = onToggleState,
+                navController = navController
             )
-            // Toggle button for the Advisor view
             ToggleButton(
                 text = "Advisor",
-                commonModifier.weight(1f),
-                mutableState,
-                HomeViewState.ADVISOR,
-                navController
+                modifier = commonModifier.weight(1f),
+                currentState = homeState,
+                targetState = HomeViewState.ADVISOR,
+                onToggleState = onToggleState,
+                navController = navController
             )
         }
     }
@@ -273,8 +321,9 @@ fun HomeViewToggle(
 fun ToggleButton(
     text: String,
     modifier: Modifier,
-    mutableState: MutableState<HomeViewState>,
+    currentState: HomeViewState,
     targetState: HomeViewState,
+    onToggleState: (HomeViewState) -> Unit,
     navController: NavController // Use NavController to navigate on click
 ) {
     // Button container with clickable modifier to switch state
@@ -283,11 +332,12 @@ fun ToggleButton(
         modifier = modifier
             .fillMaxSize()
             .clickable {
-                mutableState.value = targetState // Update the home state
-                // Navigate to the selected screen (Forecaster or Advisor)
-                when (targetState) {
-                    HomeViewState.FORECASTER -> navController.navigate("forecaster")
-                    HomeViewState.ADVISOR -> navController.navigate("advisor")
+                if (targetState != currentState) {
+                    onToggleState(targetState)
+                    when (targetState) {
+                        HomeViewState.FORECASTER -> navController.navigate("forecaster")
+                        HomeViewState.ADVISOR -> navController.navigate("advisor")
+                    }
                 }
             }
     ) {
@@ -295,7 +345,7 @@ fun ToggleButton(
         Text(
             text,
             color = Color.White,
-            fontWeight = if (mutableState.value == targetState) FontWeight.Black else FontWeight.Normal,
+            fontWeight = if (currentState == targetState) FontWeight.Black else FontWeight.Normal,
             fontSize = 20.sp
         )
     }
@@ -308,6 +358,7 @@ fun ToggleButton(
 @Composable
 fun HomePreview() {
     GPAiTheme {
+
         // Mock state for the preview
         var homeState = remember { mutableStateOf(HomeViewState.FORECASTER) }
         val navController = rememberNavController()
@@ -320,7 +371,9 @@ fun HomePreview() {
                 homeState = homeState.value,
                 modifier = Modifier.weight(0.1f) // Takes 10% of the preview screen height
             )
-            HomeViewToggle(mutableState = homeState, navController = navController)
+            HomeViewToggle(homeState = homeState.value, navController = navController, onToggleState = {
+                homeState.value = it
+            })
         }
     }
 }

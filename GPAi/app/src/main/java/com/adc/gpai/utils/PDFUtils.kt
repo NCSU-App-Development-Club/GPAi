@@ -13,7 +13,7 @@ import java.io.InputStream
 /**
  * Utils class containing pdf parsing and utility functions for the application.
  */
-public class Utils {
+public class PDFUtils {
     companion object {
 
         /**

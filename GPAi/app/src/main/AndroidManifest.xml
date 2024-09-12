@@ -13,9 +13,8 @@
         android:theme="@style/Theme.GPAi"
         tools:targetApi="31">
         <activity
-            android:name=".home.HomeActivity"
+            android:name=".onboarding.OnboardingActivity"
             android:exported="true"
-            android:label="@string/title_activity_home"
             android:theme="@style/Theme.GPAi">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,9 +23,8 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".onboarding.UploadTranscript"
+            android:name=".home.HomeActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.GPAi">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

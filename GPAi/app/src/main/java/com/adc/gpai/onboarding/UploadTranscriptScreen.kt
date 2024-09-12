@@ -1,12 +1,8 @@
 package com.adc.gpai.onboarding
 
 import android.net.Uri
-import android.os.Bundle
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,12 +27,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.adc.gpai.R
 import com.adc.gpai.models.Course
 import com.adc.gpai.models.Term
@@ -45,7 +44,7 @@ import com.adc.gpai.ui.theme.BrandFailureRed
 import com.adc.gpai.ui.theme.BrandPurple
 import com.adc.gpai.ui.theme.BrandSuccessGreen
 import com.adc.gpai.ui.theme.GPAiTheme
-import com.adc.gpai.utils.Utils
+import com.adc.gpai.utils.PDFUtils
 
 /**
  * Enum representing the current state of the file upload process.
@@ -55,67 +54,66 @@ enum class UploadState {
 }
 
 /**
- * Main activity for uploading a transcript. This activity contains the UI and logic
+ * Screen for uploading a transcript.
+ *
+ * This activity contains the UI and logic
  * for uploading and parsing a transcript PDF.
  */
-class UploadTranscript : ComponentActivity() {
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge() // Enable edge-to-edge UI on the screen.
+@Composable
+fun UploadTranscriptScreen(navController: NavHostController? = null) {
+    // Transcript state, initially null until a file is uploaded and parsed.
+    var transcript = remember {
+        mutableStateOf<Transcript?>(null)
+    }
 
-        // Set the Compose UI content
-        setContent {
-            // Transcript state, initially null until a file is uploaded and parsed.
-            var transcript = remember {
-                mutableStateOf<Transcript?>(null)
-            }
+    // State to track the upload process: IDLE, SUCCESS, or ERROR.
+    var uploadState = remember { mutableStateOf(UploadState.IDLE) }
 
-            // State to track the upload process: IDLE, SUCCESS, or ERROR.
-            var uploadState = remember { mutableStateOf(UploadState.IDLE) }
+    // Apply the custom theme to the UI.
+    val context = LocalContext.current
+    GPAiTheme {
+        Column(
+            modifier = Modifier
+                .fillMaxSize() // Fill the entire screen.
+                .padding(16.dp),
+            verticalArrangement = Arrangement.Center, // Center content vertically.
+            horizontalAlignment = Alignment.CenterHorizontally // Center content horizontally.
+        ) {
+            Column(
+                modifier = Modifier.weight(1f), // Weighting the column to fill remaining space.
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Spacer(modifier = Modifier.weight(1f)) // Spacer to add empty space above.
+                Text(text = "Please upload your transcript")
 
-            // Apply the custom theme to the UI.
-            GPAiTheme {
-                Column(
+                // Button to request a file upload from the user.
+                RequestFileButton(
                     modifier = Modifier
-                        .fillMaxSize() // Fill the entire screen.
-                        .padding(16.dp),
-                    verticalArrangement = Arrangement.Center, // Center content vertically.
-                    horizontalAlignment = Alignment.CenterHorizontally // Center content horizontally.
-                ) {
-                    Column(
-                        modifier = Modifier.weight(1f), // Weighting the column to fill remaining space.
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Spacer(modifier = Modifier.weight(1f)) // Spacer to add empty space above.
-                        Text(text = "Please upload your transcript")
+                        .padding(vertical = 16.dp), // Add padding around the button.
+                    buttonState = uploadState,
+                    onFileSelected = { fileUri ->
+                        // Read text from the selected PDF file.
+                        val pdfText = PDFUtils.readTextFromPdf(context, fileUri)
 
-                        // Button to request a file upload from the user.
-                        RequestFileButton(
-                            modifier = Modifier
-                                .padding(vertical = 16.dp), // Add padding around the button.
-                            buttonState = uploadState,
-                            onFileSelected = { fileUri ->
-                                // Read text from the selected PDF file.
-                                val pdfText = Utils.readTextFromPdf(this@UploadTranscript, fileUri)
+                        // If file reading fails, set the state to ERROR.
+                        if (pdfText == null) {
+                            uploadState.value = UploadState.ERROR
+                        } else {
+                            // Parse the transcript from the PDF content.
+                            transcript.value = PDFUtils.parseTranscript(pdfText)
+                            Log.d("Transcript", transcript.value.toString())
 
-                                // If file reading fails, set the state to ERROR.
-                                if (pdfText == null) {
-                                    uploadState.value = UploadState.ERROR
-                                } else {
-                                    // Parse the transcript from the PDF content.
-                                    transcript.value = Utils.parseTranscript(pdfText)
-                                    Log.d("Transcript", transcript.value.toString())
-
-                                    // Check if parsing was successful and update the state accordingly.
-                                    if (transcript.value != null && transcript.value!!.terms.isEmpty()) {
-                                        uploadState.value = UploadState.ERROR
-                                    } else {
-                                        uploadState.value = UploadState.SUCCESS
-                                    }
-                                }
-                            })
-                    }
+                            // Check if parsing was successful and update the state accordingly.
+                            if (transcript.value != null && transcript.value!!.terms.isEmpty()) {
+                                uploadState.value = UploadState.ERROR
+                            } else {
+                                uploadState.value = UploadState.SUCCESS
+                            }
+                        }
+                    })
+                Button(onClick = { navController?.navigate("modify") }) {
+                    Text(text = "Next")
                 }
             }
         }
@@ -270,6 +268,7 @@ val sampleTranscript = Transcript(
 @Composable
 fun UploadTranscriptPreview() {
     GPAiTheme {
-        RequestFileButton(onFileSelected = { fileUri -> {} })
+        val navController = rememberNavController()
+        UploadTranscriptScreen(navController)
     }
 }
