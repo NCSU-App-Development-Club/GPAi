@@ -29,8 +29,8 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
         with:
-          api-level: 34 # Set the API level you need
-          build-tools: '34.0.0' # Set the version of the build tools
+          api-level: 34
+          build-tools: '34.0.0'
           target: 'android-34'
 
       # Step 4: Cache Gradle dependencies
@@ -44,22 +44,30 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # Step 5: Build the app
+      # Step 5: Grant execute permission for gradlew
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+        working-directory: GPAi
+
+      # Step 6: Build the app
       - name: Build with Gradle
         run: ./gradlew build
+        working-directory: GPAi
 
-      # Step 6: Run Unit Tests
+      # Step 7: Run Unit Tests
       - name: Run Unit Tests
         run: ./gradlew test
+        working-directory: GPAi
 
-      # Step 7: Run UI Tests (Instrumented tests)
+      # Step 8: Run UI Tests (Instrumented tests)
       - name: Run Instrumented UI Tests
         run: ./gradlew connectedAndroidTest
+        working-directory: GPAi
 
-      # Step 8: Archive test reports (Optional)
+      # Step 9: Archive test reports (Optional)
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: test-results
-          path: app/build/reports/tests/
+          path: GPAi/app/build/reports/tests/
