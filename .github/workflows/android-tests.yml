@@ -1,0 +1,65 @@
+name: Android CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Unit and UI Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the code
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      # Step 2: Set up JDK 17 (or another version your app uses)
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: 17
+
+      # Step 3: Set up Android SDK
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v2
+        with:
+          api-level: 34 # Set the API level you need
+          build-tools: '34.0.0' # Set the version of the build tools
+          target: 'android-34'
+
+      # Step 4: Cache Gradle dependencies
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      # Step 5: Build the app
+      - name: Build with Gradle
+        run: ./gradlew build
+
+      # Step 6: Run Unit Tests
+      - name: Run Unit Tests
+        run: ./gradlew test
+
+      # Step 7: Run UI Tests (Instrumented tests)
+      - name: Run Instrumented UI Tests
+        run: ./gradlew connectedAndroidTest
+
+      # Step 8: Archive test reports (Optional)
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: app/build/reports/tests/
