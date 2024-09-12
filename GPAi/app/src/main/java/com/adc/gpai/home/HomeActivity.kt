@@ -49,6 +49,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -289,7 +290,7 @@ fun HomeViewToggle(
         Row(modifier = Modifier.fillMaxSize()) {
             ToggleButton(
                 text = "Forecaster",
-                modifier = commonModifier.weight(1f),
+                modifier = commonModifier.weight(1f).testTag("forecaster"),
                 currentState = homeState,
                 targetState = HomeViewState.FORECASTER,
                 onToggleState = onToggleState,
@@ -297,7 +298,7 @@ fun HomeViewToggle(
             )
             ToggleButton(
                 text = "Advisor",
-                modifier = commonModifier.weight(1f),
+                modifier = commonModifier.weight(1f).testTag("advisor"),
                 currentState = homeState,
                 targetState = HomeViewState.ADVISOR,
                 onToggleState = onToggleState,

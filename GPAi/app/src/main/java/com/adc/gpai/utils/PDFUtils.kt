@@ -103,9 +103,5 @@ public class PDFUtils {
 
             return Transcript(terms = terms)
         }
-
-
     }
-
-
 }

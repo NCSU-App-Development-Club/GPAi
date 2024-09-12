@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -75,7 +76,8 @@ fun UploadTranscriptScreen(navController: NavHostController? = null) {
         Column(
             modifier = Modifier
                 .fillMaxSize() // Fill the entire screen.
-                .padding(16.dp),
+                .padding(16.dp)
+                .testTag("upload_screen"),
             verticalArrangement = Arrangement.Center, // Center content vertically.
             horizontalAlignment = Alignment.CenterHorizontally // Center content horizontally.
         ) {
