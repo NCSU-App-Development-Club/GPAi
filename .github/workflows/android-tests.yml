@@ -29,38 +29,33 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v2
         with:
-          api-level: 33
-          build-tools: '33.0.0'
-          target: 'android-33'
+          api-level: 34
+          build-tools: '34.0.0'
+          target: 'android-34'
 
-      # Step 4: Cache Gradle dependencies
-      - name: Cache Gradle packages
-        uses: actions/cache@v3
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      # Step 4: Install Android Emulator system image for API 34
+      - name: Install Android System Image
+        run: sdkmanager "system-images;android-34;google_apis;x86_64"
+        env:
+          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
 
-      # Step 5: Grant execute permission for gradlew
+      # Step 5: Create Android Emulator
+      - name: Create Android Emulator
+        run: echo "no" | avdmanager create avd -n test -k "system-images;android-34;google_apis;x86_64"
+        env:
+          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
+
+      # Step 6: Grant execute permission for gradlew
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
         working-directory: GPAi
 
-      # Step 6: Build the app
+      # Step 7: Build the app
       - name: Build with Gradle
         run: ./gradlew build
         working-directory: GPAi
 
-      - name: Create Android Emulator
-        run: |
-          echo "no" | avdmanager create avd -n test -k "system-images;android-30;google_apis;x86_64"
-        env:
-          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
-          
-      # Step 7: Start Android Emulator
+      # Step 8: Start Android Emulator
       - name: Start Emulator
         run: |
           sudo $ANDROID_SDK_ROOT/emulator/emulator -avd test -no-skin -no-audio -no-window &
@@ -69,20 +64,21 @@ jobs:
         env:
           ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
 
-      # Step 8: Run Unit Tests
+      # Step 9: Run Unit Tests
       - name: Run Unit Tests
         run: ./gradlew test
         working-directory: GPAi
 
-      # Step 9: Run UI Tests (Instrumented tests)
+      # Step 10: Run UI Tests (Instrumented tests)
       - name: Run Instrumented UI Tests
         run: ./gradlew connectedDebugAndroidTest
         working-directory: GPAi
 
-      # Step 10: Archive test reports (Optional)
+      # Step 11: Archive test reports (Optional)
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v3
         with:
           name: test-results
           path: GPAi/app/build/reports/tests/
+
