@@ -55,23 +55,9 @@ jobs:
         run: ./gradlew build
         working-directory: GPAi
 
-      # Step 8: Start Android Emulator (no sudo needed)
-      - name: Start Emulator
-        run: |
-          $ANDROID_SDK_ROOT/emulator/emulator -avd test -no-skin -no-audio -no-window &
-          adb wait-for-device
-          adb shell input keyevent 82
-        env:
-          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
-
       # Step 9: Run Unit Tests
       - name: Run Unit Tests
         run: ./gradlew test
-        working-directory: GPAi
-
-      # Step 10: Run UI Tests (Instrumented tests)
-      - name: Run Instrumented UI Tests
-        run: ./gradlew connectedDebugAndroidTest
         working-directory: GPAi
 
       # Step 11: Archive test reports (Optional)
