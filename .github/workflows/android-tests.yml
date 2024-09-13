@@ -33,7 +33,7 @@ jobs:
           build-tools: '34.0.0'
           target: 'android-34'
 
-      # Step 4: Install Android Emulator system image for API 34
+      # Step 4: Install Android Emulator system image for API 33
       - name: Install Android System Image
         run: sdkmanager "system-images;android-34;google_apis;x86_64"
         env:
@@ -55,10 +55,10 @@ jobs:
         run: ./gradlew build
         working-directory: GPAi
 
-      # Step 8: Start Android Emulator
+      # Step 8: Start Android Emulator (no sudo needed)
       - name: Start Emulator
         run: |
-          sudo $ANDROID_SDK_ROOT/emulator/emulator -avd test -no-skin -no-audio -no-window &
+          $ANDROID_SDK_ROOT/emulator/emulator -avd test -no-skin -no-audio -no-window &
           adb wait-for-device
           adb shell input keyevent 82
         env:
@@ -81,4 +81,3 @@ jobs:
         with:
           name: test-results
           path: GPAi/app/build/reports/tests/
-
