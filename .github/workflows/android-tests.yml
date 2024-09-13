@@ -1,16 +1,18 @@
-name: Android CI
+name: Android CI with Fastlane
 
 on:
   push:
     branches:
       - main
+      - dev
   pull_request:
     branches:
       - main
+      - dev
 
 jobs:
-  test:
-    name: Run Unit and UI Tests
+  build:
+    name: Run Fastlane Lanes
     runs-on: ubuntu-latest
 
     steps:
@@ -33,51 +35,19 @@ jobs:
           build-tools: '34.0.0'
           target: 'android-34'
 
-      # Step 4: Install Android Emulator system image for API 33
-      - name: Install Android System Image
-        run: sdkmanager "system-images;android-34;google_apis;x86_64"
-        env:
-          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
-
-      # Step 5: Create Android Emulator
-      - name: Create Android Emulator
-        run: echo "no" | avdmanager create avd -n test -k "system-images;android-34;google_apis;x86_64"
-        env:
-          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
-
-      # Step 6: Grant execute permission for gradlew
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-        working-directory: GPAi
-
-      # Step 7: Build the app
-      - name: Build with Gradle
-        run: ./gradlew build
-        working-directory: GPAi
-
-      # Step 8: Start Android Emulator (no sudo needed)
-      - name: Start Emulator
+      # Step 4: Install Fastlane
+      - name: Install Fastlane
         run: |
-          $ANDROID_SDK_ROOT/emulator/emulator -avd test -no-skin -no-audio -no-window &
-          adb wait-for-device
-          adb shell input keyevent 82
-        env:
-          ANDROID_SDK_ROOT: ${{ runner.tool_cache }}/android-sdk
+          gem install fastlane
+          fastlane --version
 
-      # Step 9: Run Unit Tests
+      # Step 5: Run Unit Tests with Fastlane
       - name: Run Unit Tests
-        run: ./gradlew test
+        run: fastlane run_unit_tests
         working-directory: GPAi
 
-      # Step 10: Run UI Tests (Instrumented tests)
-      - name: Run Instrumented UI Tests
-        run: ./gradlew connectedDebugAndroidTest
+      # Step 6: Run UI Tests with Fastlane
+      - name: Run UI Tests
+        run: fastlane run_ui_tests
         working-directory: GPAi
-
-      # Step 11: Archive test reports (Optional)
-      - name: Upload Test Results
-        if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: GPAi/app/build/reports/tests/
+        
