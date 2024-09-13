@@ -4,11 +4,9 @@ on:
   push:
     branches:
       - main
-      - dev
   pull_request:
     branches:
       - main
-      - dev
 
 jobs:
   build:
@@ -35,10 +33,11 @@ jobs:
           build-tools: '34.0.0'
           target: 'android-34'
 
-      # Step 4: Install Fastlane
+      # Step 4: Install Fastlane Locally (User Install)
       - name: Install Fastlane
         run: |
-          gem install fastlane
+          gem install fastlane --user-install
+          export PATH="$HOME/.gem/ruby/3.0.0/bin:$PATH"
           fastlane --version
 
       # Step 5: Run Unit Tests with Fastlane
@@ -50,4 +49,4 @@ jobs:
       - name: Run UI Tests
         run: fastlane run_ui_tests
         working-directory: GPAi
-        
+
