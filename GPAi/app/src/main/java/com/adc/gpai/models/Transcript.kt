@@ -10,52 +10,20 @@ import kotlinx.serialization.Serializable
  *
  * @param terms A list of academic terms in the transcript, each containing a list of courses.
  */
-data class Transcript(val terms: List<Term> = ArrayList<Term>()) {
-
- // Constants representing grade points for various grades
- val A_PLUS = 4.333
- val A = 4.0
- val A_MINUS = 3.667
- val B_PLUS = 3.333
- val B = 3.0
- val B_MINUS = 2.667
- val C_PLUS = 2.333
- val C = 2.0
- val C_MINUS = 1.667
- val D_PLUS = 1.333
- val D = 1.0
- val D_MINUS = 0.667
- val F = 0.0
-
- /**
-  * Calculates the total number of credits attempted across all terms and courses in the transcript.
-  *
-  * @return The total credits attempted by summing the `attempted` value of each course.
-  */
- val totalAttempted: Int
-  get() {
-   var attempted = 0
-   // Loop through each term and course, summing the attempted credits
-   for (term in terms) {
-    for (course in term.courses) {
-     attempted += course.attempted
-    }
-   }
-   return attempted
-  }
+data class Transcript(val terms: List<Term> = ArrayList()) {
 
  /**
   * Calculates the total number of credits earned across all terms and courses in the transcript.
   *
   * @return The total credits earned by summing the `earned` value of each course.
   */
- val totalEarned: Int
+ val totalCredits: Int
   get() {
    var earned = 0
    // Loop through each term and course, summing the earned credits
    for (term in terms) {
     for (course in term.courses) {
-     earned += course.earned
+     earned += course.attempted
     }
    }
    return earned
@@ -67,7 +35,7 @@ data class Transcript(val terms: List<Term> = ArrayList<Term>()) {
   *
   * @return The total grade points earned by summing the `points` value of each course.
   */
- val totalPoints: Double
+ val totalEarnedPoints: Double
   get() {
    var points = 0.0
    // Loop through each term and course, summing the grade points
@@ -78,4 +46,20 @@ data class Transcript(val terms: List<Term> = ArrayList<Term>()) {
    }
    return points
   }
+
+ /**
+  * The GPA (Grade Point Average) calculated based on the total earned points
+  * and the total credits.
+  *
+  * If `totalCredits` is 0, the GPA will be returned as 0.0 to avoid
+  * division by zero.
+  *
+  * @return the calculated GPA as a [Double]
+  */
+ val gpa: Double
+  get() {
+   if (totalCredits == 0) return 0.0
+   return totalEarnedPoints / totalCredits
+  }
+
 }
