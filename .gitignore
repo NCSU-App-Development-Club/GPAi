@@ -63,3 +63,4 @@ lint/generated/
 *.jar
 *.war
 
+/.idea

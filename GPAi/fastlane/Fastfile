@@ -1,0 +1,30 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Run Unit Tests"
+  lane :run_unit_tests do
+    gradle(task: "test")
+  end
+
+  desc "Run UI Tests"
+  lane :run_ui_tests do
+    sh("$ANDROID_SDK_ROOT/emulator/emulator -avd test -no-skin -no-audio -no-window & adb wait-for-device")
+    gradle(task: "connectedDebugAndroidTest")
+  end
+end
+
