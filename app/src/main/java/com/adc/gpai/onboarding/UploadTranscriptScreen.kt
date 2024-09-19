@@ -46,6 +46,9 @@ import com.adc.gpai.ui.theme.BrandPurple
 import com.adc.gpai.ui.theme.BrandSuccessGreen
 import com.adc.gpai.ui.theme.GPAiTheme
 import com.adc.gpai.utils.PDFUtils
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 
 /**
  * Enum representing the current state of the file upload process.
@@ -104,13 +107,13 @@ fun UploadTranscriptScreen(navController: NavHostController? = null) {
                         } else {
                             // Parse the transcript from the PDF content.
                             transcript.value = PDFUtils.parseTranscript(pdfText)
-                            Log.d("Transcript", transcript.value.toString())
 
                             // Check if parsing was successful and update the state accordingly.
                             if (transcript.value != null && transcript.value!!.terms.isEmpty()) {
                                 uploadState.value = UploadState.ERROR
                             } else {
                                 uploadState.value = UploadState.SUCCESS
+                                Log.d("Transcript", transcript.value.toString())
                             }
                         }
                     })
@@ -249,15 +252,15 @@ val sampleTranscript = Transcript(
         Term(
             "Fall 2023",
             listOf(
-                Course("Fall 2023", "CS 101", "Introduction to Programming", 3, 3, 12.0, "A"),
-                Course("Fall 2023", "MA 200", "Calculus I", 3, 3, 9.0, "B+")
+                Course("CS 101", "Introduction to Programming", 3, 3, 12.0, "A"),
+                Course( "MA 200", "Calculus I", 3, 3, 9.0, "B+")
             )
         ),
         Term(
             "Spring 2024",
             listOf(
-                Course("Spring 2024", "CS 201", "Data Structures", 4, 4, 14.0, "A-"),
-                Course("Spring 2024", "PH 101", "Physics I", 3, 3, 9.0, "B")
+                Course( "CS 201", "Data Structures", 4, 4, 14.0, "A-"),
+                Course( "PH 101", "Physics I", 3, 3, 9.0, "B")
             )
         )
     )

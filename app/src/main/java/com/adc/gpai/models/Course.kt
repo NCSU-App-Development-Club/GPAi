@@ -1,6 +1,9 @@
 package com.adc.gpai.models
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 @Serializable
 /**
@@ -14,12 +17,11 @@ import kotlinx.serialization.Serializable
  * @param points The number of grade points earned for this course (used in GPA calculation).
  * @param grade The final grade received in the course (e.g., "A", "B+", etc.).
  */
-data class Course(
-    val term: String,
-    val courseCode: String,
+data class Course (
+    @Transient val courseCode: String = "",
     val courseName: String,
-    val attempted: Int,
-    val earned: Int,
+    @Transient val attempted: Int = 0,
+    @Transient val earned: Int = 0,
     val points: Double,
     val grade: String
 )

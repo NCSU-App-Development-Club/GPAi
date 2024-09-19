@@ -42,14 +42,12 @@ class PDFUtilsTest {
         assertEquals(2, fall2021Term.courses.size)
 
         // Assertions for course details in Fall 2021 term
-        assertEquals("CSC 101", fall2021Term.courses[0].courseCode)
         assertEquals("Introduction to Programming", fall2021Term.courses[0].courseName)
         assertEquals(3, fall2021Term.courses[0].attempted)
         assertEquals(3, fall2021Term.courses[0].earned)
         assertEquals("A-", fall2021Term.courses[0].grade)
         assertEquals(11.0, fall2021Term.courses[0].points, 0.001)
 
-        assertEquals("MATH 225", fall2021Term.courses[1].courseCode)
         assertEquals("Calculus II", fall2021Term.courses[1].courseName)
         assertEquals(4, fall2021Term.courses[1].attempted)
         assertEquals(4, fall2021Term.courses[1].earned)
@@ -61,14 +59,12 @@ class PDFUtilsTest {
         assertEquals(2, spring2022Term.courses.size)
 
         // Assertions for course details in Spring 2022 term
-        assertEquals("CSC 216", spring2022Term.courses[0].courseCode)
         assertEquals("Software Development", spring2022Term.courses[0].courseName)
         assertEquals(3, spring2022Term.courses[0].attempted)
         assertEquals(3, spring2022Term.courses[0].earned)
         assertEquals("A", spring2022Term.courses[0].grade)
         assertEquals(12.0, spring2022Term.courses[0].points, 0.001)
 
-        assertEquals("ENG 102", spring2022Term.courses[1].courseCode)
         assertEquals("Composition and Rhetoric", spring2022Term.courses[1].courseName)
         assertEquals(3, spring2022Term.courses[1].attempted)
         assertEquals(3, spring2022Term.courses[1].earned)

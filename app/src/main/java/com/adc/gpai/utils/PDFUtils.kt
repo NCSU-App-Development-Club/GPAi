@@ -13,7 +13,7 @@ import java.io.InputStream
 /**
  * Utils class containing pdf parsing and utility functions for the application.
  */
-public class PDFUtils {
+class PDFUtils {
     companion object {
 
         /**
@@ -84,7 +84,6 @@ public class PDFUtils {
                 if (courseMatch != null && currentTerm != null) {
                     val (courseCode, courseName, attempted, earned, grade, points) = courseMatch.destructured
                     val course = Course(
-                        term = currentTerm,
                         courseCode = courseCode.trim().replace("\\s+".toRegex(), " "),
                         courseName = courseName.trim().replace("\\s+".toRegex(), " "),
                         attempted = attempted.toDouble().toInt(),
