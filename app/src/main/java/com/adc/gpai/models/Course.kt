@@ -8,7 +8,7 @@ import kotlinx.serialization.json.Json
 @Serializable
 /**
  * Data class representing a course taken in a specific term.
- *
+ * Transient fields are not serialized to JSON.
  * @param term The academic term during which the course was taken (e.g., "Fall 2023").
  * @param courseCode The unique code of the course (e.g., "CS 101").
  * @param courseName The full name of the course (e.g., "Introduction to Programming").
