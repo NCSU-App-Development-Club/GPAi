@@ -42,7 +42,7 @@ class OnboardingActivityTest {
         // Verify and interact with the Intro screen
         composeTestRule.onNodeWithTag("intro_screen")
             .assertIsDisplayed()
-        composeTestRule.onNodeWithText("Next")
+        composeTestRule.onNodeWithText("Get Started")
             .performClick()
 
         // Verify and interact with the Upload screen
