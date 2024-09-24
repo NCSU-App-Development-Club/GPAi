@@ -90,8 +90,8 @@ fun OnboardingNavGraph(
     ) {
         // Forecaster screen with slide-in/out animations
         composable("intro",
-            enterTransition = { slideInHorizontally(initialOffsetX = { -2000 }) + fadeIn() },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { 2000 }) + fadeOut() },
+            enterTransition = { slideInHorizontally(initialOffsetX = { 2000 }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
             IntroScreen(navController = navController) // Displays the Intro screen
