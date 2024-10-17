@@ -168,6 +168,7 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
                 HomeNavGraph(
                     navController = navController,
                     homeState = homeState,
+                    homeViewModel = homeViewModel,
                     modifier = Modifier
                         .weight(0.9f) // Takes up 90% of the screen height
                         .fillMaxSize()
@@ -202,7 +203,7 @@ fun HomeScreen(homeViewModel: HomeViewModel) {
  */
 @Composable
 fun HomeNavGraph(
-    navController: NavHostController, homeState: HomeViewState, modifier: Modifier = Modifier
+    navController: NavHostController, homeState: HomeViewState, homeViewModel: HomeViewModel, modifier: Modifier = Modifier
 ) {
     // Determine the start destination based on the current home state
     val startDestination = if (homeState == HomeViewState.FORECASTER) "forecaster" else "advisor"
@@ -236,7 +237,7 @@ fun HomeNavGraph(
             exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-            AdvisorScreen() // Displays the Advisor screen
+            AdvisorScreen(viewModel=homeViewModel) // Displays the Advisor screen
         }
     }
 }
@@ -370,6 +371,7 @@ fun HomePreview() {
             HomeNavGraph(
                 navController = navController,
                 homeState = homeState.value,
+                homeViewModel = HomeViewModel(),
                 modifier = Modifier.weight(0.1f) // Takes 10% of the preview screen height
             )
             HomeViewToggle(homeState = homeState.value, navController = navController, onToggleState = {
