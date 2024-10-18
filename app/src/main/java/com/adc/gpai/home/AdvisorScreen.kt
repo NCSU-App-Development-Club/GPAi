@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -39,7 +40,7 @@ import com.adc.gpai.R
 import com.adc.gpai.ui.theme.GPAiTheme
 
 @Composable
-fun AdvisorScreen() {
+fun AdvisorScreen(viewModel: HomeViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -138,6 +139,6 @@ fun ChatInput(sendText: (String) -> Unit = {}, modifier: Modifier = Modifier) {
 @Composable
 fun AdvisorPreview() {
     GPAiTheme {
-        AdvisorScreen()
+        AdvisorScreen(viewModel = HomeViewModel())
     }
 }
