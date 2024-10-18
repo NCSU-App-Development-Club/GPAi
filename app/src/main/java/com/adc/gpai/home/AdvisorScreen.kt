@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -41,7 +43,7 @@ fun AdvisorScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(8.dp)
+            .padding(16.dp)
             .testTag("advisor_screen"),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom
@@ -51,7 +53,7 @@ fun AdvisorScreen() {
 }
 
 @Composable
-fun ChatInput(sendText: (String) -> Unit = {}) {
+fun ChatInput(sendText: (String) -> Unit = {}, modifier: Modifier = Modifier) {
     var input by remember { mutableStateOf("") }
 
     val launcher =
@@ -104,14 +106,14 @@ fun ChatInput(sendText: (String) -> Unit = {}) {
                         )
                         try {
                             launcher.launch(intent)
-                        } catch (e: ActivityNotFoundException) {
+                        } catch (_: ActivityNotFoundException) {
                             // There are no apps installed that can provide speech recognition functionality
                             speechRecognitionError = true
                         }
                     }
                 )
                 Icon(
-                    painter = painterResource(R.drawable.send),
+                    imageVector = Icons.AutoMirrored.Default.Send,
                     tint = Color.Black,
                     contentDescription = "Send",
                     modifier = Modifier.clickable {
@@ -122,7 +124,7 @@ fun ChatInput(sendText: (String) -> Unit = {}) {
                 )
             }
         },
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         // Make the text field completely rounded and remove the bottom border ("indicator")
         colors = TextFieldDefaults.colors().copy(
             unfocusedIndicatorColor = Color.Transparent,
