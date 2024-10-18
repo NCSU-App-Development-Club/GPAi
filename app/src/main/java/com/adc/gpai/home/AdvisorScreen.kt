@@ -17,13 +17,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
-import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,12 +50,16 @@ fun AdvisorScreen(viewModel: HomeViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom
     ) {
-        ChatInput()
+        ChatInput(viewModel, sendText = { question -> viewModel.askQuestion(question) })
     }
 }
 
 @Composable
-fun ChatInput(sendText: (String) -> Unit = {}, modifier: Modifier = Modifier) {
+fun ChatInput(
+    viewModel: HomeViewModel,
+    sendText: (String) -> Unit = {},
+    modifier: Modifier = Modifier
+) {
     var input by remember { mutableStateOf("") }
 
     val launcher =
@@ -86,11 +91,18 @@ fun ChatInput(sendText: (String) -> Unit = {}, modifier: Modifier = Modifier) {
     val focusManager =
         LocalFocusManager.current // Used to unfocus the text field after pressing send
 
+    val isLoading by viewModel.loading.collectAsState()
+
     TextField(
         value = input,
         placeholder = { Text("Ask for advice") },
         onValueChange = { newValue -> input = newValue },
         trailingIcon = {
+            if (isLoading) {
+                CircularProgressIndicator(modifier = Modifier.padding(8.dp))
+                return@TextField
+            }
+
             Row(
                 modifier = Modifier.padding(horizontal = 14.dp),
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
@@ -125,11 +137,15 @@ fun ChatInput(sendText: (String) -> Unit = {}, modifier: Modifier = Modifier) {
                 )
             }
         },
-        modifier = modifier.fillMaxWidth(),
+        enabled = !isLoading,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 0.dp, top = 0.dp, end = 0.dp, bottom = 4.dp),
         // Make the text field completely rounded and remove the bottom border ("indicator")
         colors = TextFieldDefaults.colors().copy(
             unfocusedIndicatorColor = Color.Transparent,
-            focusedIndicatorColor = Color.Transparent
+            focusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
         ),
         shape = RoundedCornerShape(9999.dp)
     )

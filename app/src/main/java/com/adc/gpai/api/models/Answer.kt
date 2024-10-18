@@ -1,11 +1,10 @@
-package com.haw.takonappcompose.models
+package com.adc.gpai.api.models
 
 import com.google.gson.annotations.SerializedName
 
 data class Answer(
     val id: String,
-    @SerializedName("object")
-    val obj: String,
+    val `object`: String,
     val created: Long,
     val model: String,
     val choices: List<Choice>,
@@ -18,7 +17,7 @@ data class Choice(
     @SerializedName("finish_reason")
     val finishReason: String
 )
-// essamy mge my message my message my message my message
+
 data class Usage(
     @SerializedName("prompt_tokens")
     val promptTokens: Int,

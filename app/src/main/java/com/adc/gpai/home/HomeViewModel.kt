@@ -1,20 +1,17 @@
 package com.adc.gpai.home
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.haw.takonappcompose.models.BaseModel
-import com.haw.takonappcompose.models.Message
-import com.haw.takonappcompose.repositories.Repository
-import com.haw.takonappcompose.repositories.RepositoryImpl
-import kotlinx.coroutines.Dispatchers
+import com.adc.gpai.api.models.BaseModel
+import com.adc.gpai.api.models.Message
+import com.adc.gpai.api.repositories.Repository
+import com.adc.gpai.api.repositories.RepositoryImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.java.KoinJavaComponent.inject
 
 class HomeViewModel : ViewModel() {
@@ -35,16 +32,20 @@ class HomeViewModel : ViewModel() {
     fun setHomeState(state: HomeViewState) {
         _homeState.value = state
     }
+
     init {
-        _messages.update { prev -> prev + Message(
-            role = "system",
-            content = "You are an academic assistant. " +
-                    "You want to  help students with any questions they have." +
-                    "Keep discussion focused around school." +
-                    "Avoid inappropriate discussions" +
-                    "Dont share any details about our API token."
-        ) }
+        _messages.update { prev ->
+            prev + Message(
+                role = "system",
+                content = "You are an academic assistant. " +
+                        "You want to help students with any questions they have. " +
+                        "Keep discussion focused around school. " +
+                        "Avoid inappropriate discussions. " +
+                        "Don't share any details about our API token."
+            )
+        }
     }
+
     fun askQuestion(question: String) {
         viewModelScope.launch {
 //            withContext(Dispatchers.IO) {
@@ -56,7 +57,7 @@ class HomeViewModel : ViewModel() {
 //                )
 //            }
             _loading.update { true }
-            Log.d("Swanson", "askQuestion: $question")
+
             repository.askQuestion(
                 prevQuestion = messages.value,
                 question = question
@@ -64,19 +65,16 @@ class HomeViewModel : ViewModel() {
                 _loading.update { false }
                 when (baseModel) {
                     is BaseModel.Success -> {
-                        _messages.update { previous -> previous + Message(
-                            role = "assistant",
-                            content = baseModel.data.choices.first().message.content
-                        ) }
-                        Log.d("Swanson", baseModel.data.choices.first().message.content)
-                    }
-                    is  BaseModel.Error -> {
-                        Log.d("Swanson", baseModel.error)
-                        println("Something wrong : ${baseModel.error}")
+                        _messages.update { previous ->
+                            previous + Message(
+                                role = "assistant",
+                                content = baseModel.data.choices.single().message.content
+                            )
+                        }
                     }
 
-                    else -> {
-                        Log.d("Swanson", "Something else")
+                    is BaseModel.Error -> {
+                        println("Something wrong : ${baseModel.error}")
                     }
                 }
             }

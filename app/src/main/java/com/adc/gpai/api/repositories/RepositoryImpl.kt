@@ -1,12 +1,10 @@
-package com.haw.takonappcompose.repositories
+package com.adc.gpai.api.repositories
 
-import com.haw.takonappcompose.models.Answer
-import com.haw.takonappcompose.models.BaseModel
-import com.haw.takonappcompose.models.Message
-import com.haw.takonappcompose.models.Question
-import com.haw.takonappcompose.network.Api
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import com.adc.gpai.api.models.Answer
+import com.adc.gpai.api.models.BaseModel
+import com.adc.gpai.api.models.Message
+import com.adc.gpai.api.models.Question
+import com.adc.gpai.api.Api
 
 class RepositoryImpl(private val api: Api) : Repository {
 

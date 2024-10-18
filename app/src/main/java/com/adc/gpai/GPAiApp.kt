@@ -1,10 +1,9 @@
 package com.adc.gpai
 
 import android.app.Application
-import android.util.Log
-import com.haw.takonappcompose.network.Api
-import com.haw.takonappcompose.repositories.Repository
-import com.haw.takonappcompose.repositories.RepositoryImpl
+import com.adc.gpai.api.Api
+import com.adc.gpai.api.repositories.Repository
+import com.adc.gpai.api.repositories.RepositoryImpl
 import org.koin.core.context.startKoin
 import org.koin.dsl.bind
 import org.koin.dsl.module

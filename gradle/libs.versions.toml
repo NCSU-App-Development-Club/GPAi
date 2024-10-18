@@ -1,6 +1,6 @@
 [versions]
 accompanistNavigationAnimation = "0.31.0-alpha"
-agp = "8.5.0"
+agp = "8.7.1"
 converterGson = "2.9.0"
 espressoIntents = "3.6.1"
 koinAndroid = "3.4.0"

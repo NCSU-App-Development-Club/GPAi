@@ -1,20 +1,11 @@
-package com.haw.takonappcompose.models
-
-import com.google.gson.annotations.SerializedName
+package com.adc.gpai.api.models
 
 data class Question(
-    @SerializedName("model")
-    val model:String = "gpt-3.5-turbo",
-    @SerializedName("messages")
-    val messages:List<Message>
-)
-data class Message(
-    @SerializedName("role")
-    val role:String,
-    @SerializedName("content")
-    val content:String
+    val model: String = "gpt-3.5-turbo",
+    val messages: List<Message>
 )
 
-val Message.fromUser:Boolean get() {
-    return role == "user"
-}
+data class Message(
+    val role: String,
+    val content: String
+)

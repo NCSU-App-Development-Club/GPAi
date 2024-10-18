@@ -1,16 +1,11 @@
-package com.haw.takonappcompose.repositories
+package com.adc.gpai.api.repositories
 
-import com.haw.takonappcompose.models.Answer
-import com.haw.takonappcompose.models.BaseModel
-import com.haw.takonappcompose.models.Message
-import kotlinx.coroutines.flow.Flow
+import com.adc.gpai.api.models.Answer
+import com.adc.gpai.api.models.BaseModel
+import com.adc.gpai.api.models.Message
 
 interface Repository {
 
     suspend fun askQuestion(prevQuestion: List<Message>, question: String): BaseModel<Answer>
-
-//    suspend fun getMessages(): Flow<List<Message>>
-//
-//    suspend fun addAnswer(answer: Message)
 
 }
