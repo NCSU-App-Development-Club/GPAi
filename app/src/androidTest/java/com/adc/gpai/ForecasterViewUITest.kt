@@ -84,6 +84,14 @@ class ForecasterViewUITest {
 
 //        Forecaster/Advisor button thingy
 //        TODO: confirm what the Forecaster/Advisor thing will be coded as
+
+        val forecastButton = composeTestRule.onNodeWithContentDescription("Forecast")
+        forecastButton.assert(hasSemantics {
+            this.role == Role.Button
+        })
+        forecastButton.assertIsDisplayed()
+        forecastButton.assertIsDisabled()
+        forecastButton.assert(hasClickAction())
     }
 
 
@@ -175,6 +183,13 @@ class ForecasterViewUITest {
 
 //        Forecaster/Advisor button thingy
 //        TODO: confirm what the Forecaster/Advisor thing will be coded as
+        val forecastButton = composeTestRule.onNodeWithContentDescription("Forecast")
+        forecastButton.assert(hasSemantics {
+            this.role == Role.Button
+        })
+        forecastButton.assertIsDisplayed()
+        forecastButton.assertIsDisabled()
+        forecastButton.assert(hasClickAction())
     }
 
     /**
