@@ -42,6 +42,8 @@ import com.adc.gpai.ui.theme.GPAiTheme
 
 @Composable
 fun AdvisorScreen(viewModel: HomeViewModel) {
+    val messages by viewModel.messages.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,6 +52,7 @@ fun AdvisorScreen(viewModel: HomeViewModel) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom
     ) {
+        AdvisorChatHistory(messages.filter { it.role != "system" }, Modifier.weight(0.9f))
         ChatInput(viewModel, sendText = { question -> viewModel.askQuestion(question) })
     }
 }

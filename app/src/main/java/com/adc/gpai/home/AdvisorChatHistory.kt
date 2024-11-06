@@ -16,12 +16,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-
-data class Message(val sender: String, val content: String)
+import com.adc.gpai.api.models.Message
 
 @Composable
-fun AdvisorChatHistory(messages: List<Message>) {
-    Column(modifier = Modifier.fillMaxSize()) {
+fun AdvisorChatHistory(messages: List<Message>, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier
                 .weight(1f)
@@ -37,7 +36,7 @@ fun AdvisorChatHistory(messages: List<Message>) {
 
 @Composable
 fun ChatBubble(message: Message) {
-    val isUser = message.sender == "User"
+    val isUser = message.role == "user"
     val alignment = if (isUser) Alignment.CenterEnd else Alignment.CenterStart
 
     Box(
@@ -53,7 +52,7 @@ fun ChatBubble(message: Message) {
             modifier = Modifier.padding(horizontal = 8.dp)
         ) {
             Text(
-                text = "${message.sender}: ${message.content}",
+                text = message.content,
                 modifier = Modifier.padding(8.dp),
                 color = MaterialTheme.colorScheme.onPrimary
             )
@@ -65,8 +64,8 @@ fun ChatBubble(message: Message) {
 @Composable
 fun PreviewAdvisorChatHistory() {
     val testMessages = listOf(
-        Message("AI", "Hey Buddy!"),
-        Message("User", "Hi AI!"))
+        Message("user", "Hi AI!"),
+        Message("assistant", "Hey Buddy!!"))
 
     AdvisorChatHistory(testMessages)
 }

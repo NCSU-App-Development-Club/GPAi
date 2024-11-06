@@ -6,6 +6,9 @@ data class Question(
 )
 
 data class Message(
+    /**
+     * "user", "system" or "assistant"
+     */
     val role: String,
     val content: String
 )

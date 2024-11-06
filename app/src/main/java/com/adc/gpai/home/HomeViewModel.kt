@@ -56,6 +56,7 @@ class HomeViewModel : ViewModel() {
 //                    )
 //                )
 //            }
+            _messages.update { list -> list + Message(role = "user", content = question) }
             _loading.update { true }
 
             repository.askQuestion(
