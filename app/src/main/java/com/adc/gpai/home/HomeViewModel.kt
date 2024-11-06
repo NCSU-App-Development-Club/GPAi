@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel () : ViewModel() {
     // Mutable state for the HomeViewState (either Forecaster or Advisor)
     private val _homeState = MutableLiveData<HomeViewState>(HomeViewState.FORECASTER)
     val homeState: LiveData<HomeViewState> = _homeState
