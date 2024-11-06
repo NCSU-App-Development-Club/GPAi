@@ -1,5 +1,7 @@
 package com.adc.gpai.models
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import kotlinx.serialization.encodeToString
@@ -17,8 +19,11 @@ import kotlinx.serialization.json.Json
  * @param points The number of grade points earned for this course (used in GPA calculation).
  * @param grade The final grade received in the course (e.g., "A", "B+", etc.).
  */
+@Entity
 data class Course (
-    @Transient val courseCode: String = "",
+    //TODO: ADDED ANOTHER VAL BC A PRIMARY KEY IS NEEDED IF THIS CLASS IS AN ENTITY
+      //val courseID: Int = 0,
+    @PrimaryKey(autoGenerate = false) @Transient val courseCode: String = "",
     val courseName: String,
     @Transient val attempted: Int = 0,
     @Transient val earned: Int = 0,
