@@ -1,5 +1,7 @@
 package com.adc.gpai.onboarding
 
+import AppDatabase
+import OnboardingViewModelFactory
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,10 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.adc.gpai.models.Course
 import com.adc.gpai.ui.theme.GPAiTheme
 
 /**
@@ -25,9 +30,11 @@ import com.adc.gpai.ui.theme.GPAiTheme
  * the OnboardingScreen composable.
  */
 class OnboardingActivity : ComponentActivity() {
+    //TODO: Probably needs to be in a Forecaster viewmodel instead of the onboarding activity
 
     // ViewModel for managing the state of the onboarding flow.
-    val onboardingViewModel = OnboardingViewModel()
+    //val onboardingViewModel = OnboardingViewModel(database:AppDataBase)
+    private lateinit var courseRepository: OnboardingViewModel
 
     /**
      * Called when the activity is starting. This is where the onboarding screen is set up
@@ -41,9 +48,69 @@ class OnboardingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            OnboardingScreen(viewModel = onboardingViewModel)
+            OnboardingScreen(viewModel = courseRepository)
         }
-    }
+        val database = AppDatabase.getDatabase(this)
+        courseRepository = ViewModelProvider(this, OnboardingViewModelFactory(database)).get(OnboardingViewModel::class.java)
+
+        //TODO: FIND WHAT YOU ACTUALLY NEED TO ENTER TO DB< BELOW ARE EXAMPLES OF CALLS
+        // Example: Adding a new course
+        val CSC116 = Course(
+            courseCode = "CSC 116",
+            courseName = "Introduction to Programming in Java",
+            attempted = 3,
+            earned = 3,
+            points = 97.0,
+            grade = "A"
+        )
+        courseRepository.addCourse(CSC116)
+
+        val MA141 = Course(
+            courseCode = "MA 141",
+            courseName = "Calculus I",
+            attempted = 4,
+            earned = 4,
+            points = 94.0,
+            grade = "A"
+        )
+        courseRepository.addCourse(MA141)
+        //Test to update
+        courseRepository.updateCourse(Course(
+            courseCode = "MA 141",
+            courseName = "Calculus I",
+            attempted = 3,
+            earned = 3,
+            points = 94.0,
+            grade = "A"
+        ))
+        // Example: Updating an existing course name
+        courseRepository.updateCourseName("Intro to programming", CSC116.courseName)
+
+        //Example attempt: update grade
+        val newGrade = 98
+        courseRepository.updateGrade(newGrade, CSC116.courseName)
+
+
+        //Example attempt: update credit hours attempted and earned
+        val newCH = 2
+        courseRepository.updateHoursAttempted(newCH, CSC116.courseName)
+        courseRepository.updateHoursEarned(newCH, CSC116.courseName)
+
+        //EX attempt, update course code
+        courseRepository.updateCourseCode("CSC101", CSC116.courseName)
+
+
+        //Example attempt: delete a course
+        courseRepository.deleteCourse(CSC116)
+
+
+        // Observe the users LiveData
+        courseRepository.courses.observe(this, Observer { userList ->
+            // Update UI with the user list
+
+    })
+
+
 }
 
 /**
@@ -72,7 +139,6 @@ fun OnboardingScreen(viewModel: OnboardingViewModel) {
  * based on the current state of the home screen.
  *
  * @param navController The navigation controller used to manage navigation between composables.
- * @param homeState The current state of the home view, which determines the start destination.
  * @param modifier Modifier to apply to the NavGraph container.
  */
 @Composable
@@ -115,4 +181,4 @@ fun OnboardingNavGraph(
             ModifyTranscriptScreen(navController = navController) // Displays the Modify Transcript screen
         }
     }
-}
+}}
