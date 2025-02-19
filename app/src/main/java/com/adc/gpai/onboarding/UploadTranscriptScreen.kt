@@ -117,6 +117,13 @@ fun UploadTranscriptScreen(navController: NavHostController? = null) {
                             }
                         }
                     })
+                Text(text = when(uploadState.value) {
+                    UploadState.IDLE -> "No Transcript uploaded"
+                    UploadState.SUCCESS -> "Transcript successfully uploaded!"
+                    UploadState.ERROR -> "Couldn't parse transcript, please try again"
+                    else -> "Please try again"
+
+                })
                 Button(onClick = { navController?.navigate("modify") }) {
                     Text(text = "Next")
                 }
