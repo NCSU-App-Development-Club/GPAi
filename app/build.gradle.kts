@@ -69,9 +69,18 @@ dependencies {
     implementation(libs.accompanist.navigation.animation)
     implementation(libs.androidx.runtime.livedata)
 
+    // Room
     ksp(libs.androidx.room.ksp)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
+
+    // Koin
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
