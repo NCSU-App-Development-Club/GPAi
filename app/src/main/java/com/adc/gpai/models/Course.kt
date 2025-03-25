@@ -4,10 +4,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 
-@Serializable
 /**
  * Data class representing a course taken in a specific term.
  * Transient fields are not serialized to JSON.
@@ -19,6 +16,7 @@ import kotlinx.serialization.json.Json
  * @param points The number of grade points earned for this course (used in GPA calculation).
  * @param grade The final grade received in the course (e.g., "A", "B+", etc.).
  */
+@Serializable
 @Entity
 data class Course (
     //TODO: ADDED ANOTHER VAL BC A PRIMARY KEY IS NEEDED IF THIS CLASS IS AN ENTITY

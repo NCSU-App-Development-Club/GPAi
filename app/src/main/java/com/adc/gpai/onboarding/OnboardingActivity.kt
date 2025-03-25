@@ -60,7 +60,8 @@ fun OnboardingScreen(viewModel: OnboardingViewModel) {
             val navController = rememberNavController()
             OnboardingNavGraph(
                 navController = navController,
-                modifier = Modifier.padding(innerPadding)
+                viewModel = viewModel,
+                modifier = Modifier.padding(innerPadding),
             )
         }
     }
@@ -77,7 +78,9 @@ fun OnboardingScreen(viewModel: OnboardingViewModel) {
  */
 @Composable
 fun OnboardingNavGraph(
-    navController: NavHostController, modifier: Modifier = Modifier
+    navController: NavHostController,
+    viewModel: OnboardingViewModel,
+    modifier: Modifier = Modifier
 ) {
     // Determine the start destination based on the current home state
     val startDestination = "intro"
@@ -103,7 +106,7 @@ fun OnboardingNavGraph(
             exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-            UploadTranscriptScreen(navController = navController) // Displays the Upload Transcript screen
+            UploadTranscriptScreen(navController = navController, viewModel = viewModel) // Displays the Upload Transcript screen
         }
 
         // Advisor screen with slide-in/out animations
@@ -112,7 +115,7 @@ fun OnboardingNavGraph(
             exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-            ModifyTranscriptScreen(navController = navController) // Displays the Modify Transcript screen
+            ModifyTranscriptScreen(navController = navController, viewModel = viewModel) // Displays the Modify Transcript screen
         }
     }
 }

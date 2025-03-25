@@ -28,9 +28,9 @@ fun ForecasterScreen() {
     var courses by remember {
         mutableStateOf(
             listOf(
-                Course("CSC 408", "Software Product Management"),
-                Course("CSC 495", "Animal Centered Computing"),
-                Course("CSC 295", "Applications in Python")
+                Course("CSC 408", "Software Product Management", 3, 3, 4.00 * 4, "A"),
+                Course("CSC 495", "Animal Centered Computing", 3, 3, 4.00 * 4, "A"),
+                Course("CSC 295", "Applications in Python", 3, 3, 4.00 * 4, "A")
             )
         )
     }
@@ -49,8 +49,8 @@ fun ForecasterScreen() {
         // Iterate over courses and display each with a delete option
         courses.forEach { course ->
             CourseEntry(
-                courseCode = course.code,
-                courseName = course.name,
+                courseCode = course.courseCode,
+                courseName = course.courseName,
                 onDelete = { courses = courses.filter { it != course } }
             )
             Spacer(modifier = Modifier.height(16.dp))
