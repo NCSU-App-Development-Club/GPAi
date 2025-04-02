@@ -9,31 +9,27 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.adc.gpai.R
+import com.adc.gpai.onboarding.TranscriptRepository
 import com.adc.gpai.ui.theme.GPAiTheme
-import com.adc.gpai.R  // Assuming R for the delete icon
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ForecasterScreen() {
-    // Mutable list of courses
-    var courses by remember {
-        mutableStateOf(
-            listOf(
-                Course("CSC 408", "Software Product Management"),
-                Course("CSC 495", "Animal Centered Computing"),
-                Course("CSC 295", "Applications in Python")
-            )
-        )
-    }
+
+    val viewModel: TranscriptRepository = koinViewModel()
+    var mostRecentTerm = viewModel.transcript.observeAsState().value?.terms?.last()
+    var courses = mostRecentTerm?.courses ?: emptyList()
 
     Column(
         modifier = Modifier
@@ -42,16 +38,16 @@ fun ForecasterScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Text(text = "Current Semester", style = MaterialTheme.typography.bodyMedium)
+        Text(text = mostRecentTerm?.name ?: "Current Semester", style = MaterialTheme.typography.bodyMedium)
 
         Spacer(modifier = Modifier.height(16.dp))
 
         // Iterate over courses and display each with a delete option
         courses.forEach { course ->
             CourseEntry(
-                courseCode = course.code,
-                courseName = course.name,
-                onDelete = { courses = courses.filter { it != course } }
+                courseCode = course.courseCode,
+                courseName = course.courseName,
+                onDelete = { viewModel.removeCourse(course) }
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -104,7 +100,7 @@ fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
             }
             IconButton(onClick = { onDelete() }) {
                 Icon(
-                    painter = painterResource(id = R.drawable.check),
+                    painter = painterResource(id = R.drawable.error),
                     contentDescription = "Delete Course",
                     tint = Color.Red
                 )
@@ -157,9 +153,3 @@ fun ForecasterPreview() {
         ForecasterScreen()
     }
 }
-
-// Course data class
-data class Course(
-    val code: String,
-    val name: String
-)

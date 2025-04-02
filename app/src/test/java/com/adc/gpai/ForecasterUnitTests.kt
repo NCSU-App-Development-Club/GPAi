@@ -7,11 +7,11 @@ import org.junit.Test
  * Unit tests for the Forecaster functionality, such as GPA calculations
  */
 class ForecasterUnitTests {
-    // private lateinit var forecaster: Forecaster
+   // private lateinit var forecaster: Forecaster
 
     @Before
     fun setUp() {
-        //  forecaster = Forecaster()
+      //  forecaster = Forecaster()
     }
 
     /**
@@ -23,8 +23,8 @@ class ForecasterUnitTests {
 //            Course("CS101", "Intro to Programming", attempted = 3, earned = 3, points = 12.0, grade = "A"),
 //            Course("MATH201", "Calculus II", attempted = 4, earned = 4, points = 12.0, grade = "B")
 //        )
-        // val gpa = forecaster.calculateGPA(courses)
-        // assertEquals(3.43, gpa, 0.01)
+       // val gpa = forecaster.calculateGPA(courses)
+       // assertEquals(3.43, gpa, 0.01)
     }
 
     @Test
