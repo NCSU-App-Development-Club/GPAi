@@ -1,15 +1,16 @@
+package com.adc.gpai.onboarding
+
+import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import android.content.Context
-import com.adc.gpai.models.Course
-import com.adc.gpai.onboarding.CourseDao
-import com.adc.gpai.onboarding.OnboardingViewModel
+import com.adc.gpai.models.CourseDTO
+import com.adc.gpai.models.TermDTO
 
-@Database(entities = [Course::class], version = 1, exportSchema = false)
+@Database(entities = [CourseDTO::class, TermDTO::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
-    abstract fun courseDao(): CourseDao
+    abstract fun termCourseDao(): TermCourseDao
 
     companion object {
         @Volatile
@@ -28,5 +29,3 @@ abstract class AppDatabase : RoomDatabase() {
         }
     }
 }
-
-

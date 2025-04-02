@@ -37,6 +37,7 @@ import com.adc.gpai.ui.theme.BrandPurple
 import com.adc.gpai.ui.theme.BrandSuccessGreen
 import com.adc.gpai.ui.theme.GPAiTheme
 import com.adc.gpai.utils.PDFUtils
+import org.koin.androidx.compose.koinViewModel
 
 /**
  * Enum representing the current state of the file upload process.
@@ -52,7 +53,10 @@ enum class UploadState {
  * for uploading and parsing a transcript PDF.
  */
 @Composable
-fun UploadTranscriptScreen(navController: NavHostController? = null, viewModel: OnboardingViewModel) {
+fun UploadTranscriptScreen(navController: NavHostController? = null) {
+
+    val viewModel: TranscriptRepository = koinViewModel()
+
     // State to track the upload process: IDLE, SUCCESS, or ERROR.
     var uploadState = remember { mutableStateOf(UploadState.IDLE) }
 
@@ -183,6 +187,6 @@ fun RequestFileButton(
 fun UploadTranscriptPreview() {
     GPAiTheme {
         val navController = rememberNavController()
-        UploadTranscriptScreen(navController = navController, viewModel = OnboardingViewModel())
+        UploadTranscriptScreen(navController = navController)
     }
 }

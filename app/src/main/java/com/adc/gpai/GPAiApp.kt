@@ -4,6 +4,10 @@ import android.app.Application
 import com.adc.gpai.api.Api
 import com.adc.gpai.api.repositories.Repository
 import com.adc.gpai.api.repositories.RepositoryImpl
+import com.adc.gpai.onboarding.AppDatabase
+import com.adc.gpai.onboarding.TranscriptRepository
+import org.koin.android.ext.koin.androidContext
+import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -16,6 +20,7 @@ class GPAiApp : Application() {
         super.onCreate()
 
         startKoin {
+            androidContext(this@GPAiApp)
             modules(module {
                 single {
                     Retrofit.Builder()
@@ -30,8 +35,10 @@ class GPAiApp : Application() {
                 single {
                     val api: Api = get()
                     RepositoryImpl(api = api)
-
                 } bind Repository::class
+                viewModel {
+                    TranscriptRepository(AppDatabase.getDatabase(androidContext()))
+                }
             })
         }
     }

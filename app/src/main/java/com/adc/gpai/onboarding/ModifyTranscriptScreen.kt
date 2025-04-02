@@ -28,9 +28,12 @@ import androidx.navigation.NavHostController
 import com.adc.gpai.home.HomeActivity
 import com.adc.gpai.models.Transcript
 import com.adc.gpai.ui.theme.GPAiTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun ModifyTranscriptScreen(navController: NavHostController? = null, viewModel: OnboardingViewModel) {
+fun ModifyTranscriptScreen(navController: NavHostController? = null) {
+    val viewModel: TranscriptRepository = koinViewModel()
+
     val context = LocalContext.current
     val transcript = viewModel.transcript.observeAsState()
 
@@ -109,7 +112,6 @@ fun CourseList(transcript: Transcript?, modifier: Modifier = Modifier) {
 @Composable
 fun ModifyTranscriptPreview() {
     GPAiTheme {
-        ModifyTranscriptScreen(navController = null, viewModel = OnboardingViewModel(
-            OnboardingViewModel.sampleTranscript))
+        ModifyTranscriptScreen(navController = null)
     }
 }

@@ -1,14 +1,11 @@
 package com.adc.gpai.models
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.Transient
 
 /**
  * Data class representing a course taken in a specific term.
  * Transient fields are not serialized to JSON.
- * @param term The academic term during which the course was taken (e.g., "Fall 2023").
+ * @param id A unique ID for the course. Used for local database persistence. Omit or specify 0 to automatically generate one.
  * @param courseCode The unique code of the course (e.g., "CS 101").
  * @param courseName The full name of the course (e.g., "Introduction to Programming").
  * @param attempted The number of credits attempted for this course.
@@ -17,15 +14,24 @@ import kotlinx.serialization.Transient
  * @param grade The final grade received in the course (e.g., "A", "B+", etc.).
  */
 @Serializable
-@Entity
-data class Course (
-    //TODO: ADDED ANOTHER VAL BC A PRIMARY KEY IS NEEDED IF THIS CLASS IS AN ENTITY
-      //val courseID: Int = 0,
-    @PrimaryKey(autoGenerate = false) @Transient val courseCode: String = "",
+data class Course(
+    val id: Int,
+    val courseCode: String = "",
     val courseName: String,
-    @Transient val attempted: Int = 0,
-    @Transient val earned: Int = 0,
+    val attempted: Int = 0,
+    val earned: Int = 0,
     val points: Double,
     val grade: String
-)
-
+) {
+    /**
+     * Creates a new Course with an automatically-generated ID.
+     */
+    constructor(
+        courseCode: String = "",
+        courseName: String,
+        attempted: Int = 0,
+        earned: Int = 0,
+        points: Double,
+        grade: String
+    ) : this(0, courseCode, courseName, attempted, earned, points, grade)
+}
