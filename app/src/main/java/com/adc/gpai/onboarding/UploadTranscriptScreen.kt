@@ -1,25 +1,20 @@
 package com.adc.gpai.onboarding
 
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -30,7 +25,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -38,17 +32,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.adc.gpai.R
-import com.adc.gpai.models.Course
-import com.adc.gpai.models.Term
-import com.adc.gpai.models.Transcript
 import com.adc.gpai.ui.theme.BrandFailureRed
 import com.adc.gpai.ui.theme.BrandPurple
 import com.adc.gpai.ui.theme.BrandSuccessGreen
 import com.adc.gpai.ui.theme.GPAiTheme
 import com.adc.gpai.utils.PDFUtils
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.encodeToString
+import org.koin.androidx.compose.koinViewModel
 
 /**
  * Enum representing the current state of the file upload process.
@@ -65,10 +54,8 @@ enum class UploadState {
  */
 @Composable
 fun UploadTranscriptScreen(navController: NavHostController? = null) {
-    // Transcript state, initially null until a file is uploaded and parsed.
-    var transcript = remember {
-        mutableStateOf<Transcript?>(null)
-    }
+
+    val viewModel: TranscriptRepository = koinViewModel()
 
     // State to track the upload process: IDLE, SUCCESS, or ERROR.
     var uploadState = remember { mutableStateOf(UploadState.IDLE) }
@@ -106,17 +93,18 @@ fun UploadTranscriptScreen(navController: NavHostController? = null) {
                             uploadState.value = UploadState.ERROR
                         } else {
                             // Parse the transcript from the PDF content.
-                            transcript.value = PDFUtils.parseTranscript(pdfText)
+                            val transcript = PDFUtils.parseTranscript(pdfText)
 
                             // Check if parsing was successful and update the state accordingly.
-                            if (transcript.value != null && transcript.value!!.terms.isEmpty()) {
+                            if (transcript.terms.isEmpty()) {
                                 uploadState.value = UploadState.ERROR
                             } else {
                                 uploadState.value = UploadState.SUCCESS
-                                Log.d("Transcript", transcript.value.toString())
+                                viewModel.updateTranscript(transcript)
                             }
                         }
                     })
+
                 Button(onClick = { navController?.navigate("modify") }) {
                     Text(text = "Next")
                 }
@@ -192,81 +180,6 @@ fun RequestFileButton(
 }
 
 /**
- * Composable function to display a list of courses in a transcript.
- * If no transcript is uploaded, it displays a placeholder message.
- *
- * @param transcript The parsed transcript data to display.
- * @param modifier Modifier to apply custom styling.
- */
-@Composable
-fun CourseList(transcript: Transcript?, modifier: Modifier = Modifier) {
-    if (transcript != null) {
-        // Scrollable column to display the transcript data.
-        Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-            for (term in transcript.terms) {
-                // Display the term name (e.g., "Fall 2023").
-                Text(
-                    text = term.name,
-                    style = MaterialTheme.typography.headlineLarge
-                )
-                for (course in term.courses) {
-                    // Display course information in a row: course code, name, credits, and grade.
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(text = course.courseCode, fontWeight = FontWeight.Bold) // Course code.
-                        Text(
-                            text = course.courseName,
-                            textAlign = TextAlign.Start,
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(horizontal = 8.dp)
-                        )
-                        Text(
-                            text = course.attempted.toString(),
-                            textAlign = TextAlign.End,
-                            modifier = Modifier.padding(horizontal = 8.dp)
-                        )
-                        Text(
-                            text = String.format("%-2s", course.grade),
-                            textAlign = TextAlign.End,
-                            modifier = Modifier.padding(end = 8.dp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp)) // Add space between terms.
-            }
-        }
-    } else {
-        // If no transcript is available, show a placeholder message.
-        Text(text = "No transcript uploaded", modifier = modifier)
-    }
-}
-
-// Sample data for previewing the UI during development.
-val sampleTranscript = Transcript(
-    listOf(
-        Term(
-            "Fall 2023",
-            listOf(
-                Course("CS 101", "Introduction to Programming", 3, 3, 12.0, "A"),
-                Course( "MA 200", "Calculus I", 3, 3, 9.0, "B+")
-            )
-        ),
-        Term(
-            "Spring 2024",
-            listOf(
-                Course( "CS 201", "Data Structures", 4, 4, 14.0, "A-"),
-                Course( "PH 101", "Physics I", 3, 3, 9.0, "B")
-            )
-        )
-    )
-)
-
-/**
  * Preview function to display the UI in the Android Studio preview window.
  */
 @Preview(showBackground = true)
@@ -274,6 +187,6 @@ val sampleTranscript = Transcript(
 fun UploadTranscriptPreview() {
     GPAiTheme {
         val navController = rememberNavController()
-        UploadTranscriptScreen(navController)
+        UploadTranscriptScreen(navController = navController)
     }
 }
