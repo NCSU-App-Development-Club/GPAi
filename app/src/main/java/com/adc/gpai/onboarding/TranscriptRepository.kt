@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.adc.gpai.models.Course
+import com.adc.gpai.models.CourseDTO
 import com.adc.gpai.models.Transcript
 import com.adc.gpai.models.toTranscript
 import kotlinx.coroutines.launch
@@ -52,6 +53,23 @@ class TranscriptRepository(private val database: AppDatabase) : ViewModel() {
         viewModelScope.launch {
             database.termCourseDao().deleteCourse(course.id)
             fetchAllCourses() // Refresh the courses list to keep in sync (just in case the update didn't work)
+        }
+    }
+
+    fun addCourse(termId: Int, course: Course) {
+        // Optimistic update - add the course to the term with matching ID
+        _transcript.value = _transcript.value?.copy(terms = _transcript.value!!.terms.map { term ->
+            if (term.id == termId) {
+                term.copy(courses = term.courses + course)
+            } else {
+                term
+            }
+        })
+        
+        // Update in the DB
+        viewModelScope.launch {
+            database.termCourseDao().insertCourse(CourseDTO.from(course, termId))
+            fetchAllCourses() // Refresh the courses list to keep in sync
         }
     }
 

@@ -113,25 +113,23 @@ fun ModifyTranscriptScreen(navController: NavHostController? = null) {
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                         
-                        // Add course button (only shown after the first term)
-                        if (termIndex == 0) {
-                            Button(
-                                onClick = { 
-                                    addingToTermIndex = termIndex
-                                    showAddCourseDialog = true
-                                },
-                                colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Add,
-                                    contentDescription = "Add Course"
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(text = "Add a course")
-                            }
+                        // Add course button - now shown under every term
+                        Button(
+                            onClick = { 
+                                addingToTermIndex = termIndex
+                                showAddCourseDialog = true
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add Course"
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(text = "Add a course")
                         }
                     }
                 }
@@ -183,18 +181,19 @@ fun ModifyTranscriptScreen(navController: NavHostController? = null) {
         
         // Add Course Dialog
         if (showAddCourseDialog) {
-            CourseDialog(
+            CourseDialogWithTermSelection(
                 title = "Add Course",
                 initialCourseName = "",
                 initialCourseCode = "",
                 initialCreditHours = "3",
                 initialGrade = "A",
                 gradeOptions = gradeOptions,
+                terms = transcript.terms,
+                initialTermIndex = addingToTermIndex,
                 onDismiss = { showAddCourseDialog = false },
-                onConfirm = { courseCode, name, hours, grade ->
+                onConfirm = { termId, courseCode, name, hours, grade ->
                     if (name.isNotBlank() && hours.isNotBlank()) {
                         // Create new course
-                        val term = transcript.terms[addingToTermIndex]
                         val points = calculatePoints(hours.toIntOrNull() ?: 0, grade)
                         
                         val newCourse = Course(
@@ -206,8 +205,8 @@ fun ModifyTranscriptScreen(navController: NavHostController? = null) {
                             grade = grade
                         )
                         
-                        // Add to repository
-                        // viewModel.addCourse(term.id, newCourse)
+                        // Add to repository - now uncommented
+                        viewModel.addCourse(termId, newCourse)
                         
                         // Reset dialog state
                         showAddCourseDialog = false
@@ -429,6 +428,173 @@ fun CourseDialog(
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
                         enabled = courseName.isNotBlank() && creditHours.isNotBlank()
+                    ) {
+                        Text("Save")
+                    }
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CourseDialogWithTermSelection(
+    title: String,
+    initialCourseName: String,
+    initialCourseCode: String,
+    initialCreditHours: String,
+    initialGrade: String,
+    gradeOptions: List<String>,
+    terms: List<Term>,
+    initialTermIndex: Int,
+    onDismiss: () -> Unit,
+    onConfirm: (termId: Int, courseCode: String, courseName: String, creditHours: String, grade: String) -> Unit
+) {
+    var courseName by remember { mutableStateOf(initialCourseName) }
+    var courseCode by remember { mutableStateOf(initialCourseCode) }
+    var creditHours by remember { mutableStateOf(initialCreditHours) }
+    var selectedGrade by remember { mutableStateOf(initialGrade) }
+    var selectedTermIndex by remember { mutableStateOf(initialTermIndex) }
+    
+    var gradeExpanded by remember { mutableStateOf(false) }
+    var termExpanded by remember { mutableStateOf(false) }
+    
+    Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Text(
+                    text = title,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                
+                // Term selection dropdown
+                ExposedDropdownMenuBox(
+                    expanded = termExpanded,
+                    onExpandedChange = { termExpanded = !termExpanded }
+                ) {
+                    TextField(
+                        value = if (terms.isNotEmpty() && selectedTermIndex < terms.size) 
+                                terms[selectedTermIndex].name 
+                                else "Select Term",
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Term") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = termExpanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
+                    )
+                    
+                    ExposedDropdownMenu(
+                        expanded = termExpanded,
+                        onDismissRequest = { termExpanded = false }
+                    ) {
+                        terms.forEachIndexed { index, term ->
+                            DropdownMenuItem(
+                                text = { Text(term.name) },
+                                onClick = {
+                                    selectedTermIndex = index
+                                    termExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                
+                // Course code field
+                TextField(
+                    value = courseCode,
+                    onValueChange = { courseCode = it },
+                    label = { Text("Course Code") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                // Course name field
+                TextField(
+                    value = courseName,
+                    onValueChange = { courseName = it },
+                    label = { Text("Course Name") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                // Credit hours field
+                TextField(
+                    value = creditHours,
+                    onValueChange = { 
+                        if (it.isEmpty() || it.all { char -> char.isDigit() }) {
+                            creditHours = it
+                        }
+                    },
+                    label = { Text("Credit Hours") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                // Grade dropdown
+                ExposedDropdownMenuBox(
+                    expanded = gradeExpanded,
+                    onExpandedChange = { gradeExpanded = !gradeExpanded }
+                ) {
+                    TextField(
+                        value = selectedGrade,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Grade") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = gradeExpanded) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor()
+                    )
+                    
+                    ExposedDropdownMenu(
+                        expanded = gradeExpanded,
+                        onDismissRequest = { gradeExpanded = false }
+                    ) {
+                        gradeOptions.forEach { grade ->
+                            DropdownMenuItem(
+                                text = { Text(grade) },
+                                onClick = {
+                                    selectedGrade = grade
+                                    gradeExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+                
+                // Action buttons
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 16.dp),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Cancel")
+                    }
+                    
+                    Spacer(modifier = Modifier.width(8.dp))
+                    
+                    Button(
+                        onClick = {
+                            if (courseName.isNotBlank() && creditHours.isNotBlank() && terms.isNotEmpty()) {
+                                val termId = terms[selectedTermIndex].id
+                                onConfirm(termId, courseCode, courseName, creditHours, selectedGrade)
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+                        enabled = courseName.isNotBlank() && creditHours.isNotBlank() && terms.isNotEmpty()
                     ) {
                         Text("Save")
                     }
