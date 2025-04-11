@@ -20,15 +20,24 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.adc.gpai.R
+import com.adc.gpai.models.Transcript
 import com.adc.gpai.onboarding.TranscriptRepository
 import com.adc.gpai.ui.theme.GPAiTheme
 import org.koin.androidx.compose.koinViewModel
 
+
+// TODO - on clicking on calculate button, calculate semester gpa, and update transcript repository to then calculate cumulative GPA
+// TODO - make calculate button obviously unclickable if user has not changed anything about the screen
+// TODO - enhance layout (at last)
+
 @Composable
 fun ForecasterScreen() {
-
+    // transcript repository that persists changes throughout app
+    // it contains a list of term objects, which each contain their respective courses
     val viewModel: TranscriptRepository = koinViewModel()
-    var mostRecentTerm = viewModel.transcript.observeAsState().value?.terms?.last()
+
+    val transcript = viewModel.transcript.observeAsState()
+    var mostRecentTerm = transcript.value?.terms?.last()
     var courses = mostRecentTerm?.courses ?: emptyList()
 
     Column(
@@ -54,8 +63,10 @@ fun ForecasterScreen() {
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Display cumulative and semester GPA (currently static)
-        Text(text = "Cumulative GPA: 3.638", style = MaterialTheme.typography.bodySmall)
+        // TODO : make this dynamic - call gpa field from Transcript object..
+        var cumGPA = transcript.value?.gpa
+
+        Text(text = "Cumulative GPA: $cumGPA", style = MaterialTheme.typography.bodySmall)
         Text(text = "Semester GPA: 4.0", style = MaterialTheme.typography.bodySmall)
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -64,7 +75,7 @@ fun ForecasterScreen() {
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Button(onClick = { /* Calculate action */ }) {
+            Button(onClick = { }) {
                 Text(text = "Calculate")
             }
 
@@ -78,6 +89,12 @@ fun ForecasterScreen() {
         }
     }
 }
+
+/***
+ * Event handler for calculate button, it does the following:
+ * Updates TranscriptRepository for latest term
+ * Updates cumulative and semester GPAs
+ */
 
 @Composable
 fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
