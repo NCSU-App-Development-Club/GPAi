@@ -74,6 +74,7 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.androidx.ui.test.junit4.android)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
