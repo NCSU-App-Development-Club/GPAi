@@ -75,15 +75,28 @@ fun ForecasterScreen() {
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Button(onClick = { }) {
+            // TODO : Add button for new course
+            Button(onClick = {
+                // Pseudocode
+                // Update TranscriptRepository with adjusted course values,
+                // and new courses
+                // use TranscriptRepository function to calculate sem gpa and cum gpa
+
+            }) {
                 Text(text = "Calculate")
             }
 
-            Button(onClick = { /* Navigate to Forecaster */ }) {
+            Button(onClick = {
+                // Pseudocode
+                // Check if on Forecaster, if not, navigate to Forecaster
+            }) {
                 Text(text = "Forecaster")
             }
 
-            Button(onClick = { /* Navigate to Advisor */ }) {
+            Button(onClick = {
+                // Pseudocode
+                // Check if on Advisor, if not, navigate to Advisor
+            }) {
                 Text(text = "Advisor")
             }
         }
@@ -100,7 +113,7 @@ fun ForecasterScreen() {
 fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
     var grade by remember { mutableStateOf(4f) }  // Default grade (A+ = 4.0)
     var units by remember { mutableStateOf(3f) }  // Default units (3)
-
+//    TODO: Modify UI for each entry here
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -133,8 +146,8 @@ fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
                 Slider(
                     value = grade,
                     onValueChange = { grade = it },
-                    valueRange = 0f..4f,
-                    steps = 5,  // A+, A, B+, etc.
+                    valueRange = 0f..4.33f,
+                    steps = 13,  // A+, A, B+, etc.
                     modifier = Modifier.width(150.dp)
                 )
             }
@@ -143,7 +156,7 @@ fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
                 Slider(
                     value = units,
                     onValueChange = { units = it },
-                    valueRange = 0f..3f,
+                    valueRange = 1f..3f,
                     steps = 2,  // 1 to 5 units
                     modifier = Modifier.width(150.dp)
                 )
@@ -155,11 +168,19 @@ fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
 // Convert numeric grade to letter equivalent
 fun gradeToLetter(grade: Float): String {
     return when {
-        grade >= 3.67f -> "A+"
-        grade >= 3.33f -> "A"
-        grade >= 3.00f -> "A-"
-        grade >= 2.67f -> "B+"
-        else -> "B"
+        grade >= 4.33f -> "A+"
+        grade >= 4.0f -> "A"
+        grade >= 3.667f -> "A-"
+        grade >= 3.33f -> "B+"
+        grade >= 3.0f -> "B"
+        grade >= 2.667f -> "B-"
+        grade >= 2.333f -> "C+"
+        grade >= 2.0f -> "C"
+        grade >= 1.667f -> "C-"
+        grade >= 1.333f -> "D+"
+        grade >= 1.0f -> "D"
+        grade >= 0.667 -> "D-"
+        else -> "F"
     }
 }
 
