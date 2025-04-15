@@ -321,11 +321,12 @@ fun CourseEntry(course: Course, onUpdate: (Course) -> Unit, onDelete: () -> Unit
             Column {
                 Text(text = "Grade: ${course.grade}")
                 Slider(
-                    value = course.points.toFloat(),
+                    enabled = course.isForGrade(),
+                    value = course.points.toFloat() / course.earned.toFloat(),
                     onValueChange = {
                         onUpdate(course.copy(
                             grade = gradeToLetter(it),
-                            points = it.toDouble()
+                            points = it.toDouble() * course.earned
                         ))
                     },
                     valueRange = 0f..4.33f,
@@ -338,7 +339,7 @@ fun CourseEntry(course: Course, onUpdate: (Course) -> Unit, onDelete: () -> Unit
                 Slider(
                     value = course.earned.toFloat(),
                     onValueChange = {
-                        onUpdate(course.copy(earned = it.toInt()))
+                        onUpdate(course.copy(attempted = it.toInt(), earned = it.toInt()))
                     },
                     valueRange = 1f..3f,
                     steps = 2,  // 1 to 5 units
