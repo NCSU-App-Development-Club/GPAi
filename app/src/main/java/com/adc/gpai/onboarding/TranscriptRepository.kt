@@ -56,6 +56,23 @@ class TranscriptRepository(private val database: AppDatabase) : ViewModel() {
         }
     }
 
+    fun addCourse(termId: Int, course: Course) {
+        // Optimistic update - add the course to the term with matching ID
+        _transcript.value = _transcript.value?.copy(terms = _transcript.value!!.terms.map { term ->
+            if (term.id == termId) {
+                term.copy(courses = term.courses + course)
+            } else {
+                term
+            }
+        })
+        
+        // Update in the DB
+        viewModelScope.launch {
+            database.termCourseDao().insertCourse(CourseDTO.from(course, termId))
+            fetchAllCourses() // Refresh the courses list to keep in sync
+        }
+    }
+
     private fun fetchAllCourses() {
         viewModelScope.launch {
             _transcript.value = database.termCourseDao().getAllTerms().toTranscript()
