@@ -1,12 +1,19 @@
 package com.adc.gpai.home
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -19,11 +26,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.navigation.NavDeepLinkRequest
 import com.adc.gpai.R
 import com.adc.gpai.models.Transcript
 import com.adc.gpai.onboarding.TranscriptRepository
 import com.adc.gpai.ui.theme.GPAiTheme
 import org.koin.androidx.compose.koinViewModel
+import androidx.navigation.NavHostController
+import com.adc.gpai.models.Course
 
 
 // TODO - on clicking on calculate button, calculate semester gpa, and update transcript repository to then calculate cumulative GPA
@@ -31,14 +42,19 @@ import org.koin.androidx.compose.koinViewModel
 // TODO - enhance layout (at last)
 
 @Composable
-fun ForecasterScreen() {
+fun ForecasterScreen(navController: NavHostController? = null) {
     // transcript repository that persists changes throughout app
     // it contains a list of term objects, which each contain their respective courses
+
+    // TODO : exception handling?
     val viewModel: TranscriptRepository = koinViewModel()
 
     val transcript = viewModel.transcript.observeAsState()
     var mostRecentTerm = transcript.value?.terms?.last()
     var courses = mostRecentTerm?.courses ?: emptyList()
+    var openPopup by remember { mutableStateOf(false) }
+    var newCourseAdded by remember { mutableStateOf(false) }
+    var newCourse by remember { mutableStateOf(Course) }
 
     Column(
         modifier = Modifier
@@ -82,13 +98,15 @@ fun ForecasterScreen() {
                 // and new courses
                 // use TranscriptRepository function to calculate sem gpa and cum gpa
 
+
             }) {
                 Text(text = "Calculate")
             }
 
             Button(onClick = {
-                //add new course to a list of courses
-
+                // create user input text fields for course code, name
+                //add new course to the list of courses
+                openPopup = true
             }) {
                 Text(text = "Add Course")
             }
@@ -99,20 +117,175 @@ fun ForecasterScreen() {
             modifier = Modifier.fillMaxWidth()
         ) {
             Button(onClick = {
-                // Pseudocode
-                // Check if on Forecaster, if not, navigate to Forecaster
+                // Add check for if already there?
+                navController?.navigate("forecaster")
             }) {
                 Text(text = "Forecaster")
             }
 
             Button(onClick = {
-                // Pseudocode
-                // Check if on Advisor, if not, navigate to Advisor
+                // Add check for if already there?
+                navController?.navigate("advisor")
             }) {
                 Text(text = "Advisor")
             }
         }
+
+        if (openPopup){
+            DisplayCourseEntryFields(
+                onDismiss = {openPopup = false},
+                onConfirmation = {
+                    newCourseCode, newCourseName, newCourseGrade, newCourseUnits ->
+                    newCourse = Course(
+                        courseCode = newCourseCode,
+                        courseName = newCourseName,
+                        points = 4.33,
+                        grade = "A+"
+                    )
+
+                 }
+            )
+        }
+
+        if (newCourseAdded){
+            // TODO: add new course to transcript repository
+            CourseEntry(
+                courseCode = newCourse.courseCode,
+                courseName = newCourse.courseName,
+                onDelete = { viewModel.removeCourse(newCourse)}
+            )
+
+            newCourseAdded = false
+        }
     }
+}
+
+/*
+ Function to display dialog box/popup for new course entry
+ */
+@Composable
+fun DisplayCourseEntryFields(
+    // pass in function to close dialog box without any updates...
+    onDismiss : () -> Unit,
+    onConfirmation: (String, String, Float, Float) -> Unit, // pass in function to update list of courses in transcript?
+){
+
+    // TODO : figure out how to exit Dialog box with onDismissRequest
+    // TODO : figure out how to add new Course with onConfirmation, or otherwise
+//    if (showDialogLocal){
+        Dialog( onDismissRequest = { onDismiss() }
+        ){
+            var courseCode = ""
+            var courseName = ""
+            var grade = 0.0f
+            var units = 1.0f
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(375.dp)
+                    .padding(16.dp),
+                shape = RoundedCornerShape(16.dp),
+            ){
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ){
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ){
+
+                        TextField(
+                            value = courseCode,
+                            onValueChange = { courseCode = it },
+                            label = { Text("Enter Course Code")}
+                        )
+                    }
+                    Row (
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ){
+                        TextField(
+                            value = courseName,
+                            onValueChange = { courseName = it },
+                            label = { Text("Enter Course Name")}
+                        )
+                    }
+
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ){
+                        Column {
+                            Text(text = "Grade: ${gradeToLetter(grade)}")
+                            Slider(
+                                value = grade,
+                                onValueChange = { grade = it },
+                                valueRange = 0f..4.33f,
+                                steps = 13,  // A+, A, B+, etc.
+                                modifier = Modifier.width(150.dp)
+                            )
+                        }
+                        Column {
+                            Text(text = "Units: ${units.toInt()}")
+                            Slider(
+                                value = units,
+                                onValueChange = { units = it },
+                                valueRange = 1f..3f,
+                                steps = 2,  // 1 to 5 units
+                                modifier = Modifier.width(150.dp)
+                            )
+                        }
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ){
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ){
+                            ElevatedButton(
+                                // passing current values back to ForecastScreen() for processing
+                                onClick = {onConfirmation(courseCode, courseName, grade, units)},
+                                modifier = Modifier.padding((8.dp)),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
+                            ) {
+                                Text("Add Course!")
+                            }
+                        }
+                        Column(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            verticalArrangement = Arrangement.Center,
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ){
+                            ElevatedButton(
+                                onClick = { onDismiss() },
+                                modifier = Modifier.padding(8.dp),
+                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                            ) {
+                                Text("Dismiss Entry")
+                            }
+                        }
+
+                    }
+                }
+            }
+        }
+//    }
+
 }
 
 /***
@@ -196,12 +369,40 @@ fun gradeToLetter(grade: Float): String {
 }
 
 
-@Composable
-fun ForecasterScreen(viewModel: TranscriptRepository = koinViewModel()){
-    ForecasterScreen(
-        viewModel = viewModel
-    )
+fun letterToGrade(letterGrade: String) : Float {
+    return when (letterGrade) {
+        "A+" -> 4.33f
+        "A" -> 4.0f
+        "A-" -> 3.667f
+        "B+" -> 3.33f
+        "B" -> 3.0f
+        "B-" -> 2.667f
+        "C+" -> 2.333f
+        "C" -> 2.0f
+        "C-" -> 1.667f
+        "D+" -> 1.333f
+        "D" -> 1.0f
+        "D-" -> 0.667f
+        else -> 0.00F
+    }
 }
+
+// TODO : need to handle viewModel interaction with Preview annotation
+//@Composable
+//fun ForecasterScreen(viewModel: TranscriptRepository = koinViewModel()){
+//    ForecasterScreen(
+//        viewModel = viewModel
+//    )
+//}
+
+@Composable
+fun addNewCourse(){
+    // Pseudocode
+    // add new entry field for course code and name
+    // populate courseEntry
+}
+
+
 @Preview(showBackground = true)
 @Composable
 fun ForecasterPreview() {
