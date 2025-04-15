@@ -89,4 +89,38 @@ class TranscriptRepository(private val database: AppDatabase) : ViewModel() {
             fetchAllCourses()
         }
     }
+
+    // Copied from jdburan/ModifyTranscriptScreen branch
+    fun addCourse(termId: Int, course: Course) {
+        // Optimistic update - add the course to the term with matching ID
+        _transcript.value = _transcript.value?.copy(terms = _transcript.value!!.terms.map { term ->
+            if (term.id == termId) {
+                term.copy(courses = term.courses + course)
+            } else {
+                term
+            }
+        })
+
+        // Update in the DB
+        viewModelScope.launch {
+            database.termCourseDao().insertCourse(CourseDTO.from(course, termId))
+            fetchAllCourses() // Refresh the courses list to keep in sync
+        }
+    }
+
+    fun checkDuplicateCourse(courseCode : String) : Boolean{
+        var terms =  transcript.value?.terms
+        if (terms != null) {
+            for (term in terms){
+                for (course in term.courses){
+                    if (courseCode == course.courseCode){
+                        return true
+                    }
+                }
+            }
+        }
+        return false
+    }
+
+
 }

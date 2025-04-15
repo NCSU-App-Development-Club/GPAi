@@ -102,7 +102,7 @@ class ForecasterViewUITest {
      * 1 - Adding a course for the first time
      */
     @Test
-    fun add_course_with_+_button(){
+    fun add_course_with_plus_button(){
         composeTestRule.setContent {
             MyComposable()
         }

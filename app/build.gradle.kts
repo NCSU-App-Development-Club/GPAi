@@ -2,8 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.jetbrains.kotlin.serialization)
+    alias(libs.plugins.compose)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.compose.compiler)
 }
 
 android {
@@ -70,9 +70,9 @@ dependencies {
     implementation(libs.androidx.runtime.livedata)
 
     // Room
-    ksp(libs.androidx.room.ksp)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.common.jvm)
+    implementation(libs.androidx.room.runtime.android)
+    ksp(libs.androidx.room.compiler)
 
     // Koin
     implementation(libs.koin.android)
@@ -81,8 +81,6 @@ dependencies {
     // Retrofit
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
-    implementation(libs.androidx.room.common.jvm)
-    implementation(libs.androidx.room.runtime.android)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
