@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -98,7 +101,7 @@ fun ForecasterScreen() {
                         tempTranscript.gpa
                     )
                 }",
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.titleMedium
             )
         }
     }
@@ -113,12 +116,11 @@ fun Term(term: Term, onUpdate: (Term) -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         Text(
             text = term.name,
-            style = MaterialTheme.typography.titleLarge
+            style = MaterialTheme.typography.displaySmall
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -138,29 +140,29 @@ fun Term(term: Term, onUpdate: (Term) -> Unit) {
                     }))
                 })
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(24.dp))
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
-
-        val locale = LocalContext.current.resources.configuration.locales.get(0)
-        Text(
-            text = "Semester GPA: ${String.format(locale, "%.2f", term.gpa)}",
-            style = MaterialTheme.typography.bodyMedium
-        )
-
-        Spacer(modifier = Modifier.height(16.dp))
-
         Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
+            val locale = LocalContext.current.resources.configuration.locales.get(0)
+            Text(
+                text = "Semester GPA: ${String.format(locale, "%.2f", term.gpa)}",
+                style = MaterialTheme.typography.bodyLarge
+            )
+
             Button(onClick = {
                 openPopup = true
             }) {
+                Icon(Icons.Default.Add, "Add")
                 Text(text = "Add Course")
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         if (openPopup) {
             DisplayCourseEntryFields(
@@ -309,6 +311,7 @@ fun CourseEntry(course: Course, onUpdate: (Course) -> Unit, onDelete: () -> Unit
             }
             IconButton(onClick = { onDelete() }) {
                 Icon(
+                    modifier = Modifier.size(24.dp),
                     painter = painterResource(id = R.drawable.error),
                     contentDescription = "Delete Course",
                     tint = Color.Red
