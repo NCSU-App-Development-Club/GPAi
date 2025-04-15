@@ -75,7 +75,7 @@ fun ForecasterScreen(navController: NavHostController? = null) {
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Iterate over courses and display each with a delete option
+        // Iterate over courses from transcript repository and display each with a delete option
         courses.forEach { course ->
             CourseEntry(
                 courseCode = course.courseCode,
@@ -84,6 +84,8 @@ fun ForecasterScreen(navController: NavHostController? = null) {
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
+
+        // TODO : Iterate over courses added by user within the screen itself (this course list is erased when clicked on Calculate button)
 
         Spacer(modifier = Modifier.height(32.dp))
 
