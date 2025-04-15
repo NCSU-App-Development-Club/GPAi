@@ -16,4 +16,13 @@ data class Term(
      * Creates a new Term with an automatically-generated ID.
      */
     constructor(name: String, courses: List<Course>) : this(0, name, courses)
+
+    val gradedCourses get() = courses.filter { it.isForGrade() }
+
+    val totalCredits get() = gradedCourses.sumOf { it.attempted }
+    val totalEarnedPoints get() = gradedCourses.sumOf { it.points }
+
+    val gpa: Double
+        get() = if (totalCredits == 0) 0.0
+        else (totalEarnedPoints / totalCredits).coerceAtMost(4.0)
 }

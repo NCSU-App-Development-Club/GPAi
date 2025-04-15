@@ -15,7 +15,7 @@ data class Transcript(val terms: List<Term> = ArrayList()) {
      * @return The total credits earned by summing the `earned` value of each course.
      */
     val totalCredits: Int
-        get() = terms.sumOf { term -> term.courses.sumOf { course -> course.attempted } }
+        get() = terms.sumOf { term -> term.gradedCourses.sumOf { course -> course.attempted } }
 
     /**
      * Calculates the total grade points earned across all terms and courses in the transcript.
@@ -24,7 +24,7 @@ data class Transcript(val terms: List<Term> = ArrayList()) {
      * @return The total grade points earned by summing the `points` value of each course.
      */
     val totalEarnedPoints: Double
-        get() = terms.sumOf { term -> term.courses.sumOf { course -> course.points } }
+        get() = terms.sumOf { term -> term.gradedCourses.sumOf { course -> course.points } }
 
     /**
      * The GPA (Grade Point Average) calculated based on the total earned points
@@ -38,7 +38,6 @@ data class Transcript(val terms: List<Term> = ArrayList()) {
     val gpa: Double
         get() {
             if (totalCredits == 0) return 0.0
-            return totalEarnedPoints / totalCredits
+            return (totalEarnedPoints / totalCredits).coerceAtMost(4.0)
         }
-
 }
