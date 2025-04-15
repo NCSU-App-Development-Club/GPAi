@@ -40,6 +40,7 @@ import com.adc.gpai.models.Course
 // TODO - on clicking on calculate button, calculate semester gpa, and update transcript repository to then calculate cumulative GPA
 // TODO - make calculate button obviously unclickable if user has not changed anything about the screen
 // TODO - enhance layout (at last)
+// TODO - don't let user click on Add New Course button, if fields have not been entered
 
 @Composable
 fun ForecasterScreen(navController: NavHostController? = null) {
@@ -54,7 +55,14 @@ fun ForecasterScreen(navController: NavHostController? = null) {
     var courses = mostRecentTerm?.courses ?: emptyList()
     var openPopup by remember { mutableStateOf(false) }
     var newCourseAdded by remember { mutableStateOf(false) }
-    var newCourse by remember { mutableStateOf(Course) }
+    var newCourse by remember { mutableStateOf(
+        Course(
+            courseCode = "default",
+            courseName = "default",
+            points = 0.0,
+            grade = "Z")
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -81,7 +89,7 @@ fun ForecasterScreen(navController: NavHostController? = null) {
 
         // TODO : make this dynamic - call gpa field from Transcript object..
         var cumGPA = transcript.value?.gpa
-
+        // TODO : handle semester gpa
         Text(text = "Cumulative GPA: $cumGPA", style = MaterialTheme.typography.bodySmall)
         Text(text = "Semester GPA: 4.0", style = MaterialTheme.typography.bodySmall)
 
@@ -135,20 +143,24 @@ fun ForecasterScreen(navController: NavHostController? = null) {
             DisplayCourseEntryFields(
                 onDismiss = {openPopup = false},
                 onConfirmation = {
-                    newCourseCode, newCourseName, newCourseGrade, newCourseUnits ->
+                    newCourseCode, newCourseName, ->
                     newCourse = Course(
                         courseCode = newCourseCode,
                         courseName = newCourseName,
                         points = 4.33,
                         grade = "A+"
                     )
-
+                    newCourseAdded = true
                  }
             )
         }
 
         if (newCourseAdded){
-            // TODO: add new course to transcript repository
+            // TODO: on delete function only needs to get rid of this specific course entry from
+            // display page, not the transcript
+            // HOWEVER, what happens after transcript is updated in Calculate button? Do the courses that were not originally
+            // part of the transcript disappear, or are there duplicate entries?
+
             CourseEntry(
                 courseCode = newCourse.courseCode,
                 courseName = newCourse.courseName,
@@ -167,125 +179,119 @@ fun ForecasterScreen(navController: NavHostController? = null) {
 fun DisplayCourseEntryFields(
     // pass in function to close dialog box without any updates...
     onDismiss : () -> Unit,
-    onConfirmation: (String, String, Float, Float) -> Unit, // pass in function to update list of courses in transcript?
+    onConfirmation: (String, String) -> Unit, // pass in function to update list of courses in transcript?
 ){
+     Dialog( onDismissRequest = { onDismiss() })
+     {
+        var courseCode = ""
+        var courseName = ""
+        var grade = 0.0f
+        var units = 1.0f
 
-    // TODO : figure out how to exit Dialog box with onDismissRequest
-    // TODO : figure out how to add new Course with onConfirmation, or otherwise
-//    if (showDialogLocal){
-        Dialog( onDismissRequest = { onDismiss() }
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(375.dp)
+                .padding(16.dp),
+            shape = RoundedCornerShape(16.dp),
         ){
-            var courseCode = ""
-            var courseName = ""
-            var grade = 0.0f
-            var units = 1.0f
-
-            Card(
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(375.dp)
-                    .padding(16.dp),
-                shape = RoundedCornerShape(16.dp),
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
             ){
-                Column(
+                Row(
                     modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.Center,
-                    horizontalAlignment = Alignment.CenterHorizontally,
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
                 ){
-                    Row(
+
+                    TextField(
+                        value = courseCode,
+                        onValueChange = { courseCode = it },
+                        label = { Text("Enter Course Code")}
+                    )
+                }
+                Row (
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ){
+                    TextField(
+                        value = courseName,
+                        onValueChange = { courseName = it },
+                        label = { Text("Enter Course Name")}
+                    )
+                }
+
+
+//                Row(
+//                    modifier = Modifier
+//                        .fillMaxWidth(),
+//                    horizontalArrangement = Arrangement.Center
+//                ){
+//                    Column {
+//                        Text(text = "Grade: ${gradeToLetter(grade)}")
+//                        Slider(
+//                            value = grade,
+//                            onValueChange = { grade = it },
+//                            valueRange = 0f..4.33f,
+//                            steps = 13,  // A+, A, B+, etc.
+//                            modifier = Modifier.width(150.dp)
+//                        )
+//                    }
+//                    Column {
+//                        Text(text = "Units: ${units.toInt()}")
+//                        Slider(
+//                            value = units,
+//                            onValueChange = { units = it },
+//                            valueRange = 1f..3f,
+//                            steps = 2,  // 1 to 5 units
+//                            modifier = Modifier.width(150.dp)
+//                        )
+//                    }
+//                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ){
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ){
-
-                        TextField(
-                            value = courseCode,
-                            onValueChange = { courseCode = it },
-                            label = { Text("Enter Course Code")}
-                        )
+                        ElevatedButton(
+                            // passing current values back to ForecastScreen() for processing
+                            onClick = {onConfirmation(courseCode, courseName)},
+                            modifier = Modifier.padding((8.dp)),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
+                        ) {
+                            Text("Add Course!")
+                        }
                     }
-                    Row (
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
+                            .fillMaxSize(),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ){
-                        TextField(
-                            value = courseName,
-                            onValueChange = { courseName = it },
-                            label = { Text("Enter Course Name")}
-                        )
-                    }
-
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ){
-                        Column {
-                            Text(text = "Grade: ${gradeToLetter(grade)}")
-                            Slider(
-                                value = grade,
-                                onValueChange = { grade = it },
-                                valueRange = 0f..4.33f,
-                                steps = 13,  // A+, A, B+, etc.
-                                modifier = Modifier.width(150.dp)
-                            )
-                        }
-                        Column {
-                            Text(text = "Units: ${units.toInt()}")
-                            Slider(
-                                value = units,
-                                onValueChange = { units = it },
-                                valueRange = 1f..3f,
-                                steps = 2,  // 1 to 5 units
-                                modifier = Modifier.width(150.dp)
-                            )
+                        ElevatedButton(
+                            onClick = { onDismiss() },
+                            modifier = Modifier.padding(8.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
+                        ) {
+                            Text("Dismiss Entry")
                         }
                     }
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ){
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ){
-                            ElevatedButton(
-                                // passing current values back to ForecastScreen() for processing
-                                onClick = {onConfirmation(courseCode, courseName, grade, units)},
-                                modifier = Modifier.padding((8.dp)),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.Green)
-                            ) {
-                                Text("Add Course!")
-                            }
-                        }
-                        Column(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                        ){
-                            ElevatedButton(
-                                onClick = { onDismiss() },
-                                modifier = Modifier.padding(8.dp),
-                                colors = ButtonDefaults.buttonColors(containerColor = Color.Red)
-                            ) {
-                                Text("Dismiss Entry")
-                            }
-                        }
-
-                    }
                 }
             }
         }
-//    }
-
+     }
 }
 
 /***
@@ -297,7 +303,7 @@ fun DisplayCourseEntryFields(
 fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
     var grade by remember { mutableStateOf(4.33f) }  // Default grade (A+ = 4.33)
     var units by remember { mutableStateOf(3f) }  // Default units (3)
-//    TODO: Modify UI for each entry here
+//    TODO: Modify UI to better match Figma design for each entry here
     Column(
         modifier = Modifier
             .fillMaxWidth(),
@@ -394,13 +400,6 @@ fun letterToGrade(letterGrade: String) : Float {
 //        viewModel = viewModel
 //    )
 //}
-
-@Composable
-fun addNewCourse(){
-    // Pseudocode
-    // add new entry field for course code and name
-    // populate courseEntry
-}
 
 
 @Preview(showBackground = true)
