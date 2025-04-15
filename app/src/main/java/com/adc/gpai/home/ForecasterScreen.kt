@@ -24,6 +24,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
@@ -41,15 +42,14 @@ import androidx.compose.ui.window.Dialog
 import com.adc.gpai.R
 import com.adc.gpai.models.Course
 import com.adc.gpai.models.Term
+import com.adc.gpai.models.Transcript
 import com.adc.gpai.onboarding.TranscriptRepository
 import com.adc.gpai.ui.theme.GPAiTheme
 import org.koin.androidx.compose.koinViewModel
 
 // TODO - update Transcript Repository whenever update made - sliders adjusted, new course added
-// TODO - make calculate button obviously unclickable if user has not changed anything about the screen
 // TODO - enhance layout (at last)
 // TODO - don't let user click on Add New Course button, if fields have not been entered
-// TODO - confirm gpa logic is consistent with everywhere else
 
 @Composable
 fun ForecasterScreen() {
@@ -58,19 +58,54 @@ fun ForecasterScreen() {
 
     val transcript = viewModel.transcript.observeAsState()
 
-    val cumGPA = transcript.value?.gpa ?: 0.0
+    // In the forecaster, the user can modify their transcript without saving it.
+    // Their edits are kept here. In the future, if we want to add the ability to
+    // sync temporary edits to the saved transcript, we can use TranscriptRepository#updateTranscript.
+    var tempTranscript by remember {
+        mutableStateOf<Transcript>(
+            transcript.value ?: Transcript(
+                emptyList()
+            )
+        )
+    }
+
+    LaunchedEffect(transcript.value) {
+        if (transcript.value != null) {
+            tempTranscript = transcript.value!!
+        }
+    }
 
     val scrollState = rememberScrollState()
     Column(modifier = Modifier.verticalScroll(scrollState)) {
-        for (term in transcript.value?.terms ?: listOf()) {
-            Term(term)
+        for ((i, term) in tempTranscript.terms.withIndex()) {
+            Term(term = term, onUpdate = { newTerm ->
+                tempTranscript = tempTranscript.copy(
+                    terms = tempTranscript.terms.let {
+                        val terms = it.toMutableList()
+                        terms[i] = newTerm
+                        terms
+                    })
+            })
         }
-        Text(text = "Cumulative GPA: $cumGPA", style = MaterialTheme.typography.bodyMedium)
+
+        Column(modifier = Modifier.padding(16.dp)) {
+            val locale = LocalContext.current.resources.configuration.locales.get(0)
+            Text(
+                text = "Cumulative GPA: ${
+                    String.format(
+                        locale,
+                        "%.2f",
+                        tempTranscript.gpa
+                    )
+                }",
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
     }
 }
 
 @Composable
-fun Term(term: Term) {
+fun Term(term: Term, onUpdate: (Term) -> Unit) {
     val viewModel: TranscriptRepository = koinViewModel()
     var openPopup by remember { mutableStateOf(false) }
 
@@ -89,11 +124,19 @@ fun Term(term: Term) {
         Spacer(modifier = Modifier.height(16.dp))
 
         // Iterate over courses from transcript repository and display each with a delete option
-        term.courses.forEach { course ->
+        term.courses.forEachIndexed { i, course ->
             CourseEntry(
-                courseCode = course.courseCode,
-                courseName = course.courseName,
-                onDelete = { viewModel.removeCourse(course) })
+                course = course,
+                onDelete = {
+                    onUpdate(term.copy(courses = term.courses.filterIndexed { j, _ -> j != i }))
+                },
+                onUpdate = { newCourse ->
+                    onUpdate(term.copy(courses = term.courses.let {
+                        val courses = term.courses.toMutableList()
+                        courses[i] = newCourse
+                        courses
+                    }))
+                })
 
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -153,7 +196,9 @@ fun DisplayCourseEntryFields(
             shape = RoundedCornerShape(16.dp),
         ) {
             Column(
-                modifier = Modifier.fillMaxSize().padding(16.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
@@ -248,10 +293,7 @@ fun DisplayCourseEntryFields(
  * Updates cumulative and semester GPAs
  */
 @Composable
-fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
-    var grade by remember { mutableStateOf(4.33f) }  // Default grade (A+ = 4.33)
-    var units by remember { mutableStateOf(3f) }  // Default units (3)
-//    TODO: Modify UI to better match Figma design for each entry here
+fun CourseEntry(course: Course, onUpdate: (Course) -> Unit, onDelete: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.Start
     ) {
@@ -261,8 +303,8 @@ fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Text(text = "Course Code: $courseCode")
-                Text(text = "Course Name: $courseName")
+                Text(text = "Course Code: ${course.courseCode}")
+                Text(text = "Course Name: ${course.courseName}")
             }
             IconButton(onClick = { onDelete() }) {
                 Icon(
@@ -277,20 +319,27 @@ fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
             modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column {
-                Text(text = "Grade: ${gradeToLetter(grade)}")
+                Text(text = "Grade: ${course.grade}")
                 Slider(
-                    value = grade,
-                    onValueChange = { grade = it },
+                    value = course.points.toFloat(),
+                    onValueChange = {
+                        onUpdate(course.copy(
+                            grade = gradeToLetter(it),
+                            points = it.toDouble()
+                        ))
+                    },
                     valueRange = 0f..4.33f,
                     steps = 13,  // A+, A, B+, etc.
                     modifier = Modifier.width(150.dp)
                 )
             }
             Column {
-                Text(text = "Units: ${units.toInt()}")
+                Text(text = "Units: ${course.earned.toInt()}")
                 Slider(
-                    value = units,
-                    onValueChange = { units = it },
+                    value = course.earned.toFloat(),
+                    onValueChange = {
+                        onUpdate(course.copy(earned = it.toInt()))
+                    },
                     valueRange = 1f..3f,
                     steps = 2,  // 1 to 5 units
                     modifier = Modifier.width(150.dp)
