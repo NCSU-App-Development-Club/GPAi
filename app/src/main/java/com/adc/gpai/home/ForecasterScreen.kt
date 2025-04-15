@@ -45,7 +45,7 @@ fun ForecasterScreen() {
             .fillMaxSize()
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+        verticalArrangement = Arrangement.Center
     ) {
         Text(text = mostRecentTerm?.name ?: "Current Semester", style = MaterialTheme.typography.bodyMedium)
 
@@ -86,6 +86,18 @@ fun ForecasterScreen() {
                 Text(text = "Calculate")
             }
 
+            Button(onClick = {
+                //add new course to a list of courses
+
+            }) {
+                Text(text = "Add Course")
+            }
+        }
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxWidth()
+        ) {
             Button(onClick = {
                 // Pseudocode
                 // Check if on Forecaster, if not, navigate to Forecaster
@@ -183,6 +195,13 @@ fun gradeToLetter(grade: Float): String {
     }
 }
 
+
+@Composable
+fun ForecasterScreen(viewModel: TranscriptRepository = koinViewModel()){
+    ForecasterScreen(
+        viewModel = viewModel
+    )
+}
 @Preview(showBackground = true)
 @Composable
 fun ForecasterPreview() {
