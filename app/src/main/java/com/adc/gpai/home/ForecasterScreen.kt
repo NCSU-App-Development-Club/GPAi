@@ -108,10 +108,9 @@ fun ForecasterScreen() {
  * Updates TranscriptRepository for latest term
  * Updates cumulative and semester GPAs
  */
-
 @Composable
 fun CourseEntry(courseCode: String, courseName: String, onDelete: () -> Unit) {
-    var grade by remember { mutableStateOf(4f) }  // Default grade (A+ = 4.0)
+    var grade by remember { mutableStateOf(4.33f) }  // Default grade (A+ = 4.33)
     var units by remember { mutableStateOf(3f) }  // Default units (3)
 //    TODO: Modify UI for each entry here
     Column(
@@ -179,7 +178,7 @@ fun gradeToLetter(grade: Float): String {
         grade >= 1.667f -> "C-"
         grade >= 1.333f -> "D+"
         grade >= 1.0f -> "D"
-        grade >= 0.667 -> "D-"
+        grade >= 0.667f -> "D-"
         else -> "F"
     }
 }
