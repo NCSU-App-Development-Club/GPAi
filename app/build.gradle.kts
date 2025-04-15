@@ -1,9 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
-    id ("kotlinx-serialization")
-    id("org.jetbrains.kotlin.plugin.compose") version "2.0.20" // this version matches your Kotlin version
-    id("com.google.devtools.ksp")
+    id("kotlinx-serialization")
+    alias(libs.plugins.compose)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -33,11 +33,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -70,9 +70,9 @@ dependencies {
     implementation(libs.androidx.runtime.livedata)
 
     // Room
-    ksp(libs.androidx.room.ksp)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.room.common.jvm)
+    implementation(libs.androidx.room.runtime.android)
+    ksp(libs.androidx.room.compiler)
 
     // Koin
     implementation(libs.koin.android)

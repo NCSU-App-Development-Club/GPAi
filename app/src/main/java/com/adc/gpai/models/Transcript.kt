@@ -40,5 +40,4 @@ data class Transcript(val terms: List<Term> = ArrayList()) {
             if (totalCredits == 0) return 0.0
             return totalEarnedPoints / totalCredits
         }
-
 }

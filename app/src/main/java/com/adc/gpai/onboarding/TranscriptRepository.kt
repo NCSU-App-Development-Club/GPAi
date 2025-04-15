@@ -6,7 +6,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.adc.gpai.models.Course
 import com.adc.gpai.models.CourseDTO
-import com.adc.gpai.models.Term
 import com.adc.gpai.models.Transcript
 import com.adc.gpai.models.toTranscript
 import kotlinx.coroutines.launch
@@ -89,28 +88,6 @@ class TranscriptRepository(private val database: AppDatabase) : ViewModel() {
         viewModelScope.launch {
             database.termCourseDao().insertCourse(CourseDTO.from(course, termId))
             fetchAllCourses() // Refresh the courses list to keep in sync
-        }
-    }
-
-    fun calculateSemGPA(termId: Int) : Double {
-        var totalCreditHours = 0
-        var totalPoints = 0.0
-        for (term in _transcript.value!!.terms){
-            if (term.id == termId){
-                val termCourses = term.courses
-                for (course in termCourses){
-                    totalPoints += course.points
-                    totalCreditHours += course.earned
-                }
-            }
-        }
-
-        // calculate gpa, and return
-        if (totalCreditHours != 0){
-            return totalPoints / totalCreditHours.toDouble()
-        }
-        else{
-            return 0.0
         }
     }
 

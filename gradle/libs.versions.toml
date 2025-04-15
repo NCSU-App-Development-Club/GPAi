@@ -1,11 +1,12 @@
 [versions]
 accompanistNavigationAnimation = "0.31.0-alpha"
-agp = "8.7.1"
+agp = "8.9.1"
 converterGson = "2.9.0"
 espressoIntents = "3.6.1"
 koinAndroid = "3.4.0"
 koinAndroidxCompose = "3.4.4"
-kotlin = "2.1.0"
+kotlin = "2.1.10"
+ksp = "2.1.10-1.0.31"
 coreKtx = "1.13.1"
 junit = "4.13.2"
 junitVersion = "1.1.5"
@@ -19,8 +20,7 @@ navigationRuntimeKtx = "2.8.0"
 navigationCompose = "2.8.0"
 retrofit = "2.9.0"
 runtimeLivedata = "1.7.1"
-roomCommonJvm = "2.7.0"
-roomRuntimeAndroid = "2.7.0"
+room = "2.7.0"
 
 [libraries]
 accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation", version.ref = "accompanistNavigationAnimation" }
@@ -48,9 +48,12 @@ androidx-navigation-runtime-ktx = { group = "androidx.navigation", name = "navig
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata", version.ref = "runtimeLivedata" }
 retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
-androidx-room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "roomCommonJvm" }
-androidx-room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "roomRuntimeAndroid" }
+androidx-room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "room" }
+androidx-room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "room" }
+androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
