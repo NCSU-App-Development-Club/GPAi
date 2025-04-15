@@ -166,7 +166,8 @@ fun Term(term: Term, onUpdate: (Term) -> Unit) {
             DisplayCourseEntryFields(
                 onDismiss = { openPopup = false },
                 onConfirmation = { course: Course ->
-                    viewModel.addCourse(term.id, course)
+                    viewModel.addCourse(term.id, course.copy(id = term.courses.maxOf { it.id } + 1))
+                    openPopup = false
                 })
         }
 
@@ -257,7 +258,7 @@ fun DisplayCourseEntryFields(
                             onClick = {
                                 onConfirmation(
                                     Course(
-                                        courseCode, courseName, units.toInt(), grade.toInt(),
+                                        courseCode, courseName, units.toInt(), units.toInt(),
                                         (units * grade).toDouble(), gradeToLetter(grade)
                                     )
                                 )
@@ -287,7 +288,7 @@ fun DisplayCourseEntryFields(
     }
 }
 
-/***
+/**
  * Event handler for calculate button, it does the following:
  * Updates TranscriptRepository for latest term
  * Updates cumulative and semester GPAs
@@ -339,10 +340,14 @@ fun CourseEntry(course: Course, onUpdate: (Course) -> Unit, onDelete: () -> Unit
                 Slider(
                     value = course.earned.toFloat(),
                     onValueChange = {
-                        onUpdate(course.copy(attempted = it.toInt(), earned = it.toInt()))
+                        onUpdate(course.copy(
+                            attempted = it.toInt(),
+                            earned = it.toInt(),
+                            points = course.points / course.earned * it
+                        ))
                     },
-                    valueRange = 1f..3f,
-                    steps = 2,  // 1 to 5 units
+                    valueRange = 1f..5f,
+                    steps = 3,  // 1 to 5 units
                     modifier = Modifier.width(150.dp)
                 )
             }
