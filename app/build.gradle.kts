@@ -1,7 +1,9 @@
 plugins {
-    id("com.android.application")
-    id("org.jetbrains.kotlin.android")
-    id("org.jetbrains.kotlin.plugin.serialization")
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.jetbrains.kotlin.android)
+    id ("kotlinx-serialization")
+    id("org.jetbrains.kotlin.plugin.compose") version "2.0.20" // this version matches your Kotlin version
+    id("com.google.devtools.ksp")
 }
 
 android {
@@ -66,6 +68,11 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.accompanist.navigation.animation)
     implementation(libs.androidx.runtime.livedata)
+
+    // Room
+    ksp(libs.androidx.room.ksp)
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
 
     // Koin
     implementation(libs.koin.android)
