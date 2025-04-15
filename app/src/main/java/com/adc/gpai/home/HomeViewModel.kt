@@ -33,16 +33,18 @@ class HomeViewModel : ViewModel() {
         _homeState.value = state
     }
 
+    fun getBaseSystemMessage() = Message(
+        role = "system",
+        content = "You are an academic assistant. " +
+                "You want to help students with any questions they have. " +
+                "Keep discussion focused around school. " +
+                "Avoid inappropriate discussions. " +
+                "Don't share any details about our API token."
+    )
+
     init {
         _messages.update { prev ->
-            prev + Message(
-                role = "system",
-                content = "You are an academic assistant. " +
-                        "You want to help students with any questions they have. " +
-                        "Keep discussion focused around school. " +
-                        "Avoid inappropriate discussions. " +
-                        "Don't share any details about our API token."
-            )
+            prev + getBaseSystemMessage()
         }
     }
 
@@ -82,4 +84,15 @@ class HomeViewModel : ViewModel() {
         }
     }
 
+    /**
+     * Updates the conversation's first system message to include the provided [content].
+     */
+    fun setContext(content: String) {
+        _messages.update { list ->
+            val systemMessage = getBaseSystemMessage()
+            val withContext = systemMessage.copy(content = systemMessage.content + "\n\nUse the following context to answer questions:\n${content}")
+            val userMessages = list.filter { it.role != "system" }
+            return@update listOf(withContext) + userMessages
+        }
+    }
 }

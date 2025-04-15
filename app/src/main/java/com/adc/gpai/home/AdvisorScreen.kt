@@ -24,8 +24,10 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -38,11 +40,34 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.adc.gpai.R
+import com.adc.gpai.onboarding.TranscriptRepository
 import com.adc.gpai.ui.theme.GPAiTheme
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AdvisorScreen(viewModel: HomeViewModel) {
     val messages by viewModel.messages.collectAsState()
+
+    val transcriptViewModel: TranscriptRepository = koinViewModel()
+    val transcript by transcriptViewModel.transcript.observeAsState()
+
+    LaunchedEffect(transcript) {
+        if (transcript == null) {
+            viewModel.setContext("The user has not submitted a transcript yet. If they ask about their courses or grades, ask them to upload their transcript.")
+            return@LaunchedEffect
+        }
+        viewModel.setContext("""
+            Here is the user's current transcript:
+            
+            ${transcript!!.terms.map { term -> """<term>
+                Name: ${term.name}
+                GPA: ${term.gpa}
+                Courses: ${term.courses.map { course -> """
+                    - ${course.courseCode} (${course.courseName}): ${course.grade} (${course.points} grade points from ${course.earned} units)
+                """.trimIndent() }}
+            </term>""".trimIndent() }}
+        """.trimIndent())
+    }
 
     Column(
         modifier = Modifier
