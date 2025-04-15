@@ -110,7 +110,7 @@ fun OnboardingNavGraph(
             exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-            ModifyTranscriptScreen(navController = navController) // Displays the Modify Transcript screen
+            ModifyTranscriptScreen() // Displays the Modify Transcript screen
         }
     }
 }
