@@ -1,4 +1,6 @@
 pluginManagement {
+    plugins {
+        id("org.jetbrains.kotlin.android") version "2.1.0"    }
     repositories {
         google {
             content {
@@ -15,6 +17,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
+        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
         mavenCentral()
     }
 }

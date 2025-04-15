@@ -26,9 +26,6 @@ import com.adc.gpai.ui.theme.GPAiTheme
  */
 class OnboardingActivity : ComponentActivity() {
 
-    // ViewModel for managing the state of the onboarding flow.
-    val onboardingViewModel = OnboardingViewModel()
-
     /**
      * Called when the activity is starting. This is where the onboarding screen is set up
      * and displayed, along with enabling edge-to-edge UI for a seamless experience.
@@ -41,7 +38,7 @@ class OnboardingActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            OnboardingScreen(viewModel = onboardingViewModel)
+            OnboardingScreen()
         }
     }
 }
@@ -53,14 +50,14 @@ class OnboardingActivity : ComponentActivity() {
  * @param viewModel The ViewModel that handles the state and logic of the onboarding process.
  */
 @Composable
-fun OnboardingScreen(viewModel: OnboardingViewModel) {
+fun OnboardingScreen() {
     GPAiTheme {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             // Sets up a navigation controller for managing the navigation within the onboarding flow.
             val navController = rememberNavController()
             OnboardingNavGraph(
                 navController = navController,
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.padding(innerPadding),
             )
         }
     }
@@ -77,7 +74,8 @@ fun OnboardingScreen(viewModel: OnboardingViewModel) {
  */
 @Composable
 fun OnboardingNavGraph(
-    navController: NavHostController, modifier: Modifier = Modifier
+    navController: NavHostController,
+    modifier: Modifier = Modifier
 ) {
     // Determine the start destination based on the current home state
     val startDestination = "intro"
@@ -112,7 +110,7 @@ fun OnboardingNavGraph(
             exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-            ModifyTranscriptScreen(navController = navController) // Displays the Modify Transcript screen
+            ModifyTranscriptScreen() // Displays the Modify Transcript screen
         }
     }
 }
