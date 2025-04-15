@@ -17,6 +17,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -37,32 +39,30 @@ import androidx.navigation.NavHostController
 import com.adc.gpai.models.Course
 
 
-// TODO - on clicking on calculate button, calculate semester gpa, and update transcript repository to then calculate cumulative GPA
+// TODO - update Transcript Repository whenever update made - sliders adjusted, new course added
 // TODO - make calculate button obviously unclickable if user has not changed anything about the screen
 // TODO - enhance layout (at last)
 // TODO - don't let user click on Add New Course button, if fields have not been entered
+// TODO - confirm gpa logic is consistent with everywhere else
 
 @Composable
 fun ForecasterScreen(navController: NavHostController? = null) {
     // transcript repository that persists changes throughout app
     // it contains a list of term objects, which each contain their respective courses
 
-    // TODO : exception handling?
+    // TODO : exception handling for empty transcript? It's possible for someone to is yet to enroll, but would like to still asses their future grades to have any courses on their transcript
     val viewModel: TranscriptRepository = koinViewModel()
 
     val transcript = viewModel.transcript.observeAsState()
     var mostRecentTerm = transcript.value?.terms?.last()
     var courses = mostRecentTerm?.courses ?: emptyList()
     var openPopup by remember { mutableStateOf(false) }
-    var newCourseAdded by remember { mutableStateOf(false) }
-    var newCourse by remember { mutableStateOf(
-        Course(
-            courseCode = "default",
-            courseName = "default",
-            points = 0.0,
-            grade = "Z")
-        )
-    }
+    var newCourseToAdd by remember { mutableStateOf(false) }
+//    var newCourse by remember { mutableStateOf(null) }
+
+    var cumGPA by remember { mutableDoubleStateOf(0.00) }
+    var semGPA by remember { mutableDoubleStateOf(0.00) }
+    var duplicateCourse by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -85,15 +85,16 @@ fun ForecasterScreen(navController: NavHostController? = null) {
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        // TODO : Iterate over courses added by user within the screen itself (this course list is erased when clicked on Calculate button)
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // TODO : make this dynamic - call gpa field from Transcript object..
-        var cumGPA = transcript.value?.gpa
-        // TODO : handle semester gpa
+        // TODO : make this dynamic - call gpa field from Transcript object..is this ok to do if cum gpa changes based on user input?
+//        var transcriptGPA = transcript.value?.gpa
+//        if ()
+//        cumGPA = transcriptGPA
+        // TODO : handle semester gpa calculation
         Text(text = "Cumulative GPA: $cumGPA", style = MaterialTheme.typography.bodySmall)
-        Text(text = "Semester GPA: 4.0", style = MaterialTheme.typography.bodySmall)
+        Text(text = "Semester GPA: $semGPA", style = MaterialTheme.typography.bodySmall)
 
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -101,14 +102,24 @@ fun ForecasterScreen(navController: NavHostController? = null) {
             horizontalArrangement = Arrangement.SpaceEvenly,
             modifier = Modifier.fillMaxWidth()
         ) {
-            // TODO : Add button for new course
             Button(onClick = {
                 // Pseudocode
                 // Update TranscriptRepository with adjusted course values,
                 // and new courses
                 // use TranscriptRepository function to calculate sem gpa and cum gpa
-
-
+                if (transcript.value == null){
+                    cumGPA = 0.0
+                    semGPA = 0.0
+                }
+                else{
+                    cumGPA = transcript.value!!.gpa
+                    if (mostRecentTerm == null){
+                        semGPA = 0.0
+                    }
+                    else{
+                        semGPA = viewModel.calculateSemGPA(mostRecentTerm.id)
+                    }
+                }
             }) {
                 Text(text = "Calculate")
             }
@@ -140,38 +151,57 @@ fun ForecasterScreen(navController: NavHostController? = null) {
                 Text(text = "Advisor")
             }
         }
-
+//        var newCourse by reme
         if (openPopup){
             DisplayCourseEntryFields(
                 onDismiss = {openPopup = false},
                 onConfirmation = {
+//                                 TODO - handle new course creation, and then saving into
+//                                 transcript repository
                     newCourseCode, newCourseName, ->
-                    newCourse = Course(
-                        courseCode = newCourseCode,
-                        courseName = newCourseName,
-                        points = 4.33,
-                        grade = "A+"
-                    )
-                    newCourseAdded = true
+                    duplicateCourse = viewModel.checkDuplicateCourse(newCourseCode)
+
+                    if (duplicateCourse){
+                        newCourseToAdd = false
+                    }
+                    else{
+                         newCourse = Course(
+                            courseCode = newCourseCode,
+                            courseName = newCourseName,
+                            points = 4.33,
+                            grade = "A+"
+                        )
+                        newCourseToAdd = true
+                    }
+
                  }
             )
         }
 
-        if (newCourseAdded){
-            // TODO: on delete function only needs to get rid of this specific course entry from
-            // display page, not the transcript
-            // HOWEVER, what happens after transcript is updated in Calculate button? Do the courses that were not originally
-            // part of the transcript disappear, or are there duplicate entries?
-
+        if (duplicateCourse){
+        // TODO Add time-sensitive alert with message "Course already exists!"
+        }
+        if (newCourseToAdd){
+            // TODO : on delete function is to remove the course from transcript repository
             CourseEntry(
                 courseCode = newCourse.courseCode,
                 courseName = newCourse.courseName,
                 onDelete = { viewModel.removeCourse(newCourse)}
             )
 
-            newCourseAdded = false
+            newCourseToAdd = false
         }
     }
+}
+
+fun calculateSemGPA(){
+    // Pseudocode
+    // Combine courses from transcript for current semester with courses added by users
+    // TODO - create/find method in Transcript Repository to get only current semester courses, then calculate gpa here
+    // convert each letter grade to numerical equivalent - are slider values stored as letter grades??
+    // multiply numerical equivalent values with specific course units
+    // add products over the lists of courses
+    // divide sum by total number of units from the lists of courses
 }
 
 /*
@@ -376,7 +406,6 @@ fun gradeToLetter(grade: Float): String {
     }
 }
 
-
 fun letterToGrade(letterGrade: String) : Float {
     return when (letterGrade) {
         "A+" -> 4.33f
@@ -394,6 +423,7 @@ fun letterToGrade(letterGrade: String) : Float {
         else -> 0.00F
     }
 }
+
 
 // TODO : need to handle viewModel interaction with Preview annotation
 //@Composable
