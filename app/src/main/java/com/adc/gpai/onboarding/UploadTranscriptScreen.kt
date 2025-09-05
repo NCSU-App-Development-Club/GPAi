@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.adc.gpai.R
+import com.adc.gpai.ui.theme.BrandDarkPurple
 import com.adc.gpai.ui.theme.BrandFailureRed
 import com.adc.gpai.ui.theme.BrandPurple
 import com.adc.gpai.ui.theme.BrandSuccessGreen
@@ -105,8 +106,14 @@ fun UploadTranscriptScreen(navController: NavHostController? = null) {
                         }
                     })
 
-                Button(onClick = { navController?.navigate("modify") }) {
-                    Text(text = "Next")
+                Button(
+                    onClick = { navController?.navigate("modify") },
+                    colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(75.dp)
+                ) {
+                    Text(text = "Next", fontSize = 40.sp)
                 }
             }
         }

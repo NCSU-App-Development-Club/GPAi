@@ -303,22 +303,18 @@ fun EnhancedTermSection(
 ) {
     var isExpanded by remember { mutableStateOf(isCurrentSemester) }
 
-    Card(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
+            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+            .padding(16.dp)
             .animateContentSize(
                 animationSpec = tween(
                     durationMillis = 300,
                     easing = LinearOutSlowInEasing
                 )
-            ),
-        shape = RoundedCornerShape(12.dp)
+            )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
             // Term header - always visible
             Row(
                 modifier = Modifier
@@ -360,6 +356,15 @@ fun EnhancedTermSection(
                 term.courses.forEachIndexed { courseIndex, course ->
                     EnhancedCourseItem(
                         course = course,
+                        onGradeChange = { newGrade ->
+                            val updatedCourse = course.copy(
+                                grade = newGrade,
+                                points = calculatePoints(course.attempted, newGrade)
+                            )
+                            val updatedCourses = term.courses.toMutableList()
+                            updatedCourses[courseIndex] = updatedCourse
+                            onUpdateTerm(term.copy(courses = updatedCourses))
+                        },
                         onEdit = { onEditCourse(courseIndex, course) },
                         onDelete = { onDeleteCourse(course) }
                     )
@@ -383,13 +388,14 @@ fun EnhancedTermSection(
                     Text(text = "Add Course")
                 }
             }
-        }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EnhancedCourseItem(
     course: Course,
+    onGradeChange: (String) -> Unit,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -415,26 +421,59 @@ fun EnhancedCourseItem(
             )
         }
 
-        // Grade display
-        Surface(
-            shape = RoundedCornerShape(6.dp),
-            color = when (course.grade.firstOrNull() ?: '?') {
-                'A', 'S' -> Color(0xFF4CAF50) // Green
-                'B' -> Color(0xFF8BC34A) // Light Green
-                'C' -> Color(0xFFFFC107) // Yellow
-                'D' -> Color(0xFFFF9800) // Orange
-                else -> Color(0xFFF44336) // Red for F
-            },
-            modifier = Modifier.padding(end = 8.dp)
+        // Grade dropdown selector
+        var gradeExpanded by remember { mutableStateOf(false) }
+        val gradeOptions = listOf("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F")
+        
+        ExposedDropdownMenuBox(
+            expanded = gradeExpanded,
+            onExpandedChange = { gradeExpanded = !gradeExpanded },
+            modifier = Modifier
+                .padding(end = 8.dp)
+                .width(50.dp)
         ) {
-            Text(
-                text = course.grade,
-                textAlign = TextAlign.Center,
-                color = Color.White,
-                fontWeight = FontWeight.Bold,
-                fontSize = 14.sp,
-                modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
-            )
+            Surface(
+                shape = RoundedCornerShape(6.dp),
+                color = when (course.grade.firstOrNull() ?: '?') {
+                    'A', 'S' -> Color(0xFF4CAF50) // Green
+                    'B' -> Color(0xFF8BC34A) // Light Green
+                    'C' -> Color(0xFFFFC107) // Yellow
+                    'D' -> Color(0xFFFF9800) // Orange
+                    else -> Color(0xFFF44336) // Red for F
+                },
+                modifier = Modifier.menuAnchor()
+            ) {
+                Text(
+                    text = course.grade,
+                    textAlign = TextAlign.Center,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
+                )
+            }
+            
+            ExposedDropdownMenu(
+                expanded = gradeExpanded,
+                onDismissRequest = { gradeExpanded = false },
+                modifier = Modifier.width(50.dp)
+            ) {
+                gradeOptions.forEach { grade ->
+                    DropdownMenuItem(
+                        text = { 
+                            Text(
+                                text = grade,
+                                modifier = Modifier.fillMaxWidth()
+                            ) 
+                        },
+                        onClick = {
+                            onGradeChange(grade)
+                            gradeExpanded = false
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
+            }
         }
 
         // Action buttons
