@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.adc.gpai"
+    namespace = "org.appdevncsu.gpai"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.adc.gpai"
+        applicationId = "org.appdevncsu.gpai"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
