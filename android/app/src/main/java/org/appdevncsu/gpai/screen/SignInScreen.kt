@@ -12,6 +12,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -27,6 +28,7 @@ import androidx.credentials.exceptions.GetCredentialException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.koin.androidx.compose.koinViewModel
 
@@ -53,6 +55,7 @@ fun SignInScreen(modifier: Modifier = Modifier) {
     val credentialManager = CredentialManager.create(context)
 
     var key by remember { mutableIntStateOf(0) }
+    var ncsuDomainRequired by remember { mutableStateOf(false) }
 
     LaunchedEffect("sign-in-request-$key") {
         try {
@@ -64,6 +67,11 @@ fun SignInScreen(modifier: Modifier = Modifier) {
         } catch (e: GetCredentialException) {
             // Handle failure
             e.printStackTrace()
+        } catch (_: RepositoryImpl.InvalidDomainException) {
+            ncsuDomainRequired = true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            authViewModel.setError(true)
         }
     }
 
@@ -77,13 +85,25 @@ fun SignInScreen(modifier: Modifier = Modifier) {
             modifier = Modifier.weight(0.7f),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("Sign in to GPAi", fontSize = 24.sp)
-            Text("with your NC State Google account", fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
-            Button(onClick = {
-                // Make the LaunchedEffect run again
-                key++
-            }) {
-                Text("Sign In")
+            if (ncsuDomainRequired) {
+                Text("Invalid Account Type", fontSize = 24.sp)
+                Text("Sign in with your @ncsu.edu Google account", fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
+                Button(onClick = {
+                    // Make the LaunchedEffect run again
+                    ncsuDomainRequired = false
+                    key++
+                }) {
+                    Text("Retry")
+                }
+            } else {
+                Text("Sign in to GPAi", fontSize = 24.sp)
+                Text("with your NC State Google account", fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
+                Button(onClick = {
+                    // Make the LaunchedEffect run again
+                    key++
+                }) {
+                    Text("Sign In")
+                }
             }
         }
     }

@@ -105,8 +105,6 @@ fun AppContainer(navController: NavHostController, modifier: Modifier = Modifier
 
     val startDestination = if ((transcript.value?.terms?.size ?: 0) > 0) "forecaster" else "intro"
 
-    println("start destination: $startDestination")
-
     NavHost(navController, startDestination = startDestination, modifier) {
         // Forecaster screen with slide-in/out animations
         composable(

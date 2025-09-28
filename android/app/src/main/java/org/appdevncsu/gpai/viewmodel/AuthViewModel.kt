@@ -64,10 +64,6 @@ class AuthViewModel(private val db: AppDatabase) : ViewModel() {
             getConfigJob.join()
             _loading.update { false }
         }
-
-        viewModelScope.launch {
-            user.collect { user -> println("User was updated: $user") }
-        }
     }
 
     fun setCurrentUser(user: User) {
@@ -109,5 +105,9 @@ class AuthViewModel(private val db: AppDatabase) : ViewModel() {
 
     fun clearError() {
         _error.value = false
+    }
+
+    fun setError(error: Boolean) {
+        _error.value = error
     }
 }
