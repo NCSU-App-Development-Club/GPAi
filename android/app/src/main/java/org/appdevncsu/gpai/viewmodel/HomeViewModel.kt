@@ -1,22 +1,23 @@
-package org.appdevncsu.gpai.home
+package org.appdevncsu.gpai.viewmodel
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import org.appdevncsu.gpai.api.models.BaseModel
-import org.appdevncsu.gpai.api.models.Message
-import org.appdevncsu.gpai.api.repositories.Repository
-import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.java.KoinJavaComponent.inject
+import org.appdevncsu.gpai.api.models.Message
+import org.appdevncsu.gpai.api.repositories.Repository
+import org.appdevncsu.gpai.api.repositories.RepositoryImpl
+import org.appdevncsu.gpai.home.HomeViewState
+import org.koin.java.KoinJavaComponent
+import kotlin.collections.plus
 
 class HomeViewModel : ViewModel() {
 
-    private val repository: Repository by inject(RepositoryImpl::class.java)
+    private val repository: Repository by KoinJavaComponent.inject(RepositoryImpl::class.java)
 
     private val _messages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
     val messages = _messages.asStateFlow()
@@ -38,8 +39,7 @@ class HomeViewModel : ViewModel() {
         content = "You are an academic assistant. " +
                 "You want to help students with any questions they have. " +
                 "Keep discussion focused around school. " +
-                "Avoid inappropriate discussions. " +
-                "Don't share any details about our API token."
+                "Avoid inappropriate discussions."
     )
 
     init {
@@ -50,35 +50,22 @@ class HomeViewModel : ViewModel() {
 
     fun askQuestion(question: String) {
         viewModelScope.launch {
-//            withContext(Dispatchers.IO) {
-//                database.answerDao().addAnswer(
-//                    answerEntity = AnswerEntity(
-//                        role = "user",
-//                        content = question
-//                    )
-//                )
-//            }
             _messages.update { list -> list + Message(role = "user", content = question) }
             _loading.update { true }
 
             repository.askQuestion(
-                prevQuestion = messages.value,
-                question = question
-            ).also { baseModel ->
+                messages = messages.value,
+            ).also { response ->
                 _loading.update { false }
-                when (baseModel) {
-                    is BaseModel.Success -> {
-                        _messages.update { previous ->
-                            previous + Message(
-                                role = "assistant",
-                                content = baseModel.data.choices.single().message.content
-                            )
-                        }
+                if (response.isSuccess) {
+                    _messages.update { previous ->
+                        previous + Message(
+                            role = "assistant",
+                            content = response.getOrThrow().message
+                        )
                     }
-
-                    is BaseModel.Error -> {
-                        println("Something wrong : ${baseModel.error}")
-                    }
+                } else {
+                    throw response.exceptionOrNull()!!
                 }
             }
         }
@@ -90,7 +77,8 @@ class HomeViewModel : ViewModel() {
     fun setContext(content: String) {
         _messages.update { list ->
             val systemMessage = getBaseSystemMessage()
-            val withContext = systemMessage.copy(content = systemMessage.content + "\n\nUse the following context to answer questions:\n${content}")
+            val withContext =
+                systemMessage.copy(content = systemMessage.content + "\n\nUse the following context to answer questions:\n${content}")
             val userMessages = list.filter { it.role != "system" }
             return@update listOf(withContext) + userMessages
         }

@@ -35,6 +35,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -67,7 +68,7 @@ fun ModifyTranscriptScreen() {
     val viewModel: TranscriptRepository = koinViewModel()
     
     // Observe transcript from the repository
-    val transcriptState = viewModel.transcript.observeAsState()
+    val transcriptState = viewModel.transcript.collectAsState()
     val transcript = transcriptState.value ?: Transcript(emptyList())
     
     // State for edit/delete operations

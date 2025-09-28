@@ -8,7 +8,7 @@ plugins {
 
 android {
     namespace = "org.appdevncsu.gpai"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "org.appdevncsu.gpai"
@@ -99,4 +99,9 @@ dependencies {
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
     testImplementation(kotlin("test"))
+
+    // Sign in with Google
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
 }

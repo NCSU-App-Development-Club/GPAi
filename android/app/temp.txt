@@ -1,0 +1,3 @@
+Android client ID: 831936222865-8cd5q8n4q7pvhsbge676lubv1n0mbqbm.apps.googleusercontent.com
+
+Web client ID: 831936222865-a9cup8aqc66a6ni2c490mibq3cu1r7su.apps.googleusercontent.com

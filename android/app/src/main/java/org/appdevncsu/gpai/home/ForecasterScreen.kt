@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
@@ -59,7 +60,7 @@ fun ForecasterScreen() {
     // TODO : exception handling for empty transcript? It's possible for someone to is yet to enroll, but would like to still asses their future grades to have any courses on their transcript
     val viewModel: TranscriptRepository = koinViewModel()
 
-    val transcript = viewModel.transcript.observeAsState()
+    val transcript = viewModel.transcript.collectAsState()
 
     // In the forecaster, the user can modify their transcript without saving it.
     // Their edits are kept here. In the future, if we want to add the ability to

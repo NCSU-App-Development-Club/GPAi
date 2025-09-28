@@ -1,14 +1,15 @@
 package org.appdevncsu.gpai.onboarding
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 import org.appdevncsu.gpai.models.Course
 import org.appdevncsu.gpai.models.CourseDTO
 import org.appdevncsu.gpai.models.Transcript
 import org.appdevncsu.gpai.models.toTranscript
-import kotlinx.coroutines.launch
+import org.appdevncsu.gpai.room.AppDatabase
 
 /**
  * A [ViewModel] that keeps track of the user's [Transcript].
@@ -22,8 +23,17 @@ import kotlinx.coroutines.launch
  * update the ViewModel's state and then immediately sync them to Room.
  */
 class TranscriptRepository(private val database: AppDatabase) : ViewModel() {
-    private val _transcript = MutableLiveData<Transcript>()
-    val transcript: LiveData<Transcript> get() = _transcript
+
+    private val _loading = MutableStateFlow(true)
+
+    /**
+     * [loading] is set to true when the repository is initializing for the first time
+     * and fetching the user's courses from local storage.
+     */
+    val loading = _loading.asStateFlow()
+
+    private val _transcript = MutableStateFlow<Transcript?>(null)
+    val transcript = _transcript.asStateFlow()
 
     init {
         fetchAllCourses()
@@ -65,7 +75,7 @@ class TranscriptRepository(private val database: AppDatabase) : ViewModel() {
                 term
             }
         })
-        
+
         // Update in the DB
         viewModelScope.launch {
             database.termCourseDao().insertCourse(CourseDTO.Companion.from(course, termId))
@@ -75,7 +85,12 @@ class TranscriptRepository(private val database: AppDatabase) : ViewModel() {
 
     private fun fetchAllCourses() {
         viewModelScope.launch {
-            _transcript.value = database.termCourseDao().getAllTerms().toTranscript()
+            try {
+                _transcript.value = database.termCourseDao().getAllTerms().toTranscript()
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            _loading.value = false
         }
     }
 

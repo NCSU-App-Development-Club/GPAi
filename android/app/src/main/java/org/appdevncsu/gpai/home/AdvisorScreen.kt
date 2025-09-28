@@ -39,17 +39,20 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.onboarding.TranscriptRepository
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
+import org.appdevncsu.gpai.viewmodel.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AdvisorScreen(viewModel: HomeViewModel) {
+fun AdvisorScreen() {
+    val viewModel: HomeViewModel = viewModel()
     val messages by viewModel.messages.collectAsState()
 
     val transcriptViewModel: TranscriptRepository = koinViewModel()
-    val transcript by transcriptViewModel.transcript.observeAsState()
+    val transcript by transcriptViewModel.transcript.collectAsState()
 
     LaunchedEffect(transcript) {
         if (transcript == null) {
@@ -85,8 +88,8 @@ fun AdvisorScreen(viewModel: HomeViewModel) {
 @Composable
 fun ChatInput(
     viewModel: HomeViewModel,
-    sendText: (String) -> Unit = {},
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    sendText: (String) -> Unit = {}
 ) {
     var input by remember { mutableStateOf("") }
 
@@ -183,6 +186,6 @@ fun ChatInput(
 @Composable
 fun AdvisorPreview() {
     GPAiTheme {
-        AdvisorScreen(viewModel = HomeViewModel())
+        AdvisorScreen()
     }
 }

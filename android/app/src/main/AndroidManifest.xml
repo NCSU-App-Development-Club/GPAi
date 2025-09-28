@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
-        android:name="org.appdevncsu.gpai.GPAiApp"
+        android:name=".GPAiApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,26 +16,23 @@
         android:theme="@style/Theme.GPAi"
         tools:targetApi="31">
         <activity
-            android:name="org.appdevncsu.gpai.onboarding.OnboardingActivity"
+            android:name=".SignInActivity"
             android:exported="true"
+            android:label="@string/title_activity_sign_in"
             android:theme="@style/Theme.GPAi">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name="org.appdevncsu.gpai.home.HomeActivity"
-            android:exported="true"
+            android:name=".onboarding.OnboardingActivity"
             android:theme="@style/Theme.GPAi">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
-
+        <activity
+            android:name=".home.HomeActivity"
+            android:theme="@style/Theme.GPAi">
+        </activity>
     </application>
 
 </manifest>

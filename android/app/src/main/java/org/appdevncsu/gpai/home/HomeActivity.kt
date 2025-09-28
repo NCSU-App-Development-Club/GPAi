@@ -58,11 +58,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import org.appdevncsu.gpai.onboarding.OnboardingActivity
 import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
 import org.appdevncsu.gpai.ui.theme.BrandPurple
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import org.appdevncsu.gpai.viewmodel.HomeViewModel
 
 /**
  * Enum class representing the possible states of the home view (Forecaster or Advisor).
@@ -234,7 +235,7 @@ fun HomeNavGraph(
             exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-            AdvisorScreen(viewModel=homeViewModel) // Displays the Advisor screen
+            AdvisorScreen() // Displays the Advisor screen
         }
     }
 }
@@ -312,7 +313,7 @@ fun HomeViewToggle(
  *
  * @param text The text label of the button.
  * @param modifier Modifier to apply to the toggle button.
- * @param mutableState The current state of the home view.
+ * @param currentState The current state of the home view.
  * @param targetState The state that this button will activate when clicked.
  * @param navController NavController to handle navigation when the button is clicked.
  */

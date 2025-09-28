@@ -1,4 +1,4 @@
-package org.appdevncsu.gpai.onboarding
+package org.appdevncsu.gpai.room
 
 import android.content.Context
 import androidx.room.Database
@@ -6,11 +6,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import org.appdevncsu.gpai.models.CourseDTO
 import org.appdevncsu.gpai.models.TermDTO
+import org.appdevncsu.gpai.models.UserDTO
 
-@Database(entities = [CourseDTO::class, TermDTO::class], version = 1, exportSchema = false)
+@Database(entities = [CourseDTO::class, TermDTO::class, UserDTO::class], version = 1, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
 
     abstract fun termCourseDao(): TermCourseDao
+    abstract fun userDao(): UserDao
 
     companion object {
         @Volatile

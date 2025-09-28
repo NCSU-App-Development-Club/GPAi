@@ -1,11 +1,16 @@
 package org.appdevncsu.gpai
 
 import android.app.Application
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
+import okhttp3.Response
 import org.appdevncsu.gpai.api.Api
+import org.appdevncsu.gpai.api.AuthorizationInterceptor
 import org.appdevncsu.gpai.api.repositories.Repository
 import org.appdevncsu.gpai.api.repositories.RepositoryImpl
-import org.appdevncsu.gpai.onboarding.AppDatabase
+import org.appdevncsu.gpai.room.AppDatabase
 import org.appdevncsu.gpai.onboarding.TranscriptRepository
+import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
@@ -24,7 +29,12 @@ class GPAiApp : Application() {
             modules(module {
                 single {
                     Retrofit.Builder()
-                        .baseUrl("https://api.openai.com/v1/chat/")
+                        .baseUrl("https://gpai-backend.ncsuappdevelopmentclub.workers.dev/")
+                        .client(
+                            OkHttpClient.Builder()
+                                .addInterceptor(AuthorizationInterceptor)
+                                .build()
+                        )
                         .addConverterFactory(GsonConverterFactory.create())
                         .build()
                 }
@@ -38,6 +48,9 @@ class GPAiApp : Application() {
                 } bind Repository::class
                 viewModel {
                     TranscriptRepository(AppDatabase.getDatabase(androidContext()))
+                }
+                viewModel {
+                    AuthViewModel(AppDatabase.getDatabase(androidContext()))
                 }
             })
         }

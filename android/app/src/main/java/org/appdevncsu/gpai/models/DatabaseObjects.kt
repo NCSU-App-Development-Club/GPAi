@@ -65,3 +65,25 @@ data class CourseDTO(
         )
     }
 }
+
+@Entity(tableName = "users")
+data class UserDTO(
+    @PrimaryKey
+    val id: String = "",
+    val name: String = "",
+    val email: String = "",
+    val photoURL: String = "",
+    val token: String = ""
+) {
+    fun toUser() = User(name, email, id, photoURL, token)
+
+    companion object {
+        fun from(user: User) = UserDTO(
+            user.id,
+            user.name,
+            user.email,
+            user.photoURL,
+            user.token
+        )
+    }
+}

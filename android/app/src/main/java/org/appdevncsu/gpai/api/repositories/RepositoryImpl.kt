@@ -1,34 +1,62 @@
 package org.appdevncsu.gpai.api.repositories
 
-import org.appdevncsu.gpai.api.models.Answer
-import org.appdevncsu.gpai.api.models.BaseModel
 import org.appdevncsu.gpai.api.models.Message
 import org.appdevncsu.gpai.api.models.Question
 import org.appdevncsu.gpai.api.Api
+import org.appdevncsu.gpai.api.AuthorizationInterceptor
+import org.appdevncsu.gpai.api.models.Answer
+import org.appdevncsu.gpai.api.models.GetConfigResponse
+import org.appdevncsu.gpai.api.models.SignInRequest
+import org.appdevncsu.gpai.api.models.SignInResponse
 
 class RepositoryImpl(private val api: Api) : Repository {
 
     override suspend fun askQuestion(
-        prevQuestion: List<Message>,
-        question: String
-    ): BaseModel<Answer> {
+        messages: List<Message>
+    ): Result<Answer> {
         try {
             api.askQuestion(
-                question = Question(
-                    messages = prevQuestion + Message(
-                        role = "user",
-                        content = question
-                    )
-                )
+                question = Question(messages = messages)
             ).also { response ->
                 return if (response.isSuccessful) {
-                    BaseModel.Success(data = response.body()!!)
+                    Result.success(response.body()!!)
                 } else {
-                    BaseModel.Error(response.errorBody()?.string().toString())
+                    Result.failure(RuntimeException(response.errorBody()?.string().toString()))
                 }
             }
         } catch (e: Exception) {
-            return BaseModel.Error(e.message.toString())
+            return Result.failure(e)
+        }
+    }
+
+    override suspend fun signIn(signInRequest: SignInRequest): Result<SignInResponse> {
+        try {
+            val response = api.signIn(signInRequest)
+
+            return if (response.isSuccessful) {
+                val body = response.body()!!
+                AuthorizationInterceptor.setToken(body.sessionID)
+                Result.success(body)
+            } else {
+                Result.failure(RuntimeException(response.errorBody()?.string().toString()))
+            }
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
+    }
+
+    override suspend fun getConfig(): Result<GetConfigResponse> {
+        try {
+            val response = api.getConfig()
+
+            return if (response.isSuccessful) {
+                val body = response.body()!!
+                Result.success(body)
+            } else {
+                Result.failure(RuntimeException(response.errorBody()?.string().toString()))
+            }
+        } catch (e: Exception) {
+            return Result.failure(e)
         }
     }
 }

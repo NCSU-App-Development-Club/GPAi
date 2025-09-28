@@ -6,7 +6,7 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "gpai-backend",
   "main": "./src/worker/index.ts",
-  "compatibility_date": "2025-04-01",
+  "compatibility_date": "2025-06-17",
   "compatibility_flags": ["nodejs_compat"],
   "observability": {
     "enabled": true
@@ -26,7 +26,10 @@
    * Environment Variables
    * https://developers.cloudflare.com/workers/wrangler/configuration/#environment-variables
    */
-  // "vars": { "MY_VARIABLE": "production_value" }
+  "vars": {
+    "EXPECTED_HD_DOMAIN": "ncsu.edu",
+    "SESSION_TTL": "2592000" // 30 days in seconds
+  },
   /**
    * Note: Use secrets to store sensitive data.
    * https://developers.cloudflare.com/workers/configuration/secrets/
@@ -41,5 +44,11 @@
    * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
    */
   // "services": [{ "binding": "MY_SERVICE", "service": "my-service" }]
-  "upload_source_maps": true
+  "upload_source_maps": true,
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "64f810faaedf4cedbf86658985f0e47a"
+    }
+  ]
 }
