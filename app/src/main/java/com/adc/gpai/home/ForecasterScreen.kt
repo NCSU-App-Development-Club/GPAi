@@ -146,7 +146,7 @@ fun ForecasterScreen() {
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 itemsIndexed(tempTranscript.terms) { termIndex, term ->
-                    EnhancedTermSection(
+                    TermSection(
                         term = term,
                         termIndex = termIndex,
                         isCurrentSemester = termIndex == tempTranscript.terms.size - 1, // Last semester is current
@@ -181,24 +181,13 @@ fun ForecasterScreen() {
         // Edit Course Dialog
         if (editingCourse != null) {
             CourseDialog(
-                title = "Edit Course",
-                initialCourseName = editingCourse!!.course.courseName,
-                initialCourseCode = editingCourse!!.course.courseCode,
-                initialCreditHours = editingCourse!!.course.attempted.toString(),
-                initialGrade = editingCourse!!.course.grade,
+                dialogState = CourseDialogState(
+                    course = editingCourse!!.course,
+                    isEditing = true
+                ),
                 gradeOptions = gradeOptions,
                 onDismiss = { editingCourse = null },
-                onConfirm = { courseCode, name, hours, grade ->
-                    val course = editingCourse!!.course
-                    val updatedCourse = course.copy(
-                        courseCode = courseCode,
-                        courseName = name,
-                        attempted = hours.toIntOrNull() ?: 0,
-                        earned = hours.toIntOrNull() ?: 0,
-                        grade = grade,
-                        points = calculatePoints(hours.toIntOrNull() ?: 0, grade)
-                    )
-
+                onConfirm = { updatedCourse ->
                     // Update in temporary transcript
                     val termIndex = editingCourse!!.termIndex
                     val courseIndex = editingCourse!!.courseIndex
@@ -221,40 +210,34 @@ fun ForecasterScreen() {
         // Add Course Dialog
         if (showAddCourseDialog) {
             CourseDialogWithTermSelection(
-                title = "Add Course",
-                initialCourseName = "",
-                initialCourseCode = "",
-                initialCreditHours = "3",
-                initialGrade = "A",
-                gradeOptions = gradeOptions,
-                terms = tempTranscript.terms,
+                dialogState = CourseDialogState(
+                    course = Course(
+                        courseCode = "",
+                        courseName = "",
+                        attempted = 3,
+                        earned = 3,
+                        points = 12.0,
+                        grade = "A"
+                    ),
+                    availableTerms = tempTranscript.terms,
+                    isEditing = false
+                ),
                 initialTermIndex = addingToTermIndex,
+                gradeOptions = gradeOptions,
                 onDismiss = { showAddCourseDialog = false },
-                onConfirm = { termId, courseCode, name, hours, grade ->
-                    if (name.isNotBlank() && hours.isNotBlank()) {
-                        val points = calculatePoints(hours.toIntOrNull() ?: 0, grade)
-                        val newCourse = Course(
-                            courseCode = courseCode,
-                            courseName = name,
-                            attempted = hours.toIntOrNull() ?: 0,
-                            earned = hours.toIntOrNull() ?: 0,
-                            points = points,
-                            grade = grade
-                        )
-
-                        // Add to temporary transcript
-                        tempTranscript = tempTranscript.copy(
-                            terms = tempTranscript.terms.map { term ->
-                                if (term.id == termId) {
-                                    term.copy(courses = term.courses + newCourse)
-                                } else {
-                                    term
-                                }
+                onConfirm = { termId, newCourse ->
+                    // Add to temporary transcript
+                    tempTranscript = tempTranscript.copy(
+                        terms = tempTranscript.terms.map { term ->
+                            if (term.id == termId) {
+                                term.copy(courses = term.courses + newCourse)
+                            } else {
+                                term
                             }
-                        )
+                        }
+                    )
 
-                        showAddCourseDialog = false
-                    }
+                    showAddCourseDialog = false
                 }
             )
         }
@@ -292,7 +275,7 @@ fun ForecasterScreen() {
 }
 
 @Composable
-fun EnhancedTermSection(
+fun TermSection(
     term: Term,
     termIndex: Int,
     isCurrentSemester: Boolean,
@@ -354,7 +337,7 @@ fun EnhancedTermSection(
 
                 // Courses in this term
                 term.courses.forEachIndexed { courseIndex, course ->
-                    EnhancedCourseItem(
+                    CourseItem(
                         course = course,
                         onGradeChange = { newGrade ->
                             val updatedCourse = course.copy(
@@ -393,7 +376,7 @@ fun EnhancedTermSection(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EnhancedCourseItem(
+fun CourseItem(
     course: Course,
     onGradeChange: (String) -> Unit,
     onEdit: () -> Unit,
@@ -497,23 +480,18 @@ fun EnhancedCourseItem(
     }
 }
 
-// Reusing dialog components from ModifyTranscriptScreen
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CourseDialog(
-    title: String,
-    initialCourseName: String,
-    initialCourseCode: String,
-    initialCreditHours: String,
-    initialGrade: String,
+    dialogState: CourseDialogState,
     gradeOptions: List<String>,
     onDismiss: () -> Unit,
-    onConfirm: (courseCode: String, courseName: String, creditHours: String, grade: String) -> Unit
+    onConfirm: (Course) -> Unit
 ) {
-    var courseName by remember { mutableStateOf(initialCourseName) }
-    var courseCode by remember { mutableStateOf(initialCourseCode) }
-    var creditHours by remember { mutableStateOf(initialCreditHours) }
-    var selectedGrade by remember { mutableStateOf(initialGrade) }
+    var courseName by remember { mutableStateOf(dialogState.course.courseName) }
+    var courseCode by remember { mutableStateOf(dialogState.course.courseCode) }
+    var creditHours by remember { mutableStateOf(dialogState.course.attempted.toString()) }
+    var selectedGrade by remember { mutableStateOf(dialogState.course.grade) }
     var expanded by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismiss) {
@@ -529,7 +507,7 @@ fun CourseDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = title,
+                    text = if (dialogState.isEditing) "Edit Course" else "Add Course",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -606,7 +584,15 @@ fun CourseDialog(
                     Button(
                         onClick = {
                             if (courseName.isNotBlank() && creditHours.isNotBlank()) {
-                                onConfirm(courseCode, courseName, creditHours, selectedGrade)
+                                val updatedCourse = dialogState.course.copy(
+                                    courseCode = courseCode,
+                                    courseName = courseName,
+                                    attempted = creditHours.toIntOrNull() ?: 0,
+                                    earned = creditHours.toIntOrNull() ?: 0,
+                                    grade = selectedGrade,
+                                    points = calculatePoints(creditHours.toIntOrNull() ?: 0, selectedGrade)
+                                )
+                                onConfirm(updatedCourse)
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
@@ -623,21 +609,16 @@ fun CourseDialog(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CourseDialogWithTermSelection(
-    title: String,
-    initialCourseName: String,
-    initialCourseCode: String,
-    initialCreditHours: String,
-    initialGrade: String,
-    gradeOptions: List<String>,
-    terms: List<Term>,
+    dialogState: CourseDialogState,
     initialTermIndex: Int,
+    gradeOptions: List<String>,
     onDismiss: () -> Unit,
-    onConfirm: (termId: Int, courseCode: String, courseName: String, creditHours: String, grade: String) -> Unit
+    onConfirm: (termId: Int, course: Course) -> Unit
 ) {
-    var courseName by remember { mutableStateOf(initialCourseName) }
-    var courseCode by remember { mutableStateOf(initialCourseCode) }
-    var creditHours by remember { mutableStateOf(initialCreditHours) }
-    var selectedGrade by remember { mutableStateOf(initialGrade) }
+    var courseName by remember { mutableStateOf(dialogState.course.courseName) }
+    var courseCode by remember { mutableStateOf(dialogState.course.courseCode) }
+    var creditHours by remember { mutableStateOf(dialogState.course.attempted.toString()) }
+    var selectedGrade by remember { mutableStateOf(dialogState.course.grade) }
     var selectedTermIndex by remember { mutableStateOf(initialTermIndex) }
 
     var gradeExpanded by remember { mutableStateOf(false) }
@@ -656,7 +637,7 @@ fun CourseDialogWithTermSelection(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = title,
+                    text = if (dialogState.isEditing) "Edit Course" else "Add Course",
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -667,8 +648,8 @@ fun CourseDialogWithTermSelection(
                     onExpandedChange = { termExpanded = !termExpanded }
                 ) {
                     TextField(
-                        value = if (terms.isNotEmpty() && selectedTermIndex < terms.size)
-                            terms[selectedTermIndex].name
+                        value = if (dialogState.availableTerms.isNotEmpty() && selectedTermIndex < dialogState.availableTerms.size)
+                            dialogState.availableTerms[selectedTermIndex].name
                         else "Select Term",
                         onValueChange = {},
                         readOnly = true,
@@ -683,7 +664,7 @@ fun CourseDialogWithTermSelection(
                         expanded = termExpanded,
                         onDismissRequest = { termExpanded = false }
                     ) {
-                        terms.forEachIndexed { index, term ->
+                        dialogState.availableTerms.forEachIndexed { index, term ->
                             DropdownMenuItem(
                                 text = { Text(term.name) },
                                 onClick = {
@@ -765,13 +746,21 @@ fun CourseDialogWithTermSelection(
 
                     Button(
                         onClick = {
-                            if (courseName.isNotBlank() && creditHours.isNotBlank() && terms.isNotEmpty()) {
-                                val termId = terms[selectedTermIndex].id
-                                onConfirm(termId, courseCode, courseName, creditHours, selectedGrade)
+                            if (courseName.isNotBlank() && creditHours.isNotBlank() && dialogState.availableTerms.isNotEmpty()) {
+                                val termId = dialogState.availableTerms[selectedTermIndex].id
+                                val newCourse = dialogState.course.copy(
+                                    courseCode = courseCode,
+                                    courseName = courseName,
+                                    attempted = creditHours.toIntOrNull() ?: 0,
+                                    earned = creditHours.toIntOrNull() ?: 0,
+                                    grade = selectedGrade,
+                                    points = calculatePoints(creditHours.toIntOrNull() ?: 0, selectedGrade)
+                                )
+                                onConfirm(termId, newCourse)
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
-                        enabled = courseName.isNotBlank() && creditHours.isNotBlank() && terms.isNotEmpty()
+                        enabled = courseName.isNotBlank() && creditHours.isNotBlank() && dialogState.availableTerms.isNotEmpty()
                     ) {
                         Text("Save")
                     }
@@ -814,42 +803,12 @@ data class CourseDeleteState(
     val course: Course
 )
 
-// Convert numeric grade to letter equivalent (kept for compatibility)
-fun gradeToLetter(grade: Float): String {
-    return when {
-        grade >= 4.33f -> "A+"
-        grade >= 4.0f -> "A"
-        grade >= 3.667f -> "A-"
-        grade >= 3.33f -> "B+"
-        grade >= 3.0f -> "B"
-        grade >= 2.667f -> "B-"
-        grade >= 2.333f -> "C+"
-        grade >= 2.0f -> "C"
-        grade >= 1.667f -> "C-"
-        grade >= 1.333f -> "D+"
-        grade >= 1.0f -> "D"
-        grade >= 0.667f -> "D-"
-        else -> "F"
-    }
-}
+data class CourseDialogState(
+    val course: Course,
+    val availableTerms: List<Term> = emptyList(),
+    val isEditing: Boolean = false
+)
 
-fun letterToGrade(letterGrade: String): Float {
-    return when (letterGrade) {
-        "A+" -> 4.33f
-        "A" -> 4.0f
-        "A-" -> 3.667f
-        "B+" -> 3.33f
-        "B" -> 3.0f
-        "B-" -> 2.667f
-        "C+" -> 2.333f
-        "C" -> 2.0f
-        "C-" -> 1.667f
-        "D+" -> 1.333f
-        "D" -> 1.0f
-        "D-" -> 0.667f
-        else -> 0.00F
-    }
-}
 
 @Preview(showBackground = true)
 @Composable
