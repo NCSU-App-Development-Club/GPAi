@@ -25,8 +25,7 @@ fun AdvisorChatHistory(messages: List<Message>, modifier: Modifier = Modifier) {
             modifier = Modifier
                 .weight(1f)
                 .padding(8.dp)
-        )
-        {
+        ) {
             items(messages) { message ->
                 ChatBubble(message = message)
             }
@@ -65,7 +64,8 @@ fun ChatBubble(message: Message) {
 fun PreviewAdvisorChatHistory() {
     val testMessages = listOf(
         Message("user", "Hi AI!"),
-        Message("assistant", "Hey Buddy!!"))
+        Message("assistant", "Hey Buddy!!")
+    )
 
     AdvisorChatHistory(testMessages)
 }

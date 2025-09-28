@@ -22,6 +22,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -143,6 +144,12 @@ fun RequestFileButton(
         UploadState.ERROR -> BrandFailureRed
     }
 
+    val buttonTextColor = when (buttonState.value) {
+        UploadState.IDLE -> Color.White
+        UploadState.SUCCESS -> Color.Black
+        UploadState.ERROR -> Color.Black
+    }
+
     // Set different icons for each state.
     val buttonIcon = when (buttonState.value) {
         UploadState.IDLE -> R.drawable.upload
@@ -163,7 +170,7 @@ fun RequestFileButton(
             .fillMaxWidth() // Make the button fill the width of the screen.
             .height(300.dp), // Set the height of the button.
         shape = RoundedCornerShape(12), // Make the button corners rounded.
-        colors = ButtonDefaults.buttonColors(buttonColor), // Set the background color.
+        colors = ButtonDefaults.buttonColors(containerColor = buttonColor, contentColor = buttonTextColor), // Set the background color.
         onClick = { launcher.launch("application/pdf") } // Open the file picker when clicked.
     ) {
         // Layout for the button's content: an icon and text.
@@ -175,7 +182,7 @@ fun RequestFileButton(
                     .padding(bottom = 16.dp), // Add padding below the icon.
                 painter = painterResource(id = buttonIcon)
             )
-            Text(fontSize = 20.sp, textAlign = TextAlign.Center, text = buttonText) // Display the button text.
+            Text(fontSize = 20.sp, textAlign = TextAlign.Center, text = buttonText)
         }
     }
 }

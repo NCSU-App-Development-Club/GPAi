@@ -31,37 +31,45 @@ fun IntroScreen(navController: NavHostController? = null) {
         modifier = Modifier
             .fillMaxSize()
             .padding(horizontal = 20.dp)
-            .testTag("intro_screen")
-        ,
+            .testTag("intro_screen"),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Spacer(modifier = Modifier.weight(0.4f))
-        Image(painter = painterResource(id = R.drawable.a_plus_graphic), contentDescription = "Logo")
+        Image(
+            painter = painterResource(id = R.drawable.a_plus_graphic),
+            contentDescription = "Logo"
+        )
         Spacer(modifier = Modifier.weight(0.4f))
-        Text(text = "Get quick academic advice with GPAi.",
+        Text(
+            text = "Get quick academic advice with GPAi.",
             fontWeight = FontWeight(weight = 900),
             fontSize = 36.sp,
             textAlign = TextAlign.Center,
             lineHeight = 44.sp,
             modifier = Modifier
-            .fillMaxWidth())
+                .fillMaxWidth()
+        )
         Spacer(modifier = Modifier.height(24.dp))
-        Text(text = "Upload your transcript and ask any question you can think of relating to your academic goals!",
+        Text(
+            text = "Upload your transcript and ask any question you can think of relating to your academic goals!",
             fontWeight = FontWeight(weight = 500),
             fontSize = 18.sp,
-            textAlign = TextAlign.Center)
+            textAlign = TextAlign.Center
+        )
         Spacer(modifier = Modifier.weight(1f))
 
-        Button(modifier = Modifier
-            .fillMaxWidth()
-            .height(74.dp),
+        Button(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(74.dp),
             colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
             onClick = { navController?.navigate("upload") }
         ) {
-            Text(text = "Get Started",
+            Text(
+                text = "Get Started",
                 fontSize = 32.sp,
                 fontWeight = FontWeight(weight = 700),
-                )
+            )
         }
         Spacer(modifier = Modifier.height(16.dp))
     }

@@ -73,7 +73,8 @@ data class UserDTO(
     val name: String = "",
     val email: String = "",
     val photoURL: String = "",
-    val token: String = ""
+    val token: String = "",
+    val updatedAt: String = ""
 ) {
     fun toUser() = User(name, email, id, photoURL, token)
 

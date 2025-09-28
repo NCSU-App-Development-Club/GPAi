@@ -106,4 +106,8 @@ class AuthViewModel(private val db: AppDatabase) : ViewModel() {
             throw signInResponse.exceptionOrNull()!!
         }
     }
+
+    fun clearError() {
+        _error.value = false
+    }
 }

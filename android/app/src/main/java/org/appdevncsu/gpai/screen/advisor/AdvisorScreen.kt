@@ -62,7 +62,7 @@ private fun AuthenticatedAdvisorScreen() {
     val transcript by transcriptViewModel.transcript.collectAsState()
 
     LaunchedEffect(transcript) {
-        if (transcript == null) {
+        if (transcript == null || transcript?.terms?.size == 0) {
             viewModel.setContext("The user has not submitted a transcript yet. If they ask about their courses or grades, ask them to upload their transcript.")
             return@LaunchedEffect
         }

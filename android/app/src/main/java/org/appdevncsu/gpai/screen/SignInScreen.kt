@@ -3,6 +3,7 @@ package org.appdevncsu.gpai.screen
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
@@ -16,6 +17,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
@@ -76,7 +78,7 @@ fun SignInScreen(modifier: Modifier = Modifier) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text("Sign in to GPAi", fontSize = 24.sp)
-            Text("with your NC State Google account", fontSize = 14.sp)
+            Text("with your NC State Google account", fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
             Button(onClick = {
                 // Make the LaunchedEffect run again
                 key++

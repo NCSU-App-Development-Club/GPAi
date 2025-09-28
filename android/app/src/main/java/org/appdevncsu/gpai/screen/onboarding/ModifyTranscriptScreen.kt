@@ -43,7 +43,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,9 +55,9 @@ import androidx.navigation.compose.rememberNavController
 import org.appdevncsu.gpai.models.Course
 import org.appdevncsu.gpai.models.Term
 import org.appdevncsu.gpai.models.Transcript
-import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
+import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)

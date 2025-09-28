@@ -377,24 +377,6 @@ fun gradeToLetter(grade: Float): String {
     }
 }
 
-fun letterToGrade(letterGrade: String): Float {
-    return when (letterGrade) {
-        "A+" -> 4.33f
-        "A" -> 4.0f
-        "A-" -> 3.667f
-        "B+" -> 3.33f
-        "B" -> 3.0f
-        "B-" -> 2.667f
-        "C+" -> 2.333f
-        "C" -> 2.0f
-        "C-" -> 1.667f
-        "D+" -> 1.333f
-        "D" -> 1.0f
-        "D-" -> 0.667f
-        else -> 0.00F
-    }
-}
-
 @Preview(showBackground = true)
 @Composable
 fun ForecasterPreview() {
