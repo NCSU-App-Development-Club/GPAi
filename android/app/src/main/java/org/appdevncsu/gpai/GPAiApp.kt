@@ -9,7 +9,7 @@ import org.appdevncsu.gpai.api.AuthorizationInterceptor
 import org.appdevncsu.gpai.api.repositories.Repository
 import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import org.appdevncsu.gpai.room.AppDatabase
-import org.appdevncsu.gpai.onboarding.TranscriptRepository
+import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.androidx.viewmodel.dsl.viewModel

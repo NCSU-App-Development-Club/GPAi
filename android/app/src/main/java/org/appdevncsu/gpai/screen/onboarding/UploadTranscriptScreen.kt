@@ -1,4 +1,4 @@
-package org.appdevncsu.gpai.onboarding
+package org.appdevncsu.gpai.screen.onboarding
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -37,6 +37,7 @@ import org.appdevncsu.gpai.ui.theme.BrandPurple
 import org.appdevncsu.gpai.ui.theme.BrandSuccessGreen
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.appdevncsu.gpai.utils.PDFUtils
+import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.koin.androidx.compose.koinViewModel
 
 /**

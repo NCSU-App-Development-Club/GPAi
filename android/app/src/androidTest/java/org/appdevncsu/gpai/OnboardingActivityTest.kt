@@ -8,7 +8,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import org.appdevncsu.gpai.home.HomeActivity
+import org.appdevncsu.gpai.activity.HomeActivity
 import org.appdevncsu.gpai.onboarding.OnboardingActivity
 import org.junit.Rule
 import org.junit.Test

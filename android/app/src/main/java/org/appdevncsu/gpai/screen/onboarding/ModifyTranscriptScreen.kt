@@ -1,6 +1,5 @@
-package org.appdevncsu.gpai.onboarding
+package org.appdevncsu.gpai.screen.onboarding
 
-import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -37,7 +36,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,33 +51,35 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import org.appdevncsu.gpai.home.HomeActivity
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import org.appdevncsu.gpai.models.Course
 import org.appdevncsu.gpai.models.Term
 import org.appdevncsu.gpai.models.Transcript
+import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModifyTranscriptScreen() {
-    val context = LocalContext.current
+fun ModifyTranscriptScreen(navController: NavHostController) {
     val viewModel: TranscriptRepository = koinViewModel()
-    
+
     // Observe transcript from the repository
     val transcriptState = viewModel.transcript.collectAsState()
     val transcript = transcriptState.value ?: Transcript(emptyList())
-    
+
     // State for edit/delete operations
     var editingCourse by remember { mutableStateOf<CourseEditState?>(null) }
     var courseToDelete by remember { mutableStateOf<CourseDeleteState?>(null) }
     var showAddCourseDialog by remember { mutableStateOf(false) }
     var addingToTermIndex by remember { mutableIntStateOf(0) }
-    
+
     // Available grade options
-    val gradeOptions = listOf("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F")
-    
+    val gradeOptions =
+        listOf("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F")
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -100,7 +100,7 @@ fun ModifyTranscriptScreen() {
                     .fillMaxWidth()
                     .padding(vertical = 16.dp)
             )
-            
+
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -119,7 +119,7 @@ fun ModifyTranscriptScreen() {
                             fontWeight = FontWeight.Bold,
                             modifier = Modifier.padding(bottom = 8.dp)
                         )
-                        
+
                         // Courses in this term
                         term.courses.forEachIndexed { courseIndex, course ->
                             CourseItem(
@@ -139,10 +139,10 @@ fun ModifyTranscriptScreen() {
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
-                        
+
                         // Add course button - now shown under every term
                         Button(
-                            onClick = { 
+                            onClick = {
                                 addingToTermIndex = termIndex
                                 showAddCourseDialog = true
                             },
@@ -161,10 +161,12 @@ fun ModifyTranscriptScreen() {
                     }
                 }
             }
-            
+
             // Finish button at the bottom
             Button(
-                onClick = { context.startActivity(Intent(context, HomeActivity::class.java)) },
+                onClick = {
+                    navController.navigate("forecaster")
+                },
                 colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -173,7 +175,7 @@ fun ModifyTranscriptScreen() {
                 Text(text = "Finish", fontSize = 40.sp)
             }
         }
-        
+
         // Edit Course Dialog
         if (editingCourse != null) {
             CourseDialog(
@@ -186,7 +188,7 @@ fun ModifyTranscriptScreen() {
                 onDismiss = { editingCourse = null },
                 onConfirm = { courseCode, name, hours, grade ->
                     val course = editingCourse!!.course
-                    
+
                     // Update the course with new values
                     val updatedCourse = course.copy(
                         courseCode = courseCode,
@@ -196,16 +198,16 @@ fun ModifyTranscriptScreen() {
                         grade = grade,
                         points = calculatePoints(hours.toIntOrNull() ?: 0, grade)
                     )
-                    
+
                     // Update in the repository
                     viewModel.updateCourse(updatedCourse)
-                    
+
                     // Clear editing state
                     editingCourse = null
                 }
             )
         }
-        
+
         // Add Course Dialog
         if (showAddCourseDialog) {
             CourseDialogWithTermSelection(
@@ -222,7 +224,7 @@ fun ModifyTranscriptScreen() {
                     if (name.isNotBlank() && hours.isNotBlank()) {
                         // Create new course
                         val points = calculatePoints(hours.toIntOrNull() ?: 0, grade)
-                        
+
                         val newCourse = Course(
                             courseCode = courseCode,
                             courseName = name,
@@ -231,17 +233,17 @@ fun ModifyTranscriptScreen() {
                             points = points,
                             grade = grade
                         )
-                        
+
                         // Add to repository - now uncommented
                         viewModel.addCourse(termId, newCourse)
-                        
+
                         // Reset dialog state
                         showAddCourseDialog = false
                     }
                 }
             )
         }
-        
+
         // Delete Confirmation Dialog
         if (courseToDelete != null) {
             AlertDialog(
@@ -289,13 +291,13 @@ fun CourseItem(
             text = "${course.courseCode} ${course.courseName}",
             modifier = Modifier.weight(1f)
         )
-        
+
         // Credit hours
         Text(
             text = "${course.attempted} cr",
             modifier = Modifier.padding(horizontal = 8.dp)
         )
-        
+
         // Grade
         Surface(
             shape = RoundedCornerShape(4.dp),
@@ -316,7 +318,7 @@ fun CourseItem(
                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
             )
         }
-        
+
         // Edit icon
         IconButton(onClick = onEdit) {
             Icon(
@@ -325,7 +327,7 @@ fun CourseItem(
                 tint = MaterialTheme.colorScheme.primary
             )
         }
-        
+
         // Delete icon
         IconButton(onClick = onDelete) {
             Icon(
@@ -354,7 +356,7 @@ fun CourseDialog(
     var creditHours by remember { mutableStateOf(initialCreditHours) }
     var selectedGrade by remember { mutableStateOf(initialGrade) }
     var expanded by remember { mutableStateOf(false) }
-    
+
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(16.dp),
@@ -373,7 +375,7 @@ fun CourseDialog(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                
+
                 // Course code field
                 TextField(
                     value = courseCode,
@@ -381,7 +383,7 @@ fun CourseDialog(
                     label = { Text("Course Code") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 // Course name field
                 TextField(
                     value = courseName,
@@ -389,11 +391,11 @@ fun CourseDialog(
                     label = { Text("Course Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 // Credit hours field
                 TextField(
                     value = creditHours,
-                    onValueChange = { 
+                    onValueChange = {
                         if (it.isEmpty() || it.all { char -> char.isDigit() }) {
                             creditHours = it
                         }
@@ -401,7 +403,7 @@ fun CourseDialog(
                     label = { Text("Credit Hours") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 // Grade dropdown
                 ExposedDropdownMenuBox(
                     expanded = expanded,
@@ -417,7 +419,7 @@ fun CourseDialog(
                             .fillMaxWidth()
                             .menuAnchor()
                     )
-                    
+
                     ExposedDropdownMenu(
                         expanded = expanded,
                         onDismissRequest = { expanded = false }
@@ -433,7 +435,7 @@ fun CourseDialog(
                         }
                     }
                 }
-                
+
                 // Action buttons
                 Row(
                     modifier = Modifier
@@ -444,9 +446,9 @@ fun CourseDialog(
                     TextButton(onClick = onDismiss) {
                         Text("Cancel")
                     }
-                    
+
                     Spacer(modifier = Modifier.width(8.dp))
-                    
+
                     Button(
                         onClick = {
                             if (courseName.isNotBlank() && creditHours.isNotBlank()) {
@@ -483,10 +485,10 @@ fun CourseDialogWithTermSelection(
     var creditHours by remember { mutableStateOf(initialCreditHours) }
     var selectedGrade by remember { mutableStateOf(initialGrade) }
     var selectedTermIndex by remember { mutableStateOf(initialTermIndex) }
-    
+
     var gradeExpanded by remember { mutableStateOf(false) }
     var termExpanded by remember { mutableStateOf(false) }
-    
+
     Dialog(onDismissRequest = onDismiss) {
         Surface(
             shape = RoundedCornerShape(16.dp),
@@ -505,16 +507,16 @@ fun CourseDialogWithTermSelection(
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
-                
+
                 // Term selection dropdown
                 ExposedDropdownMenuBox(
                     expanded = termExpanded,
                     onExpandedChange = { termExpanded = !termExpanded }
                 ) {
                     TextField(
-                        value = if (terms.isNotEmpty() && selectedTermIndex < terms.size) 
-                                terms[selectedTermIndex].name 
-                                else "Select Term",
+                        value = if (terms.isNotEmpty() && selectedTermIndex < terms.size)
+                            terms[selectedTermIndex].name
+                        else "Select Term",
                         onValueChange = {},
                         readOnly = true,
                         label = { Text("Term") },
@@ -523,7 +525,7 @@ fun CourseDialogWithTermSelection(
                             .fillMaxWidth()
                             .menuAnchor()
                     )
-                    
+
                     ExposedDropdownMenu(
                         expanded = termExpanded,
                         onDismissRequest = { termExpanded = false }
@@ -539,7 +541,7 @@ fun CourseDialogWithTermSelection(
                         }
                     }
                 }
-                
+
                 // Course code field
                 TextField(
                     value = courseCode,
@@ -547,7 +549,7 @@ fun CourseDialogWithTermSelection(
                     label = { Text("Course Code") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 // Course name field
                 TextField(
                     value = courseName,
@@ -555,11 +557,11 @@ fun CourseDialogWithTermSelection(
                     label = { Text("Course Name") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 // Credit hours field
                 TextField(
                     value = creditHours,
-                    onValueChange = { 
+                    onValueChange = {
                         if (it.isEmpty() || it.all { char -> char.isDigit() }) {
                             creditHours = it
                         }
@@ -567,7 +569,7 @@ fun CourseDialogWithTermSelection(
                     label = { Text("Credit Hours") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                
+
                 // Grade dropdown
                 ExposedDropdownMenuBox(
                     expanded = gradeExpanded,
@@ -583,7 +585,7 @@ fun CourseDialogWithTermSelection(
                             .fillMaxWidth()
                             .menuAnchor()
                     )
-                    
+
                     ExposedDropdownMenu(
                         expanded = gradeExpanded,
                         onDismissRequest = { gradeExpanded = false }
@@ -599,7 +601,7 @@ fun CourseDialogWithTermSelection(
                         }
                     }
                 }
-                
+
                 // Action buttons
                 Row(
                     modifier = Modifier
@@ -610,14 +612,20 @@ fun CourseDialogWithTermSelection(
                     TextButton(onClick = onDismiss) {
                         Text("Cancel")
                     }
-                    
+
                     Spacer(modifier = Modifier.width(8.dp))
-                    
+
                     Button(
                         onClick = {
                             if (courseName.isNotBlank() && creditHours.isNotBlank() && terms.isNotEmpty()) {
                                 val termId = terms[selectedTermIndex].id
-                                onConfirm(termId, courseCode, courseName, creditHours, selectedGrade)
+                                onConfirm(
+                                    termId,
+                                    courseCode,
+                                    courseName,
+                                    creditHours,
+                                    selectedGrade
+                                )
                             }
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
@@ -649,7 +657,7 @@ private fun calculatePoints(creditHours: Int, grade: String): Double {
         "F" -> 0.0
         else -> 0.0
     }
-    
+
     return creditHours * pointsPerCredit
 }
 
@@ -667,7 +675,8 @@ data class CourseDeleteState(
 @Preview(showBackground = true)
 @Composable
 fun ModifyTranscriptPreview() {
+    val navController = rememberNavController()
     GPAiTheme {
-        ModifyTranscriptScreen()
+        ModifyTranscriptScreen(navController)
     }
 }

@@ -6,7 +6,7 @@ import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.matcher.IntentMatchers
-import org.appdevncsu.gpai.home.HomeActivity
+import org.appdevncsu.gpai.activity.HomeActivity
 import org.appdevncsu.gpai.onboarding.OnboardingActivity
 import org.junit.Rule
 import org.junit.Test

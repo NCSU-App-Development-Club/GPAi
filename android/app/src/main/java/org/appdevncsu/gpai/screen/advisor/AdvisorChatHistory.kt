@@ -1,4 +1,4 @@
-package org.appdevncsu.gpai.home
+package org.appdevncsu.gpai.screen.advisor
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

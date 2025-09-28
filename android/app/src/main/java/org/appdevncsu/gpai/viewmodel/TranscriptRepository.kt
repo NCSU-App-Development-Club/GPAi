@@ -1,4 +1,4 @@
-package org.appdevncsu.gpai.onboarding
+package org.appdevncsu.gpai.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -12,7 +12,7 @@ import org.appdevncsu.gpai.models.toTranscript
 import org.appdevncsu.gpai.room.AppDatabase
 
 /**
- * A [ViewModel] that keeps track of the user's [Transcript].
+ * A [androidx.lifecycle.ViewModel] that keeps track of the user's [org.appdevncsu.gpai.models.Transcript].
  * To get an instance of this class, use Koin:
  * ```kotlin
  * val viewModel: TranscriptRepository = koinViewModel()

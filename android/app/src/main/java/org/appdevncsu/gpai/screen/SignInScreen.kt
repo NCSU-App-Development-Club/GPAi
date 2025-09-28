@@ -1,4 +1,4 @@
-package org.appdevncsu.gpai.home
+package org.appdevncsu.gpai.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

@@ -1,4 +1,4 @@
-package org.appdevncsu.gpai.home
+package org.appdevncsu.gpai.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,7 +46,7 @@ import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.models.Course
 import org.appdevncsu.gpai.models.Term
 import org.appdevncsu.gpai.models.Transcript
-import org.appdevncsu.gpai.onboarding.TranscriptRepository
+import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.koin.androidx.compose.koinViewModel
 

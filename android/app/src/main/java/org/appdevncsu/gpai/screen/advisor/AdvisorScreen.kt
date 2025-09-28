@@ -1,4 +1,4 @@
-package org.appdevncsu.gpai.home
+package org.appdevncsu.gpai.screen.advisor
 
 import android.app.Activity
 import android.content.ActivityNotFoundException
@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -41,13 +40,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import org.appdevncsu.gpai.R
-import org.appdevncsu.gpai.onboarding.TranscriptRepository
+import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
+import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.appdevncsu.gpai.viewmodel.HomeViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun AdvisorScreen() {
+    AuthGate {
+        AuthenticatedAdvisorScreen()
+    }
+}
+
+@Composable
+private fun AuthenticatedAdvisorScreen() {
     val viewModel: HomeViewModel = viewModel()
     val messages by viewModel.messages.collectAsState()
 

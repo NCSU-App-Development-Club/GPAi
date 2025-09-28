@@ -11,7 +11,6 @@ import kotlinx.coroutines.launch
 import org.appdevncsu.gpai.api.models.Message
 import org.appdevncsu.gpai.api.repositories.Repository
 import org.appdevncsu.gpai.api.repositories.RepositoryImpl
-import org.appdevncsu.gpai.home.HomeViewState
 import org.koin.java.KoinJavaComponent
 import kotlin.collections.plus
 
@@ -24,15 +23,6 @@ class HomeViewModel : ViewModel() {
 
     private val _loading = MutableStateFlow(false)
     val loading = _loading.asStateFlow()
-
-    // Mutable state for the HomeViewState (either Forecaster or Advisor)
-    private val _homeState = MutableLiveData<HomeViewState>(HomeViewState.FORECASTER)
-    val homeState: LiveData<HomeViewState> = _homeState
-
-    // Function to change the HomeViewState (e.g., on toggle click)
-    fun setHomeState(state: HomeViewState) {
-        _homeState.value = state
-    }
 
     fun getBaseSystemMessage() = Message(
         role = "system",

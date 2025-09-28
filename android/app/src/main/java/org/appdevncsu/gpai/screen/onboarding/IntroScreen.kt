@@ -1,4 +1,4 @@
-package org.appdevncsu.gpai.onboarding
+package org.appdevncsu.gpai.screen.onboarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
