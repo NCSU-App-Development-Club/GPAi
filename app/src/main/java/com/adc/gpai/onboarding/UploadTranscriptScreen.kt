@@ -1,5 +1,6 @@
 package com.adc.gpai.onboarding
 
+import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -32,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.adc.gpai.R
+import com.adc.gpai.home.HomeActivity
 import com.adc.gpai.ui.theme.BrandDarkPurple
 import com.adc.gpai.ui.theme.BrandFailureRed
 import com.adc.gpai.ui.theme.BrandPurple
@@ -107,7 +109,9 @@ fun UploadTranscriptScreen(navController: NavHostController? = null) {
                     })
 
                 Button(
-                    onClick = { navController?.navigate("modify") },
+                    onClick = {
+                        context.startActivity(Intent(context, HomeActivity::class.java))
+                    },
                     colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
                     modifier = Modifier
                         .fillMaxWidth()

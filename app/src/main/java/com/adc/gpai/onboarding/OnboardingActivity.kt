@@ -104,13 +104,5 @@ fun OnboardingNavGraph(
             UploadTranscriptScreen(navController = navController) // Displays the Upload Transcript screen
         }
 
-        // Advisor screen with slide-in/out animations
-        composable("modify",
-            enterTransition = { slideInHorizontally(initialOffsetX = { 2000 }) + fadeIn() },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
-            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
-            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-            ModifyTranscriptScreen() // Displays the Modify Transcript screen
-        }
     }
 }
