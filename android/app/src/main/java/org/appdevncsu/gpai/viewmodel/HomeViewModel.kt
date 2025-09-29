@@ -1,7 +1,5 @@
 package org.appdevncsu.gpai.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -12,7 +10,6 @@ import org.appdevncsu.gpai.api.models.Message
 import org.appdevncsu.gpai.api.repositories.Repository
 import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import org.koin.java.KoinJavaComponent
-import kotlin.collections.plus
 
 class HomeViewModel : ViewModel() {
 
@@ -23,6 +20,13 @@ class HomeViewModel : ViewModel() {
 
     private val _loading = MutableStateFlow(false)
     val loading = _loading.asStateFlow()
+
+    private val _expandedTerms = MutableStateFlow(emptySet<Int>())
+
+    /**
+     * A list of term IDs that have been expanded in the UI. All other terms should appear collapsed.
+     */
+    val expandedTerms = _expandedTerms.asStateFlow()
 
     fun getBaseSystemMessage() = Message(
         role = "system",
@@ -71,6 +75,20 @@ class HomeViewModel : ViewModel() {
                 systemMessage.copy(content = systemMessage.content + "\n\nUse the following context to answer questions:\n${content}")
             val userMessages = list.filter { it.role != "system" }
             return@update listOf(withContext) + userMessages
+        }
+    }
+
+    fun expand(termId: Int) {
+        _expandedTerms.update { it + termId }
+    }
+
+    fun toggleExpanded(termId: Int) {
+        _expandedTerms.update {
+            if (it.contains(termId)) {
+                it - termId
+            } else {
+                it + termId
+            }
         }
     }
 }

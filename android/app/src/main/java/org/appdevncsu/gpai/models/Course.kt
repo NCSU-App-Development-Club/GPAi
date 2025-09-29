@@ -38,7 +38,7 @@ data class Course(
     /**
      * Returns whether the course should be included in the GPA calculation.
      * Grades that should count: A+, A, A-, B+, ..., F
-     * Grades that shouldn't count: S, U, CR, AU, IN, W
+     * Grades that shouldn't count: S, U, CR, AU, NR, IN, LA, W
      */
     fun isForGrade(): Boolean {
         return this.grade.first() in 'A'..'F'

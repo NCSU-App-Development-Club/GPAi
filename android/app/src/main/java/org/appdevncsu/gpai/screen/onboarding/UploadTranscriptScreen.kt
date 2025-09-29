@@ -33,6 +33,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import org.appdevncsu.gpai.R
+import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
 import org.appdevncsu.gpai.ui.theme.BrandFailureRed
 import org.appdevncsu.gpai.ui.theme.BrandPurple
 import org.appdevncsu.gpai.ui.theme.BrandSuccessGreen
@@ -55,7 +56,7 @@ enum class UploadState {
  * for uploading and parsing a transcript PDF.
  */
 @Composable
-fun UploadTranscriptScreen(navController: NavHostController? = null) {
+fun UploadTranscriptScreen(navController: NavHostController) {
 
     val viewModel: TranscriptRepository = koinViewModel()
 
@@ -88,14 +89,14 @@ fun UploadTranscriptScreen(navController: NavHostController? = null) {
                     buttonState = uploadState,
                     onFileSelected = { fileUri ->
                         // Read text from the selected PDF file.
-                        val pdfText = PDFUtils.Companion.readTextFromPdf(context, fileUri)
+                        val pdfText = PDFUtils.readTextFromPdf(context, fileUri)
 
                         // If file reading fails, set the state to ERROR.
                         if (pdfText == null) {
                             uploadState.value = UploadState.ERROR
                         } else {
                             // Parse the transcript from the PDF content.
-                            val transcript = PDFUtils.Companion.parseTranscript(pdfText)
+                            val transcript = PDFUtils.parseTranscript(pdfText)
 
                             // Check if parsing was successful and update the state accordingly.
                             if (transcript.terms.isEmpty()) {
@@ -107,8 +108,16 @@ fun UploadTranscriptScreen(navController: NavHostController? = null) {
                         }
                     })
 
-                Button(onClick = { navController?.navigate("modify") }) {
-                    Text(text = "Next")
+                Button(
+                    onClick = {
+                        navController.navigate("forecaster")
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(75.dp)
+                ) {
+                    Text(text = "Next", fontSize = 40.sp)
                 }
             }
         }

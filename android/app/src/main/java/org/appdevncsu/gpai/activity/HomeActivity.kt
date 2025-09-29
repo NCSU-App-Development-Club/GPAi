@@ -30,7 +30,6 @@ import org.appdevncsu.gpai.screen.GPAiAppBar
 import org.appdevncsu.gpai.screen.HomeViewToggle
 import org.appdevncsu.gpai.screen.advisor.AdvisorScreen
 import org.appdevncsu.gpai.screen.onboarding.IntroScreen
-import org.appdevncsu.gpai.screen.onboarding.ModifyTranscriptScreen
 import org.appdevncsu.gpai.screen.onboarding.UploadTranscriptScreen
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.koin.androidx.compose.koinViewModel
@@ -124,16 +123,6 @@ fun AppContainer(navController: NavHostController, modifier: Modifier = Modifier
             popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
             popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
             UploadTranscriptScreen(navController = navController) // Displays the Upload Transcript screen
-        }
-
-        // Advisor screen with slide-in/out animations
-        composable(
-            "modify",
-            enterTransition = { slideInHorizontally(initialOffsetX = { 2000 }) + fadeIn() },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
-            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
-            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-            ModifyTranscriptScreen(navController) // Displays the Modify Transcript screen
         }
 
         // Forecaster screen with slide-in/out animations
