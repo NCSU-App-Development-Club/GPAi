@@ -24,19 +24,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -49,6 +55,7 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +67,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import kotlinx.coroutines.launch
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.adc.gpai.models.Course
 import com.adc.gpai.models.Term
@@ -99,9 +107,6 @@ fun ForecasterScreen() {
     val viewModel: TranscriptRepository = koinViewModel()
     val transcript = viewModel.transcript.observeAsState()
 
-    // In the forecaster, the user can modify their transcript without saving it.
-    // Their edits are kept here. In the future, if we want to add the ability to
-    // sync temporary edits to the saved transcript, we can use TranscriptRepository#updateTranscript.
     var tempTranscript by remember {
         mutableStateOf<Transcript>(
             transcript.value ?: Transcript(
@@ -116,16 +121,17 @@ fun ForecasterScreen() {
         }
     }
 
-    // Auto-expand the last term (the current term) when the screen is opened
     LaunchedEffect(tempTranscript.terms.isNotEmpty()) {
         tempTranscript.terms.lastOrNull()?.let { homeViewModel.expand(it.id) }
     }
-
-    // State for edit operations and dialogs
     var editingCourse by remember { mutableStateOf<CourseEditState?>(null) }
     var courseToDelete by remember { mutableStateOf<CourseDeleteState?>(null) }
     var showAddCourseDialog by remember { mutableStateOf(false) }
     var addingToTermIndex by remember { mutableIntStateOf(0) }
+    val hasUnsavedChanges = tempTranscript != transcript.value
+    var isSaving by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     Box(
         modifier = Modifier
@@ -135,10 +141,7 @@ fun ForecasterScreen() {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            // Cumulative GPA Display at the top
-            CumulativeGPADisplay(tempTranscript.gpa)
-
-            // Scrollable list of terms
+            GPAHeader(gpa = tempTranscript.gpa)
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -146,7 +149,7 @@ fun ForecasterScreen() {
                 itemsIndexed(tempTranscript.terms) { termIndex, term ->
                     TermSection(
                         term = term,
-                        isCurrentSemester = termIndex == tempTranscript.terms.size - 1, // Last semester is current
+                        isCurrentSemester = termIndex == tempTranscript.terms.size - 1,
                         onUpdateTerm = { newTerm ->
                             tempTranscript = tempTranscript.copy(
                                 terms = tempTranscript.terms.let {
@@ -175,7 +178,6 @@ fun ForecasterScreen() {
             }
         }
 
-        // Edit Course Dialog
         if (editingCourse != null) {
             CourseDialog(
                 dialogState = CourseDialogState(
@@ -184,7 +186,6 @@ fun ForecasterScreen() {
                 ),
                 onDismiss = { editingCourse = null },
                 onConfirm = { updatedCourse ->
-                    // Update in temporary transcript
                     val termIndex = editingCourse!!.termIndex
                     val courseIndex = editingCourse!!.courseIndex
                     tempTranscript = tempTranscript.copy(
@@ -203,7 +204,6 @@ fun ForecasterScreen() {
             )
         }
 
-        // Add Course Dialog
         if (showAddCourseDialog) {
             CourseDialogWithTermSelection(
                 dialogState = CourseDialogState(
@@ -221,7 +221,6 @@ fun ForecasterScreen() {
                 initialTermIndex = addingToTermIndex,
                 onDismiss = { showAddCourseDialog = false },
                 onConfirm = { termId, newCourse ->
-                    // Add to temporary transcript
                     tempTranscript = tempTranscript.copy(
                         terms = tempTranscript.terms.map { term ->
                             if (term.id == termId) {
@@ -237,7 +236,6 @@ fun ForecasterScreen() {
             )
         }
 
-        // Delete Confirmation Dialog
         if (courseToDelete != null) {
             AlertDialog(
                 onDismissRequest = { courseToDelete = null },
@@ -266,11 +264,54 @@ fun ForecasterScreen() {
                 }
             )
         }
+
+        if (hasUnsavedChanges) {
+            FloatingActionButton(
+                onClick = {
+                    coroutineScope.launch {
+                        isSaving = true
+                        try {
+                            viewModel.updateTranscript(tempTranscript)
+                            snackbarHostState.showSnackbar("Changes saved successfully!")
+                        } catch (e: Exception) {
+                            snackbarHostState.showSnackbar("Failed to save changes. Please try again.")
+                        } finally {
+                            isSaving = false
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                containerColor = BrandPurple
+            ) {
+                if (isSaving) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Save Changes",
+                        tint = Color.White
+                    )
+                }
+            }
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
     }
 }
 
 @Composable
-fun CumulativeGPADisplay(gpa: Double) {
+fun GPAHeader(gpa: Double) {
+    val locale = LocalContext.current.resources.configuration.locales.get(0)
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -285,14 +326,6 @@ fun CumulativeGPADisplay(gpa: Double) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "GPA Forecaster",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            val locale = LocalContext.current.resources.configuration.locales.get(0)
-            Text(
                 text = "Cumulative GPA: ${String.format(locale, "%.2f", gpa)}",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
@@ -301,6 +334,7 @@ fun CumulativeGPADisplay(gpa: Double) {
         }
     }
 }
+
 
 @Composable
 fun TermSection(
@@ -326,7 +360,6 @@ fun TermSection(
                 )
             )
     ) {
-        // Term header - always visible
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -359,11 +392,9 @@ fun TermSection(
             }
         }
 
-        // Expandable content
         if (isExpanded) {
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Courses in this term
             term.courses.forEachIndexed { courseIndex, course ->
                 CourseItem(
                     course = course,
@@ -384,7 +415,6 @@ fun TermSection(
                 }
             }
 
-            // Add course button
             Spacer(modifier = Modifier.height(12.dp))
             Button(
                 onClick = onAddCourse,
@@ -418,7 +448,6 @@ fun CourseItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        // Course info
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = "${course.courseCode} ${course.courseName}",
@@ -432,7 +461,6 @@ fun CourseItem(
             )
         }
 
-        // Grade dropdown selector
         var gradeExpanded by remember { mutableStateOf(false) }
 
         ExposedDropdownMenuBox(
@@ -486,7 +514,6 @@ fun CourseItem(
             }
         }
 
-        // Action buttons
         IconButton(onClick = onEdit) {
             Icon(
                 imageVector = Icons.Outlined.Edit,
@@ -801,7 +828,6 @@ fun CourseDialogWithTermSelection(
     }
 }
 
-// Helper function to calculate grade points
 private fun calculatePoints(creditHours: Int, grade: String): Double {
     val pointsPerCredit = when (grade) {
         "A+" -> 4.33
@@ -823,7 +849,6 @@ private fun calculatePoints(creditHours: Int, grade: String): Double {
     return creditHours * pointsPerCredit
 }
 
-// Data classes for UI state
 data class CourseEditState(
     val termIndex: Int,
     val courseIndex: Int,
