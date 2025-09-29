@@ -14,13 +14,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import org.appdevncsu.gpai.activity.scopedKoinViewModel
 import org.appdevncsu.gpai.screen.SignInScreen
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun AuthGate(modifier: Modifier = Modifier, child: @Composable () -> Unit) {
-    val authViewModel: AuthViewModel = koinViewModel()
+fun AuthGate(navController: NavHostController, modifier: Modifier = Modifier, child: @Composable () -> Unit) {
+    val authViewModel: AuthViewModel = scopedKoinViewModel(navController)
 
     val error by authViewModel.error.collectAsState()
     val loading by authViewModel.loading.collectAsState()
@@ -46,7 +47,7 @@ fun AuthGate(modifier: Modifier = Modifier, child: @Composable () -> Unit) {
         } else if (loading) {
             CircularProgressIndicator()
         } else if (user == null) {
-            SignInScreen()
+            SignInScreen(navController)
         } else {
             child()
         }

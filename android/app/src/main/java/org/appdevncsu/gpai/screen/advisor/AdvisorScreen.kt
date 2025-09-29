@@ -38,31 +38,32 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import org.appdevncsu.gpai.R
-import org.appdevncsu.gpai.viewmodel.TranscriptRepository
+import org.appdevncsu.gpai.activity.scopedKoinViewModel
+import org.appdevncsu.gpai.activity.scopedViewModel
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
-import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.appdevncsu.gpai.viewmodel.HomeViewModel
-import org.koin.androidx.compose.koinViewModel
+import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 
 @Composable
-fun AdvisorScreen() {
-    AuthGate {
-        AuthenticatedAdvisorScreen()
+fun AdvisorScreen(navController: NavHostController) {
+    AuthGate(navController) {
+        AuthenticatedAdvisorScreen(navController)
     }
 }
 
 @Composable
-private fun AuthenticatedAdvisorScreen() {
-    val viewModel: HomeViewModel = viewModel()
+private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
+    val viewModel: HomeViewModel = scopedViewModel(navController)
     val messages by viewModel.messages.collectAsState()
 
-    val transcriptViewModel: TranscriptRepository = koinViewModel()
+    val transcriptViewModel: TranscriptRepository = scopedKoinViewModel(navController)
     val transcript by transcriptViewModel.transcript.collectAsState()
 
     LaunchedEffect(transcript) {
-        if (transcript == null || transcript?.terms?.size == 0) {
+        if (transcript == null || transcript?.terms?.isEmpty() == true) {
             viewModel.setContext("The user has not submitted a transcript yet. If they ask about their courses or grades, ask them to upload their transcript.")
             return@LaunchedEffect
         }
@@ -192,7 +193,8 @@ fun ChatInput(
 @Preview(showBackground = true)
 @Composable
 fun AdvisorPreview() {
+    val navController = rememberNavController()
     GPAiTheme {
-        AdvisorScreen()
+        AdvisorScreen(navController)
     }
 }

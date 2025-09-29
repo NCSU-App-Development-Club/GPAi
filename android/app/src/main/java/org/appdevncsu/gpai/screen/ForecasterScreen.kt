@@ -65,8 +65,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import org.appdevncsu.gpai.activity.scopedKoinViewModel
+import org.appdevncsu.gpai.activity.scopedViewModel
 import org.appdevncsu.gpai.models.Course
 import org.appdevncsu.gpai.models.Term
 import org.appdevncsu.gpai.models.Transcript
@@ -75,7 +78,6 @@ import org.appdevncsu.gpai.ui.theme.BrandPurple
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.appdevncsu.gpai.viewmodel.HomeViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
-import org.koin.androidx.compose.koinViewModel
 
 val gradeOptions =
     listOf(
@@ -101,13 +103,13 @@ val gradeOptions =
     )
 
 @Composable
-fun ForecasterScreen() {
-    val homeViewModel: HomeViewModel = viewModel()
-    val viewModel: TranscriptRepository = koinViewModel()
+fun ForecasterScreen(navController: NavHostController) {
+    val homeViewModel: HomeViewModel = scopedViewModel(navController)
+    val viewModel: TranscriptRepository = scopedKoinViewModel(navController)
     val transcript = viewModel.transcript.collectAsState()
 
     var tempTranscript by remember {
-        mutableStateOf<Transcript>(
+        mutableStateOf(
             transcript.value ?: Transcript(
                 emptyList()
             )
@@ -147,6 +149,7 @@ fun ForecasterScreen() {
             ) {
                 itemsIndexed(tempTranscript.terms) { termIndex, term ->
                     TermSection(
+                        viewModel = homeViewModel,
                         term = term,
                         isCurrentSemester = termIndex == tempTranscript.terms.size - 1,
                         onUpdateTerm = { newTerm ->
@@ -273,6 +276,7 @@ fun ForecasterScreen() {
                             viewModel.updateTranscript(tempTranscript)
                             snackbarHostState.showSnackbar("Changes saved successfully!")
                         } catch (e: Exception) {
+                            e.printStackTrace()
                             snackbarHostState.showSnackbar("Failed to save changes. Please try again.")
                         } finally {
                             isSaving = false
@@ -337,6 +341,7 @@ fun GPAHeader(gpa: Double) {
 
 @Composable
 fun TermSection(
+    viewModel: HomeViewModel,
     term: Term,
     isCurrentSemester: Boolean,
     onUpdateTerm: (Term) -> Unit,
@@ -344,7 +349,6 @@ fun TermSection(
     onDeleteCourse: (Course) -> Unit,
     onAddCourse: () -> Unit
 ) {
-    val viewModel: HomeViewModel = viewModel()
     val isExpanded = viewModel.expandedTerms.collectAsState().value.contains(term.id)
 
     Column(
@@ -866,7 +870,8 @@ data class CourseDialogState(
 @Preview(showBackground = true)
 @Composable
 fun ForecasterPreview() {
+    val navController = rememberNavController()
     GPAiTheme {
-        ForecasterScreen()
+        ForecasterScreen(navController)
     }
 }

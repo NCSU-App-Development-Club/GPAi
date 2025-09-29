@@ -19,12 +19,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navigation
 import org.appdevncsu.gpai.screen.ForecasterScreen
 import org.appdevncsu.gpai.screen.GPAiAppBar
 import org.appdevncsu.gpai.screen.HomeViewToggle
@@ -102,7 +106,7 @@ fun AppContainer(navController: NavHostController, modifier: Modifier = Modifier
 
     val transcript = transcriptViewModel.transcript.collectAsState()
 
-    val startDestination = if ((transcript.value?.terms?.size ?: 0) > 0) "forecaster" else "intro"
+    val startDestination = if ((transcript.value?.terms?.size ?: 0) > 0) "home_graph" else "intro"
 
     NavHost(navController, startDestination = startDestination, modifier) {
         // Forecaster screen with slide-in/out animations
@@ -125,24 +129,52 @@ fun AppContainer(navController: NavHostController, modifier: Modifier = Modifier
             UploadTranscriptScreen(navController = navController) // Displays the Upload Transcript screen
         }
 
-        // Forecaster screen with slide-in/out animations
-        composable(
-            "forecaster",
-            enterTransition = { slideInHorizontally(initialOffsetX = { -2000 }) + fadeIn() },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { 2000 }) + fadeOut() },
-            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
-            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-            ForecasterScreen() // Displays the Forecaster screen
-        }
+        navigation(startDestination = "forecaster", route = "home_graph") {
+            // Forecaster screen with slide-in/out animations
+            composable(
+                "forecaster",
+                enterTransition = { slideInHorizontally(initialOffsetX = { -2000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { 2000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
+                ForecasterScreen(navController) // Displays the Forecaster screen
+            }
 
-        // Advisor screen with slide-in/out animations
-        composable(
-            "advisor",
-            enterTransition = { slideInHorizontally(initialOffsetX = { 2000 }) + fadeIn() },
-            exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
-            popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
-            popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-            AdvisorScreen() // Displays the Advisor screen
+            // Advisor screen with slide-in/out animations
+            composable(
+                "advisor",
+                enterTransition = { slideInHorizontally(initialOffsetX = { 2000 }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
+                AdvisorScreen(navController) // Displays the Advisor screen
+            }
         }
     }
+}
+
+/**
+ * Returns an instance of the [T] that is scoped to the `home_graph` navigation graph.
+ * When transitioning between the forecaster and advisor screens, this instance of the ViewModel
+ * is not cleaned up because it's scoped to the parent graph, not each individual destination.
+ */
+@Composable
+inline fun <reified T : ViewModel> scopedViewModel(navController: NavHostController): T {
+    val parentEntry = remember(navController.currentBackStackEntry) {
+        navController.getBackStackEntry("home_graph")
+    }
+    return viewModel<T>(viewModelStoreOwner = parentEntry)
+}
+
+/**
+ * Returns an instance of the [T] that is scoped to the `home_graph` navigation graph.
+ * When transitioning between the forecaster and advisor screens, this instance of the ViewModel
+ * is not cleaned up because it's scoped to the parent graph, not each individual destination.
+ */
+@Composable
+inline fun <reified T : ViewModel> scopedKoinViewModel(navController: NavHostController): T {
+    val parentEntry = remember(navController.currentBackStackEntry) {
+        navController.getBackStackEntry("home_graph")
+    }
+    return koinViewModel<T>(viewModelStoreOwner = parentEntry)
 }

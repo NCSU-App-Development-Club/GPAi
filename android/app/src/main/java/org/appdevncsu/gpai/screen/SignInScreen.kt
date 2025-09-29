@@ -25,16 +25,17 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialException
+import androidx.navigation.NavHostController
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import org.appdevncsu.gpai.activity.scopedKoinViewModel
 import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
-import org.koin.androidx.compose.koinViewModel
 
 @Composable
-fun SignInScreen(modifier: Modifier = Modifier) {
-    val authViewModel: AuthViewModel = koinViewModel()
+fun SignInScreen(navController: NavHostController, modifier: Modifier = Modifier) {
+    val authViewModel: AuthViewModel = scopedKoinViewModel(navController)
 
     val clientId = authViewModel.clientId.collectAsState()
 

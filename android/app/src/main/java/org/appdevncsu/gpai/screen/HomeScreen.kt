@@ -37,8 +37,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
 import org.appdevncsu.gpai.ui.theme.BrandPurple
-import org.appdevncsu.gpai.viewmodel.TranscriptRepository
-import org.koin.androidx.compose.koinViewModel
 
 /**
  * A composable function that manages the navigation between different screens (Forecaster and Advisor)
