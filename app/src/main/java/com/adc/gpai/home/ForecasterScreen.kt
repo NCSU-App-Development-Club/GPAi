@@ -70,8 +70,32 @@ import com.adc.gpai.ui.theme.BrandPurple
 import com.adc.gpai.ui.theme.GPAiTheme
 import org.koin.androidx.compose.koinViewModel
 
+val gradeOptions =
+    listOf(
+        "A+",
+        "A",
+        "A-",
+        "B+",
+        "B",
+        "B-",
+        "C+",
+        "C",
+        "C-",
+        "D+",
+        "D",
+        "D-",
+        "F",
+        // These grades don't count towards GPA:
+        "W", // Withdrawal
+        "S", "U", // Pass/fail course grades
+        "AU", "NR", // Course audit grades
+        "CR", // Transfer credit
+        "IN", "LA", // Temporarily incomplete
+    )
+
 @Composable
 fun ForecasterScreen() {
+    val homeViewModel: HomeViewModel = viewModel()
     val viewModel: TranscriptRepository = koinViewModel()
     val transcript = viewModel.transcript.observeAsState()
 
@@ -92,14 +116,16 @@ fun ForecasterScreen() {
         }
     }
 
+    // Auto-expand the last term (the current term) when the screen is opened
+    LaunchedEffect(tempTranscript.terms.isNotEmpty()) {
+        tempTranscript.terms.lastOrNull()?.let { homeViewModel.expand(it.id) }
+    }
+
     // State for edit operations and dialogs
     var editingCourse by remember { mutableStateOf<CourseEditState?>(null) }
     var courseToDelete by remember { mutableStateOf<CourseDeleteState?>(null) }
     var showAddCourseDialog by remember { mutableStateOf(false) }
     var addingToTermIndex by remember { mutableIntStateOf(0) }
-
-    // Available grade options
-    val gradeOptions = listOf("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F")
 
     Box(
         modifier = Modifier
@@ -110,35 +136,7 @@ fun ForecasterScreen() {
             modifier = Modifier.fillMaxSize()
         ) {
             // Cumulative GPA Display at the top
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(BrandPurple)
-                        .padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "GPA Forecaster",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    val locale = LocalContext.current.resources.configuration.locales.get(0)
-                    Text(
-                        text = "Cumulative GPA: ${String.format(locale, "%.2f", tempTranscript.gpa)}",
-                        fontSize = 24.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
-                }
-            }
+            CumulativeGPADisplay(tempTranscript.gpa)
 
             // Scrollable list of terms
             LazyColumn(
@@ -184,7 +182,6 @@ fun ForecasterScreen() {
                     course = editingCourse!!.course,
                     isEditing = true
                 ),
-                gradeOptions = gradeOptions,
                 onDismiss = { editingCourse = null },
                 onConfirm = { updatedCourse ->
                     // Update in temporary transcript
@@ -222,7 +219,6 @@ fun ForecasterScreen() {
                     isEditing = false
                 ),
                 initialTermIndex = addingToTermIndex,
-                gradeOptions = gradeOptions,
                 onDismiss = { showAddCourseDialog = false },
                 onConfirm = { termId, newCourse ->
                     // Add to temporary transcript
@@ -274,6 +270,39 @@ fun ForecasterScreen() {
 }
 
 @Composable
+fun CumulativeGPADisplay(gpa: Double) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 16.dp),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(BrandPurple)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "GPA Forecaster",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            val locale = LocalContext.current.resources.configuration.locales.get(0)
+            Text(
+                text = "Cumulative GPA: ${String.format(locale, "%.2f", gpa)}",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+        }
+    }
+}
+
+@Composable
 fun TermSection(
     term: Term,
     isCurrentSemester: Boolean,
@@ -297,79 +326,79 @@ fun TermSection(
                 )
             )
     ) {
-            // Term header - always visible
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { viewModel.toggleExpanded(term.id) },
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        // Term header - always visible
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { viewModel.toggleExpanded(term.id) },
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = term.name + if (isCurrentSemester) " (Current)" else "",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = if (isCurrentSemester) BrandPurple else Color.Black
+                )
+                val locale = LocalContext.current.resources.configuration.locales.get(0)
+                Text(
+                    text = "Semester GPA: ${String.format(locale, "%.2f", term.gpa)}",
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.Gray
+                )
+            }
+
+            IconButton(onClick = { viewModel.toggleExpanded(term.id) }) {
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    tint = BrandPurple
+                )
+            }
+        }
+
+        // Expandable content
+        if (isExpanded) {
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Courses in this term
+            term.courses.forEachIndexed { courseIndex, course ->
+                CourseItem(
+                    course = course,
+                    onGradeChange = { newGrade ->
+                        val updatedCourse = course.copy(
+                            grade = newGrade,
+                            points = calculatePoints(course.attempted, newGrade)
+                        )
+                        val updatedCourses = term.courses.toMutableList()
+                        updatedCourses[courseIndex] = updatedCourse
+                        onUpdateTerm(term.copy(courses = updatedCourses))
+                    },
+                    onEdit = { onEditCourse(courseIndex, course) },
+                    onDelete = { onDeleteCourse(course) }
+                )
+                if (courseIndex < term.courses.size - 1) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+            // Add course button
+            Spacer(modifier = Modifier.height(12.dp))
+            Button(
+                onClick = onAddCourse,
+                colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = term.name + if (isCurrentSemester) " (Current)" else "",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = if (isCurrentSemester) BrandPurple else Color.Black
-                    )
-                    val locale = LocalContext.current.resources.configuration.locales.get(0)
-                    Text(
-                        text = "Semester GPA: ${String.format(locale, "%.2f", term.gpa)}",
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = Color.Gray
-                    )
-                }
-
-                IconButton(onClick = { viewModel.toggleExpanded(term.id) }) {
-                    Icon(
-                        imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                        contentDescription = if (isExpanded) "Collapse" else "Expand",
-                        tint = BrandPurple
-                    )
-                }
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Course"
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(text = "Add Course")
             }
-
-            // Expandable content
-            if (isExpanded) {
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Courses in this term
-                term.courses.forEachIndexed { courseIndex, course ->
-                    CourseItem(
-                        course = course,
-                        onGradeChange = { newGrade ->
-                            val updatedCourse = course.copy(
-                                grade = newGrade,
-                                points = calculatePoints(course.attempted, newGrade)
-                            )
-                            val updatedCourses = term.courses.toMutableList()
-                            updatedCourses[courseIndex] = updatedCourse
-                            onUpdateTerm(term.copy(courses = updatedCourses))
-                        },
-                        onEdit = { onEditCourse(courseIndex, course) },
-                        onDelete = { onDeleteCourse(course) }
-                    )
-                    if (courseIndex < term.courses.size - 1) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                }
-
-                // Add course button
-                Spacer(modifier = Modifier.height(12.dp))
-                Button(
-                    onClick = onAddCourse,
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Course"
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Add Course")
-                }
-            }
+        }
     }
 }
 
@@ -405,8 +434,7 @@ fun CourseItem(
 
         // Grade dropdown selector
         var gradeExpanded by remember { mutableStateOf(false) }
-        val gradeOptions = listOf("A+", "A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F")
-        
+
         ExposedDropdownMenuBox(
             expanded = gradeExpanded,
             onExpandedChange = { gradeExpanded = !gradeExpanded },
@@ -434,7 +462,7 @@ fun CourseItem(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
                 )
             }
-            
+
             ExposedDropdownMenu(
                 expanded = gradeExpanded,
                 onDismissRequest = { gradeExpanded = false },
@@ -442,11 +470,11 @@ fun CourseItem(
             ) {
                 gradeOptions.forEach { grade ->
                     DropdownMenuItem(
-                        text = { 
+                        text = {
                             Text(
                                 text = grade,
                                 modifier = Modifier.fillMaxWidth()
-                            ) 
+                            )
                         },
                         onClick = {
                             onGradeChange(grade)
@@ -483,7 +511,6 @@ fun CourseItem(
 @Composable
 fun CourseDialog(
     dialogState: CourseDialogState,
-    gradeOptions: List<String>,
     onDismiss: () -> Unit,
     onConfirm: (Course) -> Unit
 ) {
@@ -589,7 +616,10 @@ fun CourseDialog(
                                     attempted = creditHours.toIntOrNull() ?: 0,
                                     earned = creditHours.toIntOrNull() ?: 0,
                                     grade = selectedGrade,
-                                    points = calculatePoints(creditHours.toIntOrNull() ?: 0, selectedGrade)
+                                    points = calculatePoints(
+                                        creditHours.toIntOrNull() ?: 0,
+                                        selectedGrade
+                                    )
                                 )
                                 onConfirm(updatedCourse)
                             }
@@ -610,7 +640,6 @@ fun CourseDialog(
 fun CourseDialogWithTermSelection(
     dialogState: CourseDialogState,
     initialTermIndex: Int,
-    gradeOptions: List<String>,
     onDismiss: () -> Unit,
     onConfirm: (termId: Int, course: Course) -> Unit
 ) {
@@ -753,7 +782,10 @@ fun CourseDialogWithTermSelection(
                                     attempted = creditHours.toIntOrNull() ?: 0,
                                     earned = creditHours.toIntOrNull() ?: 0,
                                     grade = selectedGrade,
-                                    points = calculatePoints(creditHours.toIntOrNull() ?: 0, selectedGrade)
+                                    points = calculatePoints(
+                                        creditHours.toIntOrNull() ?: 0,
+                                        selectedGrade
+                                    )
                                 )
                                 onConfirm(termId, newCourse)
                             }
