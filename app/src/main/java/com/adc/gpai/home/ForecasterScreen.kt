@@ -22,8 +22,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.AlertDialog
@@ -43,6 +43,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableIntStateOf
@@ -53,14 +54,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import com.adc.gpai.R
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.adc.gpai.models.Course
 import com.adc.gpai.models.Term
 import com.adc.gpai.models.Transcript
@@ -148,7 +148,6 @@ fun ForecasterScreen() {
                 itemsIndexed(tempTranscript.terms) { termIndex, term ->
                     TermSection(
                         term = term,
-                        termIndex = termIndex,
                         isCurrentSemester = termIndex == tempTranscript.terms.size - 1, // Last semester is current
                         onUpdateTerm = { newTerm ->
                             tempTranscript = tempTranscript.copy(
@@ -277,14 +276,14 @@ fun ForecasterScreen() {
 @Composable
 fun TermSection(
     term: Term,
-    termIndex: Int,
     isCurrentSemester: Boolean,
     onUpdateTerm: (Term) -> Unit,
     onEditCourse: (Int, Course) -> Unit,
     onDeleteCourse: (Course) -> Unit,
     onAddCourse: () -> Unit
 ) {
-    var isExpanded by remember { mutableStateOf(isCurrentSemester) }
+    val viewModel: HomeViewModel = viewModel()
+    val isExpanded = viewModel.expandedTerms.collectAsState().value.contains(term.id)
 
     Column(
         modifier = Modifier
@@ -302,7 +301,7 @@ fun TermSection(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { isExpanded = !isExpanded },
+                    .clickable { viewModel.toggleExpanded(term.id) },
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -322,7 +321,7 @@ fun TermSection(
                     )
                 }
 
-                IconButton(onClick = { isExpanded = !isExpanded }) {
+                IconButton(onClick = { viewModel.toggleExpanded(term.id) }) {
                     Icon(
                         imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                         contentDescription = if (isExpanded) "Collapse" else "Expand",

@@ -28,6 +28,13 @@ class HomeViewModel : ViewModel() {
     private val _homeState = MutableLiveData<HomeViewState>(HomeViewState.FORECASTER)
     val homeState: LiveData<HomeViewState> = _homeState
 
+    private val _expandedTerms = MutableStateFlow(emptyList<Int>())
+
+    /**
+     * A list of term IDs that have been expanded in the UI. All other terms should appear collapsed.
+     */
+    val expandedTerms = _expandedTerms.asStateFlow()
+
     // Function to change the HomeViewState (e.g., on toggle click)
     fun setHomeState(state: HomeViewState) {
         _homeState.value = state
@@ -93,6 +100,16 @@ class HomeViewModel : ViewModel() {
             val withContext = systemMessage.copy(content = systemMessage.content + "\n\nUse the following context to answer questions:\n${content}")
             val userMessages = list.filter { it.role != "system" }
             return@update listOf(withContext) + userMessages
+        }
+    }
+
+    fun toggleExpanded(termId: Int) {
+        _expandedTerms.update {
+            if (it.contains(termId)) {
+                it.filter { i -> termId != i }
+            } else {
+                it + termId
+            }
         }
     }
 }
