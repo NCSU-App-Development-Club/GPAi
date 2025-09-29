@@ -28,7 +28,7 @@ class HomeViewModel : ViewModel() {
     private val _homeState = MutableLiveData<HomeViewState>(HomeViewState.FORECASTER)
     val homeState: LiveData<HomeViewState> = _homeState
 
-    private val _expandedTerms = MutableStateFlow(emptyList<Int>())
+    private val _expandedTerms = MutableStateFlow(emptySet<Int>())
 
     /**
      * A list of term IDs that have been expanded in the UI. All other terms should appear collapsed.
@@ -103,10 +103,14 @@ class HomeViewModel : ViewModel() {
         }
     }
 
+    fun expand(termId: Int) {
+        _expandedTerms.update { it + termId }
+    }
+
     fun toggleExpanded(termId: Int) {
         _expandedTerms.update {
             if (it.contains(termId)) {
-                it.filter { i -> termId != i }
+                it - termId
             } else {
                 it + termId
             }
