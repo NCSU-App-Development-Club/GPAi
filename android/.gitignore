@@ -61,3 +61,8 @@ lint/generated/
 *.war
 
 /.idea
+
+# Release signing (never commit credentials)
+keystore.properties
+keystore/
+*.jks
