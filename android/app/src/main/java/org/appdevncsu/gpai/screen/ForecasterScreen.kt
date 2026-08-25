@@ -78,6 +78,7 @@ import org.appdevncsu.gpai.ui.theme.BrandPurple
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.appdevncsu.gpai.viewmodel.HomeViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
+import androidx.compose.ui.platform.LocalConfiguration
 
 val gradeOptions =
     listOf(
@@ -313,7 +314,7 @@ fun ForecasterScreen(navController: NavHostController) {
 
 @Composable
 fun GPAHeader(gpa: Double) {
-    val locale = LocalContext.current.resources.configuration.locales.get(0)
+    val locale = LocalConfiguration.current.locales.get(0)
 
     Card(
         modifier = Modifier
@@ -377,7 +378,7 @@ fun TermSection(
                     fontWeight = FontWeight.Bold,
                     color = if (isCurrentSemester) BrandPurple else Color.Black
                 )
-                val locale = LocalContext.current.resources.configuration.locales.get(0)
+                val locale = LocalConfiguration.current.locales.get(0)
                 Text(
                     text = "Semester GPA: ${String.format(locale, "%.2f", term.gpa)}",
                     fontSize = 14.sp,
