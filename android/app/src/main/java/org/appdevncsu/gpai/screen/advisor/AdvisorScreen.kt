@@ -19,6 +19,7 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -112,7 +113,7 @@ private fun AdvisorChatContent(
             ) {
                 Text(
                     text = error,
-                    color = Color.Red,
+                    color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.fillMaxWidth()
                 )
                 if (canRetry) {
@@ -182,7 +183,7 @@ fun ChatInput(
                 Icon(
                     painter = painterResource(R.drawable.microphone),
                     "Microphone",
-                    tint = Color.Black,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.clickable {
                         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
                         intent.putExtra(
@@ -199,7 +200,7 @@ fun ChatInput(
                 )
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Send,
-                    tint = Color.Black,
+                    tint = if (input.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
                     modifier = Modifier.clickable {
                         sendText(input)

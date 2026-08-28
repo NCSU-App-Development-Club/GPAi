@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -23,7 +24,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -73,7 +73,7 @@ fun UploadTranscriptScreen(navController: NavHostController) {
     GPAiTheme {
         Column(
             modifier = Modifier
-                .fillMaxSize() // Fill the entire screen.
+                .fillMaxSize()
                 .padding(16.dp)
                 .testTag("upload_screen"),
             verticalArrangement = Arrangement.Center, // Center content vertically.
@@ -172,9 +172,9 @@ fun RequestFileButton(
     }
 
     val buttonTextColor = when (buttonState.value) {
-        UploadState.IDLE, UploadState.PARSING -> Color.White
-        UploadState.SUCCESS -> Color.Black
-        UploadState.ERROR -> Color.Black
+        UploadState.IDLE, UploadState.PARSING -> MaterialTheme.colorScheme.onPrimary
+        UploadState.SUCCESS -> MaterialTheme.colorScheme.onSurface
+        UploadState.ERROR -> MaterialTheme.colorScheme.onSurface
     }
 
     // Set different icons for each state.

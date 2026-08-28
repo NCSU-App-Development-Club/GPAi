@@ -53,7 +53,7 @@ fun ChatBubble(message: Message) {
             Text(
                 text = message.content,
                 modifier = Modifier.padding(8.dp),
-                color = MaterialTheme.colorScheme.onPrimary
+                color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
             )
         }
     }

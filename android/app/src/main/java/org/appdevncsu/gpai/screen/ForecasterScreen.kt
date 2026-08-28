@@ -58,7 +58,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -134,7 +133,6 @@ fun ForecasterScreen(navController: NavHostController) {
     var isSaving by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
-
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -292,14 +290,14 @@ fun ForecasterScreen(navController: NavHostController) {
                 if (isSaving) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = Color.White,
+                        color = MaterialTheme.colorScheme.onPrimary,
                         strokeWidth = 2.dp
                     )
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
                         contentDescription = "Save Changes",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
             }
@@ -333,7 +331,7 @@ fun GPAHeader(gpa: Double) {
                 text = "Cumulative GPA: ${String.format(locale, "%.2f", gpa)}",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = Color.White
+                color = MaterialTheme.colorScheme.onPrimary
             )
         }
     }
@@ -355,7 +353,7 @@ fun TermSection(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(8.dp))
             .padding(16.dp)
             .animateContentSize(
                 animationSpec = tween(
@@ -376,14 +374,14 @@ fun TermSection(
                     text = term.name + if (isCurrentSemester) " (Current)" else "",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isCurrentSemester) BrandPurple else Color.Black
+                    color = if (isCurrentSemester) BrandPurple else MaterialTheme.colorScheme.onSurface
                 )
                 val locale = LocalConfiguration.current.locales.get(0)
                 Text(
                     text = "Semester GPA: ${String.format(locale, "%.2f", term.displayGpa)}",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
 
@@ -447,7 +445,7 @@ fun CourseItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(Color.LightGray.copy(alpha = 0.2f), RoundedCornerShape(8.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f), RoundedCornerShape(8.dp))
             .padding(12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -461,7 +459,7 @@ fun CourseItem(
             Text(
                 text = "${course.attempted} credits",
                 fontSize = 12.sp,
-                color = Color.Gray
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -488,7 +486,7 @@ fun CourseItem(
                 Text(
                     text = course.grade,
                     textAlign = TextAlign.Center,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp,
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
