@@ -53,7 +53,6 @@
   ],
   "ratelimits": [
     {
-      "binding": "RATE_LIMITER_MIN",
       "name": "RATE_LIMITER_MIN",
       "namespace_id": "1001",
       "simple": { "limit": 10, "period": 60 }
