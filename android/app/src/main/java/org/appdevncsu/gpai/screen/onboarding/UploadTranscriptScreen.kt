@@ -123,7 +123,12 @@ fun UploadTranscriptScreen(navController: NavHostController) {
 
                 Button(
                     onClick = {
-                        navController.navigate("forecaster")
+                        // Enter the main nav graph and pop the onboarding screens off
+                        // the back stack so that the back gesture exits the app instead
+                        // of going back to the last onboarding screen.
+                        navController.navigate("home_graph") {
+                            popUpTo("intro") { inclusive = true }
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
                     modifier = Modifier
@@ -193,7 +198,10 @@ fun RequestFileButton(
             .fillMaxWidth() // Make the button fill the width of the screen.
             .height(300.dp), // Set the height of the button.
         shape = RoundedCornerShape(12), // Make the button corners rounded.
-        colors = ButtonDefaults.buttonColors(containerColor = buttonColor, contentColor = buttonTextColor), // Set the background color.
+        colors = ButtonDefaults.buttonColors(
+            containerColor = buttonColor,
+            contentColor = buttonTextColor
+        ), // Set the background color.
         onClick = { launcher.launch("application/pdf") } // Open the file picker when clicked.
     ) {
         // Layout for the button's content: an icon and text.
