@@ -25,9 +25,10 @@ class PDFUtils {
         fun readTextFromPdf(context: Context, pdfUri: Uri): String? {
             PDFBoxResourceLoader.init(context)
             var document: PDDocument? = null
+            var inputStream: InputStream? = null
             return try {
                 // Open the PDF file as an InputStream
-                val inputStream: InputStream? = context.contentResolver.openInputStream(pdfUri)
+                inputStream = context.contentResolver.openInputStream(pdfUri)
                 // Load the document from the InputStream
                 document = PDDocument.load(inputStream)
                 // Use PDFTextStripper to extract text
@@ -37,8 +38,9 @@ class PDFUtils {
                 e.printStackTrace()
                 null
             } finally {
-                // Close the document
+                // Close the document and input stream
                 document?.close()
+                inputStream?.close()
             }
         }
 

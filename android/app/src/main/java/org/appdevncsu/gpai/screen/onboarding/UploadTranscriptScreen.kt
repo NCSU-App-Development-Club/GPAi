@@ -20,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +33,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
 import org.appdevncsu.gpai.ui.theme.BrandFailureRed
@@ -46,7 +50,7 @@ import org.koin.androidx.compose.koinViewModel
  * Enum representing the current state of the file upload process.
  */
 enum class UploadState {
-    IDLE, SUCCESS, ERROR
+    IDLE, PARSING, SUCCESS, ERROR
 }
 
 /**
@@ -60,8 +64,9 @@ fun UploadTranscriptScreen(navController: NavHostController) {
 
     val viewModel: TranscriptRepository = koinViewModel()
 
-    // State to track the upload process: IDLE, SUCCESS, or ERROR.
-    var uploadState = remember { mutableStateOf(UploadState.IDLE) }
+    // State to track the upload process: IDLE, PARSING, SUCCESS, or ERROR.
+    val uploadState = remember { mutableStateOf(UploadState.IDLE) }
+    val coroutineScope = rememberCoroutineScope()
 
     // Apply the custom theme to the UI.
     val context = LocalContext.current
@@ -88,22 +93,25 @@ fun UploadTranscriptScreen(navController: NavHostController) {
                         .padding(vertical = 16.dp), // Add padding around the button.
                     buttonState = uploadState,
                     onFileSelected = { fileUri ->
-                        // Read text from the selected PDF file.
-                        val pdfText = PDFUtils.readTextFromPdf(context, fileUri)
+                        uploadState.value = UploadState.PARSING
+                        coroutineScope.launch {
+                            val pdfText = withContext(Dispatchers.IO) {
+                                PDFUtils.readTextFromPdf(context, fileUri)
+                            }
 
-                        // If file reading fails, set the state to ERROR.
-                        if (pdfText == null) {
-                            uploadState.value = UploadState.ERROR
-                        } else {
-                            // Parse the transcript from the PDF content.
-                            val transcript = PDFUtils.parseTranscript(pdfText)
-
-                            // Check if parsing was successful and update the state accordingly.
-                            if (transcript.terms.isEmpty()) {
+                            if (pdfText == null) {
                                 uploadState.value = UploadState.ERROR
                             } else {
-                                uploadState.value = UploadState.SUCCESS
-                                viewModel.updateTranscript(transcript)
+                                val transcript = withContext(Dispatchers.IO) {
+                                    PDFUtils.parseTranscript(pdfText)
+                                }
+
+                                if (transcript.terms.isEmpty()) {
+                                    uploadState.value = UploadState.ERROR
+                                } else {
+                                    uploadState.value = UploadState.SUCCESS
+                                    viewModel.updateTranscript(transcript)
+                                }
                             }
                         }
                     })
@@ -148,20 +156,20 @@ fun RequestFileButton(
 
     // Change the button's color based on the current state.
     val buttonColor = when (buttonState.value) {
-        UploadState.IDLE -> BrandPurple
+        UploadState.IDLE, UploadState.PARSING -> BrandPurple
         UploadState.SUCCESS -> BrandSuccessGreen
         UploadState.ERROR -> BrandFailureRed
     }
 
     val buttonTextColor = when (buttonState.value) {
-        UploadState.IDLE -> Color.White
+        UploadState.IDLE, UploadState.PARSING -> Color.White
         UploadState.SUCCESS -> Color.Black
         UploadState.ERROR -> Color.Black
     }
 
     // Set different icons for each state.
     val buttonIcon = when (buttonState.value) {
-        UploadState.IDLE -> R.drawable.upload
+        UploadState.IDLE, UploadState.PARSING -> R.drawable.upload
         UploadState.SUCCESS -> R.drawable.check
         UploadState.ERROR -> R.drawable.error
     }
@@ -169,6 +177,7 @@ fun RequestFileButton(
     // Display different button text based on the current upload state.
     val buttonText = when (buttonState.value) {
         UploadState.IDLE -> "Click here to upload your transcript"
+        UploadState.PARSING -> "Reading transcript..."
         UploadState.SUCCESS -> "Click here to upload a different transcript"
         UploadState.ERROR -> "Couldn't parse transcript, please try again"
     }
