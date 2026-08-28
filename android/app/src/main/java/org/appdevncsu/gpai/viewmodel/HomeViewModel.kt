@@ -35,20 +35,6 @@ class HomeViewModel : ViewModel() {
      */
     val expandedTerms = _expandedTerms.asStateFlow()
 
-    fun getBaseSystemMessage() = Message(
-        role = "system",
-        content = "You are an academic assistant. " +
-                "You want to help students with any questions they have. " +
-                "Keep discussion focused around school. " +
-                "Avoid inappropriate discussions."
-    )
-
-    init {
-        _messages.update { prev ->
-            prev + getBaseSystemMessage()
-        }
-    }
-
     fun askQuestion(question: String) {
         _error.update { null }
         viewModelScope.launch {
@@ -61,10 +47,12 @@ class HomeViewModel : ViewModel() {
             ).also { response ->
                 _loading.update { false }
                 if (response.isSuccess) {
+                    val answer = response.getOrThrow()
                     _messages.update { previous ->
                         previous + Message(
                             role = "assistant",
-                            content = response.getOrThrow().message
+                            content = answer.message,
+                            signature = answer.signature
                         )
                     }
                 } else {
@@ -88,15 +76,20 @@ class HomeViewModel : ViewModel() {
     }
 
     /**
-     * Updates the conversation's first system message to include the provided [content].
+     * Stores the user's transcript/context as a single `user` message (not a `system` message —
+     * the system prompt is owned by the backend). The message is marked [Message.isContext] so the
+     * UI hides it, and is kept at the front of the conversation. Replaces any previous context.
      */
     fun setContext(content: String) {
+        val contextMessage = Message(
+            role = "user",
+            content = "Use the following context to answer questions:\n${content}",
+            isContext = true
+        )
         _messages.update { list ->
-            val systemMessage = getBaseSystemMessage()
-            val withContext =
-                systemMessage.copy(content = systemMessage.content + "\n\nUse the following context to answer questions:\n${content}")
-            val userMessages = list.filter { it.role != "system" }
-            return@update listOf(withContext) + userMessages
+            // There is at most one context message; drop any existing one and prepend the new one.
+            val withoutOldContext = list.filter { !it.isContext }
+            listOf(contextMessage) + withoutOldContext
         }
     }
 

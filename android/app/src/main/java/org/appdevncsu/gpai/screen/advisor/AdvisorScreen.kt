@@ -100,7 +100,10 @@ private fun AdvisorChatContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Bottom
     ) {
-        AdvisorChatHistory(messages.filter { it.role != "system" }, Modifier.weight(0.9f))
+        AdvisorChatHistory(
+            messages.filter { it.role != "system" && !it.isContext },
+            Modifier.weight(0.9f)
+        )
         if (error != null) {
             Column(
                 modifier = Modifier
