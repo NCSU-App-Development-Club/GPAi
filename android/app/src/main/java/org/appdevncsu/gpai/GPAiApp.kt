@@ -1,6 +1,7 @@
 package org.appdevncsu.gpai
 
 import android.app.Application
+import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import okhttp3.OkHttpClient
 import org.appdevncsu.gpai.api.Api
 import org.appdevncsu.gpai.api.AuthorizationInterceptor
@@ -22,6 +23,7 @@ class GPAiApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        PDFBoxResourceLoader.init(this)
 
         startKoin {
             androidContext(this@GPAiApp)

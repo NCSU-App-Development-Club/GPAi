@@ -23,7 +23,6 @@ class PDFUtils {
          * @return The extracted text from the PDF file, or null if an error occurred.
          */
         fun readTextFromPdf(context: Context, pdfUri: Uri): String? {
-            PDFBoxResourceLoader.init(context)
             var document: PDDocument? = null
             var inputStream: InputStream? = null
             return try {
