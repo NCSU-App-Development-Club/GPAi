@@ -30,6 +30,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -53,7 +58,8 @@ fun GPAiAppBar(navController: NavHostController) {
                 text = stringResource(R.string.app_name),
                 fontWeight = FontWeight.Black,
                 fontSize = 40.sp,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                maxLines = 1
             )
         },
         actions = {
@@ -169,10 +175,13 @@ fun ToggleButton(
         contentAlignment = Alignment.Center,
         modifier = modifier
             .fillMaxSize()
-            .clickable {
-                if (enabled) {
-                    onClick()
-                }
+            .semantics {
+                role = Role.Button
+                selected = !enabled
+                contentDescription = text
+            }
+            .clickable(enabled = enabled) {
+                onClick()
             }
     ) {
         // Text label inside the toggle button

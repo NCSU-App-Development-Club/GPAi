@@ -59,6 +59,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -79,6 +80,7 @@ import org.appdevncsu.gpai.ui.theme.BrandPurple
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.appdevncsu.gpai.viewmodel.HomeViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
+import androidx.compose.ui.platform.LocalConfiguration
 
 val gradeOptions =
     listOf(
@@ -333,7 +335,8 @@ fun GPAHeader(gpa: Double) {
                 text = stringResource(R.string.cumulative_gpa, gpa),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onPrimary
+                color = MaterialTheme.colorScheme.onPrimary,
+                maxLines = 1
             )
         }
     }
@@ -367,6 +370,7 @@ fun TermSection(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .semantics(mergeDescendants = true) {}
                 .clickable { viewModel.toggleExpanded(term.id) },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -376,7 +380,8 @@ fun TermSection(
                     text = term.name + if (isCurrentSemester) stringResource(R.string.current_semester_suffix) else "",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isCurrentSemester) BrandPurple else MaterialTheme.colorScheme.onSurface
+                    color = if (isCurrentSemester) BrandPurple else MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1
                 )
                 Text(
                     text = stringResource(R.string.semester_gpa, term.displayGpa),
