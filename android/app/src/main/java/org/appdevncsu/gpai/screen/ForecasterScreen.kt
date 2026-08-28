@@ -143,7 +143,7 @@ fun ForecasterScreen(navController: NavHostController) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
-            GPAHeader(gpa = tempTranscript.gpa)
+            GPAHeader(gpa = tempTranscript.displayGpa)
             LazyColumn(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -380,7 +380,7 @@ fun TermSection(
                 )
                 val locale = LocalConfiguration.current.locales.get(0)
                 Text(
-                    text = "Semester GPA: ${String.format(locale, "%.2f", term.gpa)}",
+                    text = "Semester GPA: ${String.format(locale, "%.2f", term.displayGpa)}",
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = Color.Gray

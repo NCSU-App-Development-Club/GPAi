@@ -38,6 +38,13 @@ data class Transcript(val terms: List<Term> = ArrayList()) {
     val gpa: Double
         get() {
             if (totalCredits == 0) return 0.0
-            return (totalEarnedPoints / totalCredits).coerceAtMost(4.0)
+            return totalEarnedPoints / totalCredits
         }
+
+    /**
+     * The GPA as it should be displayed to the user. NC State caps the displayed
+     * GPA at 4.0 even though the raw value (e.g. A+ = 4.33) can exceed it.
+     */
+    val displayGpa: Double
+        get() = gpa.coerceAtMost(4.0)
 }

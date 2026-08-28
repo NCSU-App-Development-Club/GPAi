@@ -72,7 +72,7 @@ private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
             
             ${transcript!!.terms.map { term -> """<term>
                 Name: ${term.name}
-                GPA: ${term.gpa}
+                GPA: ${term.displayGpa}
                 Courses: ${term.courses.map { course -> """
                     - ${course.courseCode} (${course.courseName}): ${course.grade} (${course.points} grade points from ${course.earned} units)
                 """.trimIndent() }}

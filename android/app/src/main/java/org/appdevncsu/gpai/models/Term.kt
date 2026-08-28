@@ -24,5 +24,12 @@ data class Term(
 
     val gpa: Double
         get() = if (totalCredits == 0) 0.0
-        else (totalEarnedPoints / totalCredits).coerceAtMost(4.0)
+        else totalEarnedPoints / totalCredits
+
+    /**
+     * The GPA as it should be displayed to the user. NC State caps the displayed
+     * GPA at 4.0 even though the raw value (e.g. A+ = 4.33) can exceed it.
+     */
+    val displayGpa: Double
+        get() = gpa.coerceAtMost(4.0)
 }
