@@ -58,6 +58,8 @@ fun AdvisorScreen(navController: NavHostController) {
 private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
     val viewModel: HomeViewModel = scopedViewModel(navController)
     val messages by viewModel.messages.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val pendingRetry by viewModel.pendingRetry.collectAsState()
 
     val transcriptViewModel: TranscriptRepository = scopedKoinViewModel(navController)
     val transcript by transcriptViewModel.transcript.collectAsState()
@@ -89,6 +91,24 @@ private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
         verticalArrangement = Arrangement.Bottom
     ) {
         AdvisorChatHistory(messages.filter { it.role != "system" }, Modifier.weight(0.9f))
+        if (error != null) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp)
+            ) {
+                Text(
+                    text = error!!,
+                    color = Color.Red,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                if (pendingRetry != null) {
+                    TextButton(onClick = { viewModel.retry() }) {
+                        Text("Retry")
+                    }
+                }
+            }
+        }
         ChatInput(viewModel, sendText = { question -> viewModel.askQuestion(question) })
     }
 }

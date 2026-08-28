@@ -63,8 +63,8 @@ fun ChatBubble(message: Message) {
 @Composable
 fun PreviewAdvisorChatHistory() {
     val testMessages = listOf(
-        Message("user", "Hi AI!"),
-        Message("assistant", "Hey Buddy!!")
+        Message(role = "user", content = "Hi AI!"),
+        Message(role = "assistant", content = "Hey Buddy!!")
     )
 
     AdvisorChatHistory(testMessages)

@@ -1,5 +1,6 @@
 package org.appdevncsu.gpai.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,12 @@ class HomeViewModel : ViewModel() {
 
     private val _loading = MutableStateFlow(false)
     val loading = _loading.asStateFlow()
+
+    private val _error = MutableStateFlow<String?>(null)
+    val error = _error.asStateFlow()
+
+    private val _pendingRetry = MutableStateFlow<String?>(null)
+    val pendingRetry = _pendingRetry.asStateFlow()
 
     private val _expandedTerms = MutableStateFlow(emptySet<Int>())
 
@@ -43,8 +50,10 @@ class HomeViewModel : ViewModel() {
     }
 
     fun askQuestion(question: String) {
+        _error.update { null }
         viewModelScope.launch {
-            _messages.update { list -> list + Message(role = "user", content = question) }
+            val userMessage = Message(role = "user", content = question)
+            _messages.update { list -> list + userMessage }
             _loading.update { true }
 
             repository.askQuestion(
@@ -59,10 +68,23 @@ class HomeViewModel : ViewModel() {
                         )
                     }
                 } else {
-                    throw response.exceptionOrNull()!!
+                    Log.e("HomeViewModel", "askQuestion failed for question: $question", response.exceptionOrNull())
+                    _messages.update { list -> list.filter { it.id != userMessage.id } }
+                    _error.update { "Something went wrong while getting a response. Please try again." }
+                    _pendingRetry.update { question }
                 }
             }
         }
+    }
+
+    /**
+     * Re-sends the question from the most recent failed request. Re-adds the user
+     * message to the chat and retries the backend call.
+     */
+    fun retry() {
+        val question = _pendingRetry.value ?: return
+        _pendingRetry.update { null }
+        askQuestion(question)
     }
 
     /**
