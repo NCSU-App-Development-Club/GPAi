@@ -41,6 +41,6 @@ data class Course(
      * Grades that shouldn't count: S, U, CR, AU, NR, IN, LA, W
      */
     fun isForGrade(): Boolean {
-        return this.grade.first() in 'A'..'F'
+        return grade.trim().matches(Regex("^[A-Fa-f][+-]?$"))
     }
 }
