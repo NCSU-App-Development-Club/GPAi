@@ -7,8 +7,9 @@ import okhttp3.Response
  * Intercepts HTTP requests to add the user's authorization token.
  * The token is updated in [org.appdevncsu.gpai.viewmodel.AuthViewModel].
  */
-object AuthorizationInterceptor : Interceptor {
+class AuthorizationInterceptor : Interceptor {
 
+    @Volatile
     private var token: String? = null
 
     fun setToken(newToken: String) {

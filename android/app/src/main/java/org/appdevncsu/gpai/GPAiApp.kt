@@ -26,12 +26,14 @@ class GPAiApp : Application() {
         startKoin {
             androidContext(this@GPAiApp)
             modules(module {
+                single { AuthorizationInterceptor() }
                 single {
+                    val interceptor: AuthorizationInterceptor = get()
                     Retrofit.Builder()
                         .baseUrl(BuildConfig.BASE_URL)
                         .client(
                             OkHttpClient.Builder()
-                                .addInterceptor(AuthorizationInterceptor)
+                                .addInterceptor(interceptor)
                                 .build()
                         )
                         .addConverterFactory(GsonConverterFactory.create())
@@ -50,7 +52,7 @@ class GPAiApp : Application() {
                 }
                 single { CredentialsStore(androidContext()) }
                 viewModel {
-                    AuthViewModel(get())
+                    AuthViewModel(get(), get())
                 }
             })
         }

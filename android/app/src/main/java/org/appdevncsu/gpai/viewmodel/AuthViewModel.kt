@@ -16,7 +16,10 @@ import org.appdevncsu.gpai.models.User
 import org.appdevncsu.gpai.security.CredentialsStore
 import org.koin.java.KoinJavaComponent
 
-class AuthViewModel(private val credentialsStore: CredentialsStore) : ViewModel() {
+class AuthViewModel(
+    private val credentialsStore: CredentialsStore,
+    private val interceptor: AuthorizationInterceptor,
+) : ViewModel() {
 
     private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(true)
     val loading = _loading.asStateFlow()
@@ -53,7 +56,7 @@ class AuthViewModel(private val credentialsStore: CredentialsStore) : ViewModel(
             }
             _user.value = user
             if (!user?.token.isNullOrEmpty()) {
-                AuthorizationInterceptor.setToken(user.token)
+                interceptor.setToken(user.token)
             }
         }
 
@@ -80,7 +83,7 @@ class AuthViewModel(private val credentialsStore: CredentialsStore) : ViewModel(
         viewModelScope.launch {
             try {
                 credentialsStore.save(user)
-                AuthorizationInterceptor.setToken(user.token)
+                interceptor.setToken(user.token)
             } catch (e: Exception) {
                 e.printStackTrace()
                 // Revert the change because the update didn't succeed

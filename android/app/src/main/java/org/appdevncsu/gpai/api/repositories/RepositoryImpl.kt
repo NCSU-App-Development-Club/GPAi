@@ -3,7 +3,6 @@ package org.appdevncsu.gpai.api.repositories
 import org.appdevncsu.gpai.api.models.Message
 import org.appdevncsu.gpai.api.models.Question
 import org.appdevncsu.gpai.api.Api
-import org.appdevncsu.gpai.api.AuthorizationInterceptor
 import org.appdevncsu.gpai.api.models.Answer
 import org.appdevncsu.gpai.api.models.GetConfigResponse
 import org.appdevncsu.gpai.api.models.SignInRequest
@@ -40,7 +39,6 @@ class RepositoryImpl(private val api: Api) : Repository {
 
             return if (response.isSuccessful) {
                 val body = response.body()!!
-                AuthorizationInterceptor.setToken(body.sessionID)
                 Result.success(body)
             } else {
                 val str = response.errorBody()?.string().toString()

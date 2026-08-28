@@ -16,7 +16,7 @@ interface Repository {
     /**
      * Creates a GPAi session for the user and returns the session token
      */
-    suspend fun signIn(googleToken: SignInRequest): Result<SignInResponse>
+    suspend fun signIn(signInRequest: SignInRequest): Result<SignInResponse>
 
     /**
      * Gets configuration needed to send Google authorization requests (the Client ID)
