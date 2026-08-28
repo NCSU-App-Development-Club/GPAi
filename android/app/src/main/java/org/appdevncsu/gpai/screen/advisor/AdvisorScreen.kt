@@ -39,8 +39,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import org.appdevncsu.gpai.R
+import org.appdevncsu.gpai.api.models.Message
 import org.appdevncsu.gpai.activity.scopedKoinViewModel
 import org.appdevncsu.gpai.activity.scopedViewModel
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
@@ -57,9 +57,6 @@ fun AdvisorScreen(navController: NavHostController) {
 @Composable
 private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
     val viewModel: HomeViewModel = scopedViewModel(navController)
-    val messages by viewModel.messages.collectAsState()
-    val error by viewModel.error.collectAsState()
-    val pendingRetry by viewModel.pendingRetry.collectAsState()
 
     val transcriptViewModel: TranscriptRepository = scopedKoinViewModel(navController)
     val transcript by transcriptViewModel.transcript.collectAsState()
@@ -82,8 +79,21 @@ private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
         """.trimIndent())
     }
 
+    AdvisorChatContent(viewModel = viewModel)
+}
+
+@Composable
+private fun AdvisorChatContent(
+    viewModel: HomeViewModel,
+    modifier: Modifier = Modifier,
+    messages: List<Message> = viewModel.messages.collectAsState().value,
+    error: String? = viewModel.error.collectAsState().value,
+    canRetry: Boolean = viewModel.pendingRetry.collectAsState().value != null,
+    onRetry: () -> Unit = { viewModel.retry() }
+) {
+
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
             .testTag("advisor_screen"),
@@ -98,12 +108,12 @@ private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
                     .padding(bottom = 8.dp)
             ) {
                 Text(
-                    text = error!!,
+                    text = error,
                     color = Color.Red,
                     modifier = Modifier.fillMaxWidth()
                 )
-                if (pendingRetry != null) {
-                    TextButton(onClick = { viewModel.retry() }) {
+                if (canRetry) {
+                    TextButton(onClick = onRetry) {
                         Text("Retry")
                     }
                 }
@@ -210,11 +220,34 @@ fun ChatInput(
     )
 }
 
+private val previewMessages = listOf(
+    Message(role = "user", content = "Hi AI!"),
+    Message(role = "assistant", content = "Hey Buddy!! How can I help you today?"),
+    Message(role = "user", content = "What's my GPA?"),
+    Message(role = "assistant", content = "Based on your transcript, your cumulative GPA is 3.80.")
+)
+
 @Preview(showBackground = true)
 @Composable
 fun AdvisorPreview() {
-    val navController = rememberNavController()
     GPAiTheme {
-        AdvisorScreen(navController)
+        AdvisorChatContent(
+            viewModel = remember { HomeViewModel() },
+            messages = previewMessages
+        )
+    }
+}
+
+@Preview(showBackground = true, name = "Advisor (error state)")
+@Composable
+fun AdvisorErrorPreview() {
+    GPAiTheme {
+        AdvisorChatContent(
+            viewModel = remember { HomeViewModel() },
+            messages = previewMessages,
+            error = "Something went wrong while getting a response. Please try again.",
+            canRetry = true,
+            onRetry = {}
+        )
     }
 }
