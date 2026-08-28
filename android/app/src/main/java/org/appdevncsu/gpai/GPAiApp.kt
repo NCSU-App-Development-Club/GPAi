@@ -28,7 +28,7 @@ class GPAiApp : Application() {
             modules(module {
                 single {
                     Retrofit.Builder()
-                        .baseUrl("https://gpai-backend.ncsuappdevelopmentclub.workers.dev/")
+                        .baseUrl(BuildConfig.BASE_URL)
                         .client(
                             OkHttpClient.Builder()
                                 .addInterceptor(AuthorizationInterceptor)
