@@ -24,7 +24,11 @@ import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
 
 @Composable
-fun AuthGate(navController: NavHostController, modifier: Modifier = Modifier, child: @Composable () -> Unit) {
+fun AuthGate(
+    navController: NavHostController,
+    modifier: Modifier = Modifier,
+    child: @Composable () -> Unit
+) {
     val authViewModel: AuthViewModel = scopedKoinViewModel(navController)
 
     val error by authViewModel.error.collectAsState()
@@ -70,7 +74,16 @@ private fun AuthGateContent(
                 }
             }
 
-            loading -> CircularProgressIndicator()
+            loading -> {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Signing you in...")
+                    CircularProgressIndicator()
+                }
+            }
+
             user == null -> SignInScreen(navController)
             else -> child()
         }

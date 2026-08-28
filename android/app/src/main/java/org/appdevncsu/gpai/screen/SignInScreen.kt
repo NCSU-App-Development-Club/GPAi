@@ -1,5 +1,6 @@
 package org.appdevncsu.gpai.screen
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.credentials.CredentialManager
@@ -25,6 +27,8 @@ import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.GetCredentialResponse
 import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.NoCredentialException
 import androidx.navigation.NavHostController
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
@@ -57,6 +61,7 @@ fun SignInScreen(navController: NavHostController, modifier: Modifier = Modifier
 
     var key by remember { mutableIntStateOf(0) }
     var ncsuDomainRequired by remember { mutableStateOf(false) }
+    var noCredentials by remember { mutableStateOf(false) }
 
     LaunchedEffect("sign-in-request-$key") {
         try {
@@ -65,13 +70,19 @@ fun SignInScreen(navController: NavHostController, modifier: Modifier = Modifier
                 request = credentialRequest
             )
             handleSignIn(result, authViewModel)
+        } catch (_: NoCredentialException) {
+            // The user doesn't have any Google accounts on their device
+            noCredentials = true
+        } catch (_: GetCredentialCancellationException) {
+            // User cancelled the sign-in prompt; no action needed
         } catch (e: GetCredentialException) {
-            // Handle failure
             e.printStackTrace()
+            authViewModel.setError(true)
         } catch (_: RepositoryImpl.InvalidDomainException) {
+            // The user signed in with a non-NCSU Google account
             ncsuDomainRequired = true
         } catch (e: Exception) {
-            e.printStackTrace()
+            Log.e("SignInScreen", "Failed to sign in user", e)
             authViewModel.setError(true)
         }
     }
@@ -88,7 +99,11 @@ fun SignInScreen(navController: NavHostController, modifier: Modifier = Modifier
         ) {
             if (ncsuDomainRequired) {
                 Text("Invalid Account Type", fontSize = 24.sp)
-                Text("Sign in with your @ncsu.edu Google account", fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
+                Text(
+                    "Sign in with your @ncsu.edu Google account",
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+                )
                 Button(onClick = {
                     // Make the LaunchedEffect run again
                     ncsuDomainRequired = false
@@ -96,9 +111,27 @@ fun SignInScreen(navController: NavHostController, modifier: Modifier = Modifier
                 }) {
                     Text("Retry")
                 }
+            } else if (noCredentials) {
+                Text("No Account Found", fontSize = 24.sp)
+                Text(
+                    "No Google account was found on this device. Add a Google account in your device settings, then try again.",
+                    fontSize = 14.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+                )
+                Button(onClick = {
+                    noCredentials = false
+                    key++
+                }) {
+                    Text("Retry")
+                }
             } else {
                 Text("Sign in to GPAi", fontSize = 24.sp)
-                Text("with your NC State Google account", fontSize = 14.sp, modifier = Modifier.padding(top = 4.dp, bottom = 8.dp))
+                Text(
+                    "with your NC State Google account",
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+                )
                 Button(onClick = {
                     // Make the LaunchedEffect run again
                     key++
