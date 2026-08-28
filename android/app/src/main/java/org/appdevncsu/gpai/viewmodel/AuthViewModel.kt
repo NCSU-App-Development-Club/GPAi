@@ -33,6 +33,16 @@ class AuthViewModel(private val credentialsStore: CredentialsStore) : ViewModel(
     private val repository: Repository by KoinJavaComponent.inject(RepositoryImpl::class.java)
 
     init {
+        load()
+    }
+
+    /**
+     * Loads the persisted user and fetches the backend config.
+     */
+    fun load() {
+        _loading.value = true
+        _error.value = false
+
         val getUserJob = viewModelScope.async {
             val user = try {
                 credentialsStore.user()
@@ -100,10 +110,6 @@ class AuthViewModel(private val credentialsStore: CredentialsStore) : ViewModel(
         } else {
             throw signInResponse.exceptionOrNull()!!
         }
-    }
-
-    fun clearError() {
-        _error.value = false
     }
 
     fun setError(error: Boolean) {
