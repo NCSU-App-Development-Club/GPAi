@@ -12,11 +12,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.activity.scopedKoinViewModel
 import org.appdevncsu.gpai.models.User
 import org.appdevncsu.gpai.screen.SignInScreen
@@ -63,14 +65,14 @@ private fun AuthGateContent(
     ) {
         when {
             error -> {
-                Text("There was a problem signing you in", fontSize = 20.sp)
+                Text(stringResource(R.string.auth_error_title), fontSize = 20.sp)
                 Text(
-                    "Please try again later.",
+                    stringResource(R.string.auth_error_subtitle),
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
                 )
                 Button(onClick = onRetry) {
-                    Text("Retry")
+                    Text(stringResource(R.string.retry))
                 }
             }
 
@@ -79,7 +81,7 @@ private fun AuthGateContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text("Signing you in...")
+                    Text(stringResource(R.string.signing_in))
                     CircularProgressIndicator()
                 }
             }

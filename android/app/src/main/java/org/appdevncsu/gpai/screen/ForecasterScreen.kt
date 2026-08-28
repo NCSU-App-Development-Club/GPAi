@@ -58,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -67,6 +68,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
+import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.activity.scopedKoinViewModel
 import org.appdevncsu.gpai.activity.scopedViewModel
 import org.appdevncsu.gpai.models.Course
@@ -77,7 +79,6 @@ import org.appdevncsu.gpai.ui.theme.BrandPurple
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.appdevncsu.gpai.viewmodel.HomeViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
-import androidx.compose.ui.platform.LocalConfiguration
 
 val gradeOptions =
     listOf(
@@ -133,6 +134,9 @@ fun ForecasterScreen(navController: NavHostController) {
     var isSaving by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
+    val changesSavedMessage = stringResource(R.string.changes_saved)
+    val changesFailedMessage = stringResource(R.string.changes_failed)
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -240,8 +244,8 @@ fun ForecasterScreen(navController: NavHostController) {
         if (courseToDelete != null) {
             AlertDialog(
                 onDismissRequest = { courseToDelete = null },
-                title = { Text("Confirm Deletion") },
-                text = { Text("Are you sure you want to delete this course: ${courseToDelete!!.course.courseName}?") },
+                title = { Text(stringResource(R.string.confirm_deletion)) },
+                text = { Text(stringResource(R.string.delete_course_confirm, courseToDelete!!.course.courseName)) },
                 confirmButton = {
                     Button(
                         onClick = {
@@ -255,12 +259,12 @@ fun ForecasterScreen(navController: NavHostController) {
                         },
                         colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple)
                     ) {
-                        Text("Delete")
+                        Text(stringResource(R.string.delete))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { courseToDelete = null }) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
                 }
             )
@@ -273,10 +277,10 @@ fun ForecasterScreen(navController: NavHostController) {
                         isSaving = true
                         try {
                             viewModel.updateTranscript(tempTranscript)
-                            snackbarHostState.showSnackbar("Changes saved successfully!")
+                            snackbarHostState.showSnackbar(changesSavedMessage)
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            snackbarHostState.showSnackbar("Failed to save changes. Please try again.")
+                            snackbarHostState.showSnackbar(changesFailedMessage)
                         } finally {
                             isSaving = false
                         }
@@ -296,7 +300,7 @@ fun ForecasterScreen(navController: NavHostController) {
                 } else {
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Save Changes",
+                        contentDescription = stringResource(R.string.save_changes),
                         tint = MaterialTheme.colorScheme.onPrimary
                     )
                 }
@@ -312,8 +316,6 @@ fun ForecasterScreen(navController: NavHostController) {
 
 @Composable
 fun GPAHeader(gpa: Double) {
-    val locale = LocalConfiguration.current.locales.get(0)
-
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -328,7 +330,7 @@ fun GPAHeader(gpa: Double) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Cumulative GPA: ${String.format(locale, "%.2f", gpa)}",
+                text = stringResource(R.string.cumulative_gpa, gpa),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onPrimary
@@ -371,14 +373,13 @@ fun TermSection(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = term.name + if (isCurrentSemester) " (Current)" else "",
+                    text = term.name + if (isCurrentSemester) stringResource(R.string.current_semester_suffix) else "",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (isCurrentSemester) BrandPurple else MaterialTheme.colorScheme.onSurface
                 )
-                val locale = LocalConfiguration.current.locales.get(0)
                 Text(
-                    text = "Semester GPA: ${String.format(locale, "%.2f", term.displayGpa)}",
+                    text = stringResource(R.string.semester_gpa, term.displayGpa),
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Medium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -388,7 +389,7 @@ fun TermSection(
             IconButton(onClick = { viewModel.toggleExpanded(term.id) }) {
                 Icon(
                     imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
-                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    contentDescription = if (isExpanded) stringResource(R.string.collapse) else stringResource(R.string.expand),
                     tint = BrandPurple
                 )
             }
@@ -425,10 +426,10 @@ fun TermSection(
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Add Course"
+                    contentDescription = stringResource(R.string.add_course)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(text = "Add Course")
+                Text(text = stringResource(R.string.add_course))
             }
         }
     }
@@ -457,7 +458,7 @@ fun CourseItem(
                 fontWeight = FontWeight.Medium
             )
             Text(
-                text = "${course.attempted} credits",
+                text = stringResource(R.string.credits_format, course.attempted),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -519,7 +520,7 @@ fun CourseItem(
         IconButton(onClick = onEdit) {
             Icon(
                 imageVector = Icons.Outlined.Edit,
-                contentDescription = "Edit Course",
+                contentDescription = stringResource(R.string.edit_course),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(20.dp)
             )
@@ -528,7 +529,7 @@ fun CourseItem(
         IconButton(onClick = onDelete) {
             Icon(
                 imageVector = Icons.Outlined.Delete,
-                contentDescription = "Delete Course",
+                contentDescription = stringResource(R.string.delete_course),
                 tint = MaterialTheme.colorScheme.error,
                 modifier = Modifier.size(20.dp)
             )
@@ -562,7 +563,7 @@ fun CourseDialog(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = if (dialogState.isEditing) "Edit Course" else "Add Course",
+                    text = if (dialogState.isEditing) stringResource(R.string.edit_course) else stringResource(R.string.add_course),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -571,14 +572,14 @@ fun CourseDialog(
                 TextField(
                     value = courseCode,
                     onValueChange = { courseCode = it },
-                    label = { Text("Course Code") },
+                    label = { Text(stringResource(R.string.course_code_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 TextField(
                     value = courseName,
                     onValueChange = { courseName = it },
-                    label = { Text("Course Name") },
+                    label = { Text(stringResource(R.string.course_name_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -589,7 +590,7 @@ fun CourseDialog(
                             creditHours = it
                         }
                     },
-                    label = { Text("Credit Hours") },
+                    label = { Text(stringResource(R.string.credit_hours_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -601,7 +602,7 @@ fun CourseDialog(
                         value = selectedGrade,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Grade") },
+                        label = { Text(stringResource(R.string.grade_label)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -631,7 +632,7 @@ fun CourseDialog(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -656,7 +657,7 @@ fun CourseDialog(
                         colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
                         enabled = courseName.isNotBlank() && creditHours.isNotBlank()
                     ) {
-                        Text("Save")
+                        Text(stringResource(R.string.save))
                     }
                 }
             }
@@ -694,7 +695,7 @@ fun CourseDialogWithTermSelection(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Text(
-                    text = if (dialogState.isEditing) "Edit Course" else "Add Course",
+                    text = if (dialogState.isEditing) stringResource(R.string.edit_course) else stringResource(R.string.add_course),
                     fontSize = 20.sp,
                     fontWeight = FontWeight.Bold,
                     modifier = Modifier.padding(bottom = 8.dp)
@@ -707,10 +708,10 @@ fun CourseDialogWithTermSelection(
                     TextField(
                         value = if (dialogState.availableTerms.isNotEmpty() && selectedTermIndex < dialogState.availableTerms.size)
                             dialogState.availableTerms[selectedTermIndex].name
-                        else "Select Term",
+                        else stringResource(R.string.select_term),
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Term") },
+                        label = { Text(stringResource(R.string.term_label)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = termExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -736,14 +737,14 @@ fun CourseDialogWithTermSelection(
                 TextField(
                     value = courseCode,
                     onValueChange = { courseCode = it },
-                    label = { Text("Course Code") },
+                    label = { Text(stringResource(R.string.course_code_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
                 TextField(
                     value = courseName,
                     onValueChange = { courseName = it },
-                    label = { Text("Course Name") },
+                    label = { Text(stringResource(R.string.course_name_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -754,7 +755,7 @@ fun CourseDialogWithTermSelection(
                             creditHours = it
                         }
                     },
-                    label = { Text("Credit Hours") },
+                    label = { Text(stringResource(R.string.credit_hours_label)) },
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -766,7 +767,7 @@ fun CourseDialogWithTermSelection(
                         value = selectedGrade,
                         onValueChange = {},
                         readOnly = true,
-                        label = { Text("Grade") },
+                        label = { Text(stringResource(R.string.grade_label)) },
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = gradeExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
@@ -796,7 +797,7 @@ fun CourseDialogWithTermSelection(
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                        Text(stringResource(R.string.cancel))
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
@@ -822,7 +823,7 @@ fun CourseDialogWithTermSelection(
                         colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
                         enabled = courseName.isNotBlank() && creditHours.isNotBlank() && dialogState.availableTerms.isNotEmpty()
                     ) {
-                        Text("Save")
+                        Text(stringResource(R.string.save))
                     }
                 }
             }

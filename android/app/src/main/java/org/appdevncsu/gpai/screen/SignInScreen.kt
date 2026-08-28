@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -33,6 +34,7 @@ import androidx.navigation.NavHostController
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.activity.scopedKoinViewModel
 import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
@@ -98,9 +100,9 @@ fun SignInScreen(navController: NavHostController, modifier: Modifier = Modifier
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             if (ncsuDomainRequired) {
-                Text("Invalid Account Type", fontSize = 24.sp)
+                Text(stringResource(R.string.invalid_account_type), fontSize = 24.sp)
                 Text(
-                    "Sign in with your @ncsu.edu Google account",
+                    stringResource(R.string.invalid_account_hint),
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
                 )
@@ -109,12 +111,12 @@ fun SignInScreen(navController: NavHostController, modifier: Modifier = Modifier
                     ncsuDomainRequired = false
                     key++
                 }) {
-                    Text("Retry")
+                    Text(stringResource(R.string.retry))
                 }
             } else if (noCredentials) {
-                Text("No Account Found", fontSize = 24.sp)
+                Text(stringResource(R.string.no_account_found), fontSize = 24.sp)
                 Text(
-                    "No Google account was found on this device. Add a Google account in your device settings, then try again.",
+                    stringResource(R.string.no_account_hint),
                     fontSize = 14.sp,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
@@ -123,12 +125,12 @@ fun SignInScreen(navController: NavHostController, modifier: Modifier = Modifier
                     noCredentials = false
                     key++
                 }) {
-                    Text("Retry")
+                    Text(stringResource(R.string.retry))
                 }
             } else {
-                Text("Sign in to GPAi", fontSize = 24.sp)
+                Text(stringResource(R.string.sign_in_title), fontSize = 24.sp)
                 Text(
-                    "with your NC State Google account",
+                    stringResource(R.string.sign_in_subtitle),
                     fontSize = 14.sp,
                     modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
                 )
@@ -136,7 +138,7 @@ fun SignInScreen(navController: NavHostController, modifier: Modifier = Modifier
                     // Make the LaunchedEffect run again
                     key++
                 }) {
-                    Text("Sign In")
+                    Text(stringResource(R.string.sign_in))
                 }
             }
         }

@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
@@ -118,7 +119,7 @@ private fun AdvisorChatContent(
                 )
                 if (canRetry) {
                     TextButton(onClick = onRetry) {
-                        Text("Retry")
+                        Text(stringResource(R.string.retry))
                     }
                 }
             }
@@ -151,13 +152,13 @@ fun ChatInput(
         AlertDialog(
             onDismissRequest = { speechRecognitionError = false },
             title = {
-                Text("Speech Recognition Failed")
+                Text(stringResource(R.string.speech_recognition_failed))
             },
             text = {
-                Text("Your device does not support speech recognition natively. You may be able to use dictation through your keyboard app for a similar experience.")
+                Text(stringResource(R.string.speech_recognition_error))
             },
             confirmButton = {
-                TextButton(onClick = { speechRecognitionError = false }) { Text("Dismiss") }
+                TextButton(onClick = { speechRecognitionError = false }) { Text(stringResource(R.string.dismiss)) }
             })
     }
 
@@ -168,7 +169,7 @@ fun ChatInput(
 
     TextField(
         value = input,
-        placeholder = { Text("Ask for advice") },
+        placeholder = { Text(stringResource(R.string.ask_for_advice)) },
         onValueChange = { newValue -> input = newValue },
         trailingIcon = {
             if (isLoading) {
@@ -182,7 +183,7 @@ fun ChatInput(
             ) {
                 Icon(
                     painter = painterResource(R.drawable.microphone),
-                    "Microphone",
+                    stringResource(R.string.microphone),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.clickable {
                         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
@@ -201,7 +202,7 @@ fun ChatInput(
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Send,
                     tint = if (input.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
-                    contentDescription = "Send",
+                    contentDescription = stringResource(R.string.send),
                     modifier = Modifier.then(
                         if (input.isNotBlank()) Modifier.clickable {
                             sendText(input)

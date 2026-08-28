@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Refresh
@@ -30,13 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
 import org.appdevncsu.gpai.ui.theme.BrandPurple
 
@@ -50,7 +50,7 @@ fun GPAiAppBar(navController: NavHostController) {
     TopAppBar(
         title = {
             Text(
-                text = "GPAi",
+                text = stringResource(R.string.app_name),
                 fontWeight = FontWeight.Black,
                 fontSize = 40.sp,
                 textAlign = TextAlign.Center
@@ -65,7 +65,7 @@ fun GPAiAppBar(navController: NavHostController) {
             ) {
                 Icon(
                     imageVector = Icons.Default.Refresh,
-                    contentDescription = "Upload New Transcript",
+                    contentDescription = stringResource(R.string.upload_new_transcript),
                 )
             }
         },
@@ -120,7 +120,7 @@ fun HomeViewToggle(
 
         Row(modifier = Modifier.fillMaxSize()) {
             ToggleButton(
-                text = "Forecaster",
+                text = stringResource(R.string.forecaster_tab),
                 modifier = commonModifier
                     .weight(1f)
                     .testTag("forecaster"),
@@ -133,7 +133,7 @@ fun HomeViewToggle(
                 }
             )
             ToggleButton(
-                text = "Advisor",
+                text = stringResource(R.string.advisor_tab),
                 modifier = commonModifier
                     .weight(1f)
                     .testTag("advisor"),

@@ -1,4 +1,71 @@
 <resources>
     <string name="app_name">GPAi</string>
     <string name="title_activity_home">HomeActivity</string>
+
+    <!-- Intro Screen -->
+    <string name="intro_headline">Get quick academic advice with GPAi.</string>
+    <string name="intro_description">Upload your transcript and ask any question you can think of relating to your academic goals!</string>
+    <string name="get_started">Get Started</string>
+    <string name="logo_description">Logo</string>
+
+    <!-- Upload Screen -->
+    <string name="upload_transcript_prompt">Please upload your transcript</string>
+    <string name="upload_transcript_idle">Click here to upload your transcript</string>
+    <string name="upload_transcript_parsing">Reading transcript…</string>
+    <string name="upload_transcript_success">Click here to upload a different transcript</string>
+    <string name="upload_transcript_error">Couldn\'t parse transcript, please try again</string>
+    <string name="next">Next</string>
+
+    <!-- Home Screen -->
+    <string name="forecaster_tab">Forecaster</string>
+    <string name="advisor_tab">Advisor</string>
+    <string name="upload_new_transcript">Upload New Transcript</string>
+
+    <!-- Forecaster Screen -->
+    <string name="cumulative_gpa">Cumulative GPA: %1$.2f</string>
+    <string name="semester_gpa">Semester GPA: %1$.2f</string>
+    <string name="current_semester_suffix"> (Current)</string>
+    <string name="add_course">Add Course</string>
+    <string name="edit_course">Edit Course</string>
+    <string name="delete_course">Delete Course</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="confirm_deletion">Confirm Deletion</string>
+    <string name="delete_course_confirm">Are you sure you want to delete this course: %1$s?</string>
+    <string name="delete">Delete</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="credits_format">%1$d credits</string>
+    <string name="course_code_label">Course Code</string>
+    <string name="course_name_label">Course Name</string>
+    <string name="credit_hours_label">Credit Hours</string>
+    <string name="grade_label">Grade</string>
+    <string name="term_label">Term</string>
+    <string name="select_term">Select Term</string>
+    <string name="changes_saved">Changes saved successfully!</string>
+    <string name="changes_failed">Failed to save changes. Please try again.</string>
+    <string name="expand">Expand</string>
+    <string name="collapse">Collapse</string>
+
+    <!-- Advisor Screen -->
+    <string name="ask_for_advice">Ask for advice</string>
+    <string name="send">Send</string>
+    <string name="microphone">Microphone</string>
+    <string name="retry">Retry</string>
+    <string name="speech_recognition_failed">Speech Recognition Failed</string>
+    <string name="speech_recognition_error">Your device does not support speech recognition natively. You may be able to use dictation through your keyboard app for a similar experience.</string>
+    <string name="dismiss">Dismiss</string>
+
+    <!-- Auth Gate -->
+    <string name="auth_error_title">There was a problem signing you in</string>
+    <string name="auth_error_subtitle">Please try again later.</string>
+    <string name="signing_in">Signing you in…</string>
+
+    <!-- Sign In Screen -->
+    <string name="sign_in_title">Sign in to GPAi</string>
+    <string name="sign_in_subtitle">with your NC State Google account</string>
+    <string name="sign_in">Sign In</string>
+    <string name="invalid_account_type">Invalid Account Type</string>
+    <string name="invalid_account_hint">Sign in with your @ncsu.edu Google account</string>
+    <string name="no_account_found">No Account Found</string>
+    <string name="no_account_hint">No Google account was found on this device. Add a Google account in your device settings, then try again.</string>
 </resources>

@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,11 +38,11 @@ fun IntroScreen(navController: NavHostController? = null) {
         Spacer(modifier = Modifier.weight(0.4f))
         Image(
             painter = painterResource(id = R.drawable.a_plus_graphic),
-            contentDescription = "Logo"
+            contentDescription = stringResource(R.string.logo_description)
         )
         Spacer(modifier = Modifier.weight(0.4f))
         Text(
-            text = "Get quick academic advice with GPAi.",
+            text = stringResource(R.string.intro_headline),
             fontWeight = FontWeight(weight = 900),
             fontSize = 36.sp,
             textAlign = TextAlign.Center,
@@ -51,7 +52,7 @@ fun IntroScreen(navController: NavHostController? = null) {
         )
         Spacer(modifier = Modifier.height(24.dp))
         Text(
-            text = "Upload your transcript and ask any question you can think of relating to your academic goals!",
+            text = stringResource(R.string.intro_description),
             fontWeight = FontWeight(weight = 500),
             fontSize = 18.sp,
             textAlign = TextAlign.Center
@@ -66,7 +67,7 @@ fun IntroScreen(navController: NavHostController? = null) {
             onClick = { navController?.navigate("upload") }
         ) {
             Text(
-                text = "Get Started",
+                text = stringResource(R.string.get_started),
                 fontSize = 32.sp,
                 fontWeight = FontWeight(weight = 700),
             )

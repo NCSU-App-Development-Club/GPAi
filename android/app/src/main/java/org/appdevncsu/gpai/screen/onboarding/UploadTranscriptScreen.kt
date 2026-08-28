@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -85,7 +86,7 @@ fun UploadTranscriptScreen(navController: NavHostController) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.weight(1f)) // Spacer to add empty space above.
-                Text(text = "Please upload your transcript")
+                Text(text = stringResource(R.string.upload_transcript_prompt))
 
                 // Button to request a file upload from the user.
                 RequestFileButton(
@@ -136,7 +137,7 @@ fun UploadTranscriptScreen(navController: NavHostController) {
                         .fillMaxWidth()
                         .height(75.dp)
                 ) {
-                    Text(text = "Next", fontSize = 40.sp)
+                    Text(text = stringResource(R.string.next), fontSize = 40.sp)
                 }
             }
         }
@@ -187,10 +188,10 @@ fun RequestFileButton(
 
     // Display different button text based on the current upload state.
     val buttonText = when (buttonState.value) {
-        UploadState.IDLE -> "Click here to upload your transcript"
-        UploadState.PARSING -> "Reading transcript..."
-        UploadState.SUCCESS -> "Click here to upload a different transcript"
-        UploadState.ERROR -> "Couldn't parse transcript, please try again"
+        UploadState.IDLE -> stringResource(R.string.upload_transcript_idle)
+        UploadState.PARSING -> stringResource(R.string.upload_transcript_parsing)
+        UploadState.SUCCESS -> stringResource(R.string.upload_transcript_success)
+        UploadState.ERROR -> stringResource(R.string.upload_transcript_error)
     }
 
     // Create the actual upload button.
