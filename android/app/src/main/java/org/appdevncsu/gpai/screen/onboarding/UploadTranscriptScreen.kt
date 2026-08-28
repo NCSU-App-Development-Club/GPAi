@@ -109,8 +109,13 @@ fun UploadTranscriptScreen(navController: NavHostController) {
                                 if (transcript.terms.isEmpty()) {
                                     uploadState.value = UploadState.ERROR
                                 } else {
-                                    uploadState.value = UploadState.SUCCESS
-                                    viewModel.updateTranscript(transcript)
+                                    try {
+                                        viewModel.updateTranscript(transcript)
+                                        uploadState.value = UploadState.SUCCESS
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                        uploadState.value = UploadState.ERROR
+                                    }
                                 }
                             }
                         }

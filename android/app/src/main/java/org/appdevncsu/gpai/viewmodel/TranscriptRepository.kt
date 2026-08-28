@@ -97,11 +97,9 @@ class TranscriptRepository(private val database: AppDatabase) : ViewModel() {
     /**
      * Removes all existing terms and courses and inserts new ones from the provided [transcript].
      */
-    fun updateTranscript(transcript: Transcript) {
-        _transcript.value = transcript // Update the value immediately while we're saving it
-        viewModelScope.launch {
-            database.termCourseDao().writeTranscript(transcript)
-            fetchAllCourses()
-        }
+    suspend fun updateTranscript(transcript: Transcript) {
+        _transcript.value = transcript // Optimistic update so the UI reflects the change immediately
+        database.termCourseDao().writeTranscript(transcript)
+        fetchAllCourses() // Re-sync from the DB
     }
 }
