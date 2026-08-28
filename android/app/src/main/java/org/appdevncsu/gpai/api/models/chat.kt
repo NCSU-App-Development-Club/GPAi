@@ -19,7 +19,6 @@ data class Message(
      * Marks the synthetic transcript/context message. The model sees it as a user message,
      * but it's always hidden in the UI, and it gets updated whenever the transcript changes.
      */
-    @Transient
     val isContext: Boolean = false,
     /**
      * Server-issued HMAC signature for assistant messages. Sent back to the server on subsequent

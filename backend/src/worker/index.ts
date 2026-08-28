@@ -40,6 +40,7 @@ const SYSTEM_PROMPT =
   "Keep discussion focused around school. Avoid inappropriate discussions.";
 
 const MAX_MESSAGES = 100;
+const MAX_LLM_MESSAGES = 20;
 const MAX_MESSAGE_CHARS = 8000;
 const MAX_TOTAL_CHARS = 30000;
 
@@ -51,6 +52,7 @@ const chatRequestSchema = z
           role: z.enum(["user", "assistant"]),
           content: z.string().min(1).max(MAX_MESSAGE_CHARS),
           signature: z.string().optional(),
+          isContext: z.boolean().optional(),
         })
       )
       .min(1)
@@ -177,11 +179,20 @@ app.post(
       baseURL: `https://gateway.ai.cloudflare.com/v1/${cfg.AI_GATEWAY_ACCOUNT_ID}/${cfg.AI_GATEWAY_ID}/compat`,
     });
 
+    // Keep only the most recent messages in the conversation to reduce the number of tokens used
+    // (except for the context message at the beginning; that one is always kept)
+    const contextMsgs = messages.filter((m) => m.isContext);
+    const conversationMsgs = messages.filter((m) => !m.isContext);
+    const trimmed = [
+      ...contextMsgs,
+      ...conversationMsgs.slice(-MAX_LLM_MESSAGES),
+    ];
+
     const response = await openai.chat.completions.create({
       model: cfg.AI_GATEWAY_MODEL,
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        ...messages.map((m) => ({ role: m.role, content: m.content })),
+        ...trimmed.map((m) => ({ role: m.role, content: m.content })),
       ],
     });
 
