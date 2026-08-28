@@ -38,19 +38,29 @@ app.post("/api/sign-in", async (c) => {
   const body = await c.req.json();
   const googleToken = body["googleIdToken"] as string;
 
-  const { payload } = await jwtVerify(googleToken, JWKS, {
-    issuer: "https://accounts.google.com",
-  });
+  if (typeof googleToken !== "string" || googleToken.length === 0) {
+    return c.json({ error: "Bad request" }, 400);
+  }
+
+  let payload;
+  try {
+    const result = await jwtVerify(googleToken, JWKS, {
+      issuer: "https://accounts.google.com",
+    });
+    payload = result.payload;
+  } catch {
+    // Invalid or expired Google ID token — not a server error.
+    return c.json({ error: "Invalid or expired token" }, 401);
+  }
+
+  const azp = payload.azp as string | undefined;
+  const aud = payload.aud as string | undefined;
 
   if (
-    !crypto.timingSafeEqual(
-      Buffer.from(payload.azp as string),
-      Buffer.from(GOOGLE_ANDROID_CLIENT_ID!)
-    ) ||
-    !crypto.timingSafeEqual(
-      Buffer.from(payload.aud as string),
-      Buffer.from(GOOGLE_WEB_CLIENT_ID!)
-    )
+    typeof azp !== "string" ||
+    typeof aud !== "string" ||
+    !safeEqual(azp, GOOGLE_ANDROID_CLIENT_ID!) ||
+    !safeEqual(aud, GOOGLE_WEB_CLIENT_ID!)
   ) {
     return c.json({ error: "Bad request" }, 400);
   }
@@ -111,6 +121,19 @@ app.post(
     return c.json({ message });
   }
 );
+
+/**
+ * Constant-time string comparison that returns `false` when the two values
+ * differ in length (`crypto.timingSafeEqual` throws in that case)
+ */
+function safeEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) {
+    return false;
+  }
+  return crypto.timingSafeEqual(bufA, bufB);
+}
 
 function checkEnvVars() {
   if (
