@@ -13,12 +13,10 @@ import org.appdevncsu.gpai.api.models.SignInRequest
 import org.appdevncsu.gpai.api.repositories.Repository
 import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import org.appdevncsu.gpai.models.User
-import org.appdevncsu.gpai.models.UserDTO
-import org.appdevncsu.gpai.room.AppDatabase
+import org.appdevncsu.gpai.security.CredentialsStore
 import org.koin.java.KoinJavaComponent
-import kotlin.getValue
 
-class AuthViewModel(private val db: AppDatabase) : ViewModel() {
+class AuthViewModel(private val credentialsStore: CredentialsStore) : ViewModel() {
 
     private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(true)
     val loading = _loading.asStateFlow()
@@ -37,14 +35,14 @@ class AuthViewModel(private val db: AppDatabase) : ViewModel() {
     init {
         val getUserJob = viewModelScope.async {
             val user = try {
-                db.userDao().getUser()?.toUser()
+                credentialsStore.user()
             } catch (e: Exception) {
                 _error.value = true
                 e.printStackTrace()
                 null
             }
             _user.value = user
-            if (user != null) {
+            if (!user?.token.isNullOrEmpty()) {
                 AuthorizationInterceptor.setToken(user.token)
             }
         }
@@ -71,7 +69,8 @@ class AuthViewModel(private val db: AppDatabase) : ViewModel() {
         _user.update { user }
         viewModelScope.launch {
             try {
-                db.userDao().setUser(UserDTO.from(user))
+                credentialsStore.save(user)
+                AuthorizationInterceptor.setToken(user.token)
             } catch (e: Exception) {
                 e.printStackTrace()
                 // Revert the change because the update didn't succeed
