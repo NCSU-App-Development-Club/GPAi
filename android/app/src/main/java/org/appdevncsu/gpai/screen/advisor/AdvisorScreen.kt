@@ -202,11 +202,13 @@ fun ChatInput(
                     imageVector = Icons.AutoMirrored.Default.Send,
                     tint = if (input.isBlank()) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.primary,
                     contentDescription = "Send",
-                    modifier = Modifier.clickable {
-                        sendText(input)
-                        input = ""
-                        focusManager.clearFocus()
-                    }
+                    modifier = Modifier.then(
+                        if (input.isNotBlank()) Modifier.clickable {
+                            sendText(input)
+                            input = ""
+                            focusManager.clearFocus()
+                        } else Modifier
+                    )
                 )
             }
         },

@@ -131,6 +131,7 @@ fun UploadTranscriptScreen(navController: NavHostController) {
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+                    enabled = uploadState.value == UploadState.SUCCESS,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(75.dp)
