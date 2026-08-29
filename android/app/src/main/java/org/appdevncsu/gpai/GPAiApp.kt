@@ -16,8 +16,8 @@ import org.appdevncsu.gpai.security.CredentialsStore
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.koin.android.ext.koin.androidContext
-import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import retrofit2.Retrofit

@@ -1,7 +1,5 @@
 <resources>
     <string name="app_name">GPAi</string>
-    <string name="title_activity_home">HomeActivity</string>
-
     <!-- Intro Screen -->
     <string name="intro_headline">Get quick academic advice with GPAi.</string>
     <string name="intro_description">Upload your transcript and ask any question you can think of relating to your academic goals!</string>
@@ -42,7 +40,10 @@
     <string name="delete">Delete</string>
     <string name="cancel">Cancel</string>
     <string name="save">Save</string>
-    <string name="credits_format">%1$d credits</string>
+    <plurals name="credits_format">
+        <item quantity="one">%d credit</item>
+        <item quantity="other">%d credits</item>
+    </plurals>
     <string name="course_code_label">Course Code</string>
     <string name="course_name_label">Course Name</string>
     <string name="credit_hours_label">Credit Hours</string>

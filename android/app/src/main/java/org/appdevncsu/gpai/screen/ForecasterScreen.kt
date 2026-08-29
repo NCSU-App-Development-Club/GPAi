@@ -34,6 +34,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -58,6 +59,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
@@ -80,7 +82,6 @@ import org.appdevncsu.gpai.ui.theme.BrandPurple
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.appdevncsu.gpai.viewmodel.HomeViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
-import androidx.compose.ui.platform.LocalConfiguration
 
 val gradeOptions =
     listOf(
@@ -463,7 +464,7 @@ fun CourseItem(
                 fontWeight = FontWeight.Medium
             )
             Text(
-                text = stringResource(R.string.credits_format, course.attempted),
+                text = pluralStringResource(R.plurals.credits_format, course.attempted, course.attempted),
                 fontSize = 12.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -487,7 +488,7 @@ fun CourseItem(
                     'D' -> Color(0xFFFF9800) // Orange
                     else -> Color(0xFFF44336) // Red for F
                 },
-                modifier = Modifier.menuAnchor()
+                modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
             ) {
                 Text(
                     text = course.grade,
@@ -611,7 +612,7 @@ fun CourseDialog(
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
 
                     ExposedDropdownMenu(
@@ -682,7 +683,7 @@ fun CourseDialogWithTermSelection(
     var courseCode by remember { mutableStateOf(dialogState.course.courseCode) }
     var creditHours by remember { mutableStateOf(dialogState.course.attempted.toString()) }
     var selectedGrade by remember { mutableStateOf(dialogState.course.grade) }
-    var selectedTermIndex by remember { mutableStateOf(initialTermIndex) }
+    var selectedTermIndex by remember { mutableIntStateOf(initialTermIndex) }
 
     var gradeExpanded by remember { mutableStateOf(false) }
     var termExpanded by remember { mutableStateOf(false) }
@@ -720,7 +721,7 @@ fun CourseDialogWithTermSelection(
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = termExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
 
                     ExposedDropdownMenu(

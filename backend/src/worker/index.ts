@@ -71,14 +71,14 @@ const JWKS = createRemoteJWKSet(
 
 const app = new Hono<{ Bindings: Env }>();
 
-app.get("/api/config", async (c) => {
+app.get("/api/config", (c) => {
   c.header("Cache-Control", "max-age=86400"); // Allow this response to be cached for up to a day
   return c.json({ clientId: cfg.GOOGLE_WEB_CLIENT_ID }, 200);
 });
 
 app.post("/api/sign-in", async (c) => {
-  const body = await c.req.json();
-  const googleToken = body["googleIdToken"] as string;
+  const body: { googleIdToken: string } = await c.req.json();
+  const googleToken = body.googleIdToken;
 
   if (typeof googleToken !== "string" || googleToken.length === 0) {
     return c.json({ error: "Bad request" }, 400);
@@ -111,7 +111,8 @@ app.post("/api/sign-in", async (c) => {
 
   if (hd !== cfg.EXPECTED_HD_DOMAIN) {
     return c.json({ error: "Invalid domain" }, 403);
-  } else if (email_verified !== true) {
+  }
+  if (!email_verified) {
     return c.json({ error: "Email not verified" }, 403);
   }
 
@@ -126,14 +127,14 @@ app.post("/api/sign-in", async (c) => {
 
   const sessionID = crypto.randomBytes(64).toString("base64url");
 
-  await createSession(sessionID, parsed.data, cfg.SESSION_TTL);
+  await createSession(sessionID, parsed.data, cfg.SESSION_TTL, c.env);
 
   return c.json({ sessionID }, 200);
 });
 
 app.delete("/api/session", requireAuth, async (c) => {
   const token = c.get("token");
-  await deleteSession(token);
+  await deleteSession(token, c.env);
   return c.json({ ok: true }, 200);
 });
 
@@ -149,7 +150,7 @@ app.post("/api/chat", requireAuth, async (c) => {
   }
 
   // Validate the input
-  const body = await c.req.json();
+  const body: unknown = await c.req.json();
   const parsed = chatRequestSchema.safeParse(body);
   if (!parsed.success) {
     return c.json({ error: "Bad request" }, 400);

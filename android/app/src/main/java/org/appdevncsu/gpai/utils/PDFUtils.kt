@@ -5,13 +5,12 @@ import android.net.Uri
 import org.appdevncsu.gpai.models.Course
 import org.appdevncsu.gpai.models.Term
 import org.appdevncsu.gpai.models.Transcript
-import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import com.tom_roush.pdfbox.text.PDFTextStripper
 import java.io.InputStream
 
 /**
- * Utils class containing pdf parsing and utility functions for the application.
+ * Utils class containing PDF parsing and utility functions for the application.
  */
 class PDFUtils {
     companion object {

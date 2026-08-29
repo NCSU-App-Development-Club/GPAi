@@ -29,7 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -108,13 +108,13 @@ fun HomeViewToggle(
     val offsetX by transition.animateDp(label = "offset animation") { state ->
         when (state) {
             "forecaster" -> 0.dp
-            "advisor" -> (LocalConfiguration.current.screenWidthDp.dp / 2) - 16.dp
+            "advisor" -> (LocalWindowInfo.current.containerDpSize.width / 2) - 16.dp
             else -> 0.dp
         }
     }
 
     val commonModifier = Modifier.fillMaxSize()
-    val boxWidth = LocalConfiguration.current.screenWidthDp.dp / 2 - 16.dp
+    val boxWidth = LocalWindowInfo.current.containerDpSize.width / 2 - 16.dp
 
     Box(
         modifier = modifier

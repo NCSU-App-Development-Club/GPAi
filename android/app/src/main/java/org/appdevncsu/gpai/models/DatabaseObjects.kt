@@ -36,7 +36,7 @@ fun Collection<TermWithCoursesDTO>.toTranscript() = Transcript(map(TermWithCours
         entity = TermDTO::class,
         parentColumns = ["id"],
         childColumns = ["termId"],
-        onDelete = ForeignKey.Companion.CASCADE // When this Course's Term is deleted, delete the Course automatically
+        onDelete = ForeignKey.CASCADE // When this Course's Term is deleted, delete the Course automatically
     )]
 )
 data class CourseDTO(

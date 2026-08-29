@@ -2,6 +2,7 @@ package org.appdevncsu.gpai.security
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import kotlinx.coroutines.Dispatchers
@@ -62,18 +63,17 @@ class CredentialsStore(context: Context) {
     }
 
     suspend fun save(user: User) = withContext(Dispatchers.IO) {
-        prefs.edit().apply {
+        prefs.edit {
             putString(KEY_ID, user.id)
             putString(KEY_NAME, user.name)
             putString(KEY_EMAIL, user.email)
             putString(KEY_PHOTO, user.photoURL)
             putString(KEY_TOKEN, encrypt(user.token))
-            apply()
         }
     }
 
     suspend fun clear() = withContext(Dispatchers.IO) {
-        prefs.edit().clear().apply()
+        prefs.edit { clear() }
     }
 
     companion object {

@@ -197,7 +197,7 @@ fun RequestFileButton(
     // Create the actual upload button.
     Button(
         modifier = modifier
-            .fillMaxWidth() // Make the button fill the width of the screen.
+            .fillMaxWidth() // Make the button fill the screen width.
             .height(300.dp), // Set the height of the button.
         shape = RoundedCornerShape(12), // Make the button corners rounded.
         colors = ButtonDefaults.buttonColors(

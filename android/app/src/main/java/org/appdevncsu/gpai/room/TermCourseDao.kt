@@ -60,9 +60,9 @@ interface TermCourseDao {
     suspend fun writeTranscript(transcript: Transcript) {
         truncate() // Clear ALL terms and courses
         transcript.terms.forEach { term ->
-            val termId = insertTerm(TermDTO.Companion.from(term)).toInt()
+            val termId = insertTerm(TermDTO.from(term)).toInt()
             term.courses.forEach { course ->
-                insertCourse(CourseDTO.Companion.from(course, termId))
+                insertCourse(CourseDTO.from(course, termId))
             }
         }
     }

@@ -78,7 +78,7 @@ class TranscriptRepository(private val database: AppDatabase) : ViewModel() {
 
         // Update in the DB
         viewModelScope.launch {
-            database.termCourseDao().insertCourse(CourseDTO.Companion.from(course, termId))
+            database.termCourseDao().insertCourse(CourseDTO.from(course, termId))
             fetchAllCourses() // Refresh the courses list to keep in sync
         }
     }

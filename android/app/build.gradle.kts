@@ -19,12 +19,12 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "org.appdevncsu.gpai"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "org.appdevncsu.gpai"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         versionCode = 1
         versionName = "1.0"
 
@@ -115,10 +115,10 @@ dependencies {
     debugImplementation(libs.androidx.ui.test.manifest)
 
     // Mockito
-    testImplementation("org.mockito:mockito-core:5.23.0")
-    testImplementation("org.mockito.kotlin:mockito-kotlin:6.3.0")
-    testImplementation("androidx.arch.core:core-testing:2.2.0")
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.androidx.core.testing)
+    testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(kotlin("test"))
 
     // Sign in with Google

@@ -146,8 +146,7 @@ fun SignInScreen(navController: NavHostController, modifier: Modifier = Modifier
 }
 
 private suspend fun handleSignIn(result: GetCredentialResponse, viewModel: AuthViewModel) {
-    val credential = result.credential
-    when (credential) {
+    when (val credential = result.credential) {
         is CustomCredential -> {
             if (credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
                 try {
