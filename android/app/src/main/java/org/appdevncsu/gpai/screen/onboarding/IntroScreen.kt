@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,7 +24,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import org.appdevncsu.gpai.R
-import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 
 @Composable
@@ -63,7 +63,7 @@ fun IntroScreen(navController: NavHostController? = null) {
             modifier = Modifier
                 .fillMaxWidth()
                 .height(74.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
             onClick = { navController?.navigate("upload") }
         ) {
             Text(

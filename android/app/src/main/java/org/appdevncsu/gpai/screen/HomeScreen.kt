@@ -45,8 +45,6 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import org.appdevncsu.gpai.R
-import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
-import org.appdevncsu.gpai.ui.theme.BrandPurple
 
 /**
  * A composable function that manages the navigation between different screens (Forecaster and Advisor)
@@ -121,7 +119,7 @@ fun HomeViewToggle(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(BrandDarkPurple)
+            .background(MaterialTheme.colorScheme.secondary)
             .height(75.dp)
     ) {
         Box(
@@ -129,7 +127,7 @@ fun HomeViewToggle(
             modifier = Modifier
                 .offset(x = offsetX)
                 .clip(RoundedCornerShape(12.dp))
-                .background(BrandPurple)
+                .background(MaterialTheme.colorScheme.primary)
                 .fillMaxHeight()
                 .width(boxWidth)
         ) {}

@@ -48,6 +48,7 @@ import org.appdevncsu.gpai.screen.ProfileScreen
 import org.appdevncsu.gpai.screen.advisor.AdvisorScreen
 import org.appdevncsu.gpai.screen.onboarding.IntroScreen
 import org.appdevncsu.gpai.screen.onboarding.UploadTranscriptScreen
+import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.koin.androidx.compose.koinViewModel
@@ -69,7 +70,8 @@ class HomeActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge() // Enables edge-to-edge mode for better UI experience on modern devices
         setContent {
-            val navController = rememberNavController()
+            GPAiTheme {
+                val navController = rememberNavController()
 
             val currentBackStackEntry = navController.currentBackStackEntryFlow.collectAsState(null)
             val currentRoute = currentBackStackEntry.value?.destination?.route
@@ -124,6 +126,7 @@ class HomeActivity : ComponentActivity() {
                         Spacer(modifier = Modifier.padding(bottom = 16.dp)) // Adds space below the toggle
                     }
                 }
+            }
             }
         }
     }

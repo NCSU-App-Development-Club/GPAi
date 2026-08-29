@@ -77,8 +77,6 @@ import org.appdevncsu.gpai.activity.scopedViewModel
 import org.appdevncsu.gpai.models.Course
 import org.appdevncsu.gpai.models.Term
 import org.appdevncsu.gpai.models.Transcript
-import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
-import org.appdevncsu.gpai.ui.theme.BrandPurple
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.appdevncsu.gpai.viewmodel.HomeViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
@@ -260,7 +258,7 @@ fun ForecasterScreen(navController: NavHostController) {
                             )
                             courseToDelete = null
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple)
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                     ) {
                         Text(stringResource(R.string.delete))
                     }
@@ -292,7 +290,7 @@ fun ForecasterScreen(navController: NavHostController) {
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(16.dp),
-                containerColor = BrandPurple
+                containerColor = MaterialTheme.colorScheme.primary
             ) {
                 if (isSaving) {
                     CircularProgressIndicator(
@@ -328,7 +326,7 @@ fun GPAHeader(gpa: Double) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(BrandPurple)
+                .background(MaterialTheme.colorScheme.primary)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -381,7 +379,7 @@ fun TermSection(
                     text = term.name + if (isCurrentSemester) " " + stringResource(R.string.current_semester_suffix) else "",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
-                    color = if (isCurrentSemester) BrandPurple else MaterialTheme.colorScheme.onSurface,
+                    color = if (isCurrentSemester) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
                     maxLines = 1
                 )
                 Text(
@@ -396,7 +394,7 @@ fun TermSection(
                 Icon(
                     imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = if (isExpanded) stringResource(R.string.collapse) else stringResource(R.string.expand),
-                    tint = BrandPurple
+                    tint = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -427,7 +425,7 @@ fun TermSection(
             Spacer(modifier = Modifier.height(12.dp))
             Button(
                 onClick = onAddCourse,
-                colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Icon(
@@ -660,7 +658,7 @@ fun CourseDialog(
                                 onConfirm(updatedCourse)
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                         enabled = courseName.isNotBlank() && creditHours.isNotBlank()
                     ) {
                         Text(stringResource(R.string.save))
@@ -826,7 +824,7 @@ fun CourseDialogWithTermSelection(
                                 onConfirm(termId, newCourse)
                             }
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                         enabled = courseName.isNotBlank() && creditHours.isNotBlank() && dialogState.availableTerms.isNotEmpty()
                     ) {
                         Text(stringResource(R.string.save))

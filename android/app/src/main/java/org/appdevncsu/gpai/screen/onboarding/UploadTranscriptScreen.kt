@@ -38,10 +38,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.appdevncsu.gpai.R
-import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
-import org.appdevncsu.gpai.ui.theme.BrandFailureRed
-import org.appdevncsu.gpai.ui.theme.BrandPurple
-import org.appdevncsu.gpai.ui.theme.BrandSuccessGreen
+import org.appdevncsu.gpai.ui.theme.LocalExtraColors
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
 import org.appdevncsu.gpai.utils.PDFUtils
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
@@ -131,7 +128,7 @@ fun UploadTranscriptScreen(navController: NavHostController) {
                             popUpTo("intro") { inclusive = true }
                         }
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = BrandDarkPurple),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                     enabled = uploadState.value == UploadState.SUCCESS,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -168,15 +165,15 @@ fun RequestFileButton(
 
     // Change the button's color based on the current state.
     val buttonColor = when (buttonState.value) {
-        UploadState.IDLE, UploadState.PARSING -> BrandPurple
-        UploadState.SUCCESS -> BrandSuccessGreen
-        UploadState.ERROR -> BrandFailureRed
+        UploadState.IDLE, UploadState.PARSING -> MaterialTheme.colorScheme.primary
+        UploadState.SUCCESS -> LocalExtraColors.current.success
+        UploadState.ERROR -> MaterialTheme.colorScheme.error
     }
 
     val buttonTextColor = when (buttonState.value) {
         UploadState.IDLE, UploadState.PARSING -> MaterialTheme.colorScheme.onPrimary
         UploadState.SUCCESS -> MaterialTheme.colorScheme.onSurface
-        UploadState.ERROR -> MaterialTheme.colorScheme.onSurface
+        UploadState.ERROR -> MaterialTheme.colorScheme.onError
     }
 
     // Set different icons for each state.
