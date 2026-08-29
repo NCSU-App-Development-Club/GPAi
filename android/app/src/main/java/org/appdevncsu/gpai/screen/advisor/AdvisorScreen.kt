@@ -62,6 +62,11 @@ private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
 
     val transcriptViewModel: TranscriptRepository = scopedKoinViewModel(navController)
     val transcript by transcriptViewModel.transcript.collectAsState()
+    val messages by viewModel.messages.collectAsState()
+    val error by viewModel.error.collectAsState()
+    val pendingRetry by viewModel.pendingRetry.collectAsState()
+    val canRetry = pendingRetry != null
+    val isLoading by viewModel.loading.collectAsState()
 
     LaunchedEffect(transcript) {
         if (transcript == null || transcript?.terms?.isEmpty() == true) {
@@ -81,17 +86,25 @@ private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
         """.trimIndent())
     }
 
-    AdvisorChatContent(viewModel = viewModel)
+    AdvisorChatContent(
+        messages = messages,
+        error = error,
+        canRetry = canRetry,
+        isLoading = isLoading,
+        onRetry = { viewModel.retry() },
+        onSendQuestion = { viewModel.askQuestion(it) }
+    )
 }
 
 @Composable
 private fun AdvisorChatContent(
-    viewModel: HomeViewModel,
-    modifier: Modifier = Modifier,
-    messages: List<Message> = viewModel.messages.collectAsState().value,
-    error: String? = viewModel.error.collectAsState().value,
-    canRetry: Boolean = viewModel.pendingRetry.collectAsState().value != null,
-    onRetry: () -> Unit = { viewModel.retry() }
+    messages: List<Message>,
+    error: String?,
+    canRetry: Boolean,
+    isLoading: Boolean,
+    onRetry: () -> Unit,
+    onSendQuestion: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
 
     Column(
@@ -124,15 +137,15 @@ private fun AdvisorChatContent(
                 }
             }
         }
-        ChatInput(viewModel, sendText = { question -> viewModel.askQuestion(question) })
+        ChatInput(isLoading = isLoading, onSend = onSendQuestion)
     }
 }
 
 @Composable
 fun ChatInput(
-    viewModel: HomeViewModel,
-    modifier: Modifier = Modifier,
-    sendText: (String) -> Unit = {}
+    isLoading: Boolean,
+    onSend: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     var input by remember { mutableStateOf("") }
 
@@ -164,8 +177,6 @@ fun ChatInput(
 
     val focusManager =
         LocalFocusManager.current // Used to unfocus the text field after pressing send
-
-    val isLoading by viewModel.loading.collectAsState()
 
     TextField(
         value = input,
@@ -205,7 +216,7 @@ fun ChatInput(
                     contentDescription = stringResource(R.string.send),
                     modifier = Modifier.then(
                         if (input.isNotBlank()) Modifier.clickable {
-                            sendText(input)
+                            onSend(input)
                             input = ""
                             focusManager.clearFocus()
                         } else Modifier
@@ -239,8 +250,12 @@ private val previewMessages = listOf(
 fun AdvisorPreview() {
     GPAiTheme {
         AdvisorChatContent(
-            viewModel = remember { HomeViewModel() },
-            messages = previewMessages
+            messages = previewMessages,
+            error = null,
+            canRetry = false,
+            isLoading = false,
+            onRetry = {},
+            onSendQuestion = {}
         )
     }
 }
@@ -250,11 +265,12 @@ fun AdvisorPreview() {
 fun AdvisorErrorPreview() {
     GPAiTheme {
         AdvisorChatContent(
-            viewModel = remember { HomeViewModel() },
             messages = previewMessages,
             error = "Something went wrong while getting a response. Please try again.",
             canRetry = true,
-            onRetry = {}
+            isLoading = false,
+            onRetry = {},
+            onSendQuestion = {}
         )
     }
 }

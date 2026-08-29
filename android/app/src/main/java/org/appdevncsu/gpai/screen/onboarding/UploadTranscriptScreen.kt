@@ -33,7 +33,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,68 +67,85 @@ fun UploadTranscriptScreen(navController: NavHostController) {
 
     // Apply the custom theme to the UI.
     val context = LocalContext.current
+    UploadTranscriptContent(
+        uploadState = uploadState.value,
+        onFileSelected = { fileUri ->
+            uploadState.value = UploadState.PARSING
+            coroutineScope.launch {
+                val pdfText = withContext(Dispatchers.IO) {
+                    PDFUtils.readTextFromPdf(context, fileUri)
+                }
+
+                if (pdfText == null) {
+                    uploadState.value = UploadState.ERROR
+                } else {
+                    val transcript = withContext(Dispatchers.IO) {
+                        PDFUtils.parseTranscript(pdfText)
+                    }
+
+                    if (transcript.terms.isEmpty()) {
+                        uploadState.value = UploadState.ERROR
+                    } else {
+                        try {
+                            viewModel.updateTranscript(transcript)
+                            uploadState.value = UploadState.SUCCESS
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                            uploadState.value = UploadState.ERROR
+                        }
+                    }
+                }
+            }
+        },
+        onNextClick = {
+            // Enter the main nav graph and pop the onboarding screens off
+            // the back stack so that the back gesture exits the app instead
+            // of going back to the last onboarding screen.
+            navController.navigate("home_graph") {
+                popUpTo("intro") { inclusive = true }
+            }
+        }
+    )
+}
+
+@Composable
+fun UploadTranscriptContent(
+    uploadState: UploadState,
+    onFileSelected: (Uri) -> Unit,
+    onNextClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val buttonState = remember { mutableStateOf(uploadState) }
+    buttonState.value = uploadState
+
     GPAiTheme {
         Column(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(16.dp)
                 .testTag("upload_screen"),
-            verticalArrangement = Arrangement.Center, // Center content vertically.
-            horizontalAlignment = Alignment.CenterHorizontally // Center content horizontally.
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Column(
-                modifier = Modifier.weight(1f), // Weighting the column to fill remaining space.
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.weight(1f)) // Spacer to add empty space above.
                 Text(text = stringResource(R.string.upload_transcript_prompt))
 
-                // Button to request a file upload from the user.
                 RequestFileButton(
                     modifier = Modifier
-                        .padding(vertical = 16.dp), // Add padding around the button.
-                    buttonState = uploadState,
-                    onFileSelected = { fileUri ->
-                        uploadState.value = UploadState.PARSING
-                        coroutineScope.launch {
-                            val pdfText = withContext(Dispatchers.IO) {
-                                PDFUtils.readTextFromPdf(context, fileUri)
-                            }
-
-                            if (pdfText == null) {
-                                uploadState.value = UploadState.ERROR
-                            } else {
-                                val transcript = withContext(Dispatchers.IO) {
-                                    PDFUtils.parseTranscript(pdfText)
-                                }
-
-                                if (transcript.terms.isEmpty()) {
-                                    uploadState.value = UploadState.ERROR
-                                } else {
-                                    try {
-                                        viewModel.updateTranscript(transcript)
-                                        uploadState.value = UploadState.SUCCESS
-                                    } catch (e: Exception) {
-                                        e.printStackTrace()
-                                        uploadState.value = UploadState.ERROR
-                                    }
-                                }
-                            }
-                        }
-                    })
+                        .padding(vertical = 16.dp),
+                    buttonState = buttonState,
+                    onFileSelected = onFileSelected
+                )
 
                 Button(
-                    onClick = {
-                        // Enter the main nav graph and pop the onboarding screens off
-                        // the back stack so that the back gesture exits the app instead
-                        // of going back to the last onboarding screen.
-                        navController.navigate("home_graph") {
-                            popUpTo("intro") { inclusive = true }
-                        }
-                    },
+                    onClick = onNextClick,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-                    enabled = uploadState.value == UploadState.SUCCESS,
+                    enabled = uploadState == UploadState.SUCCESS,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(75.dp)
@@ -224,7 +240,10 @@ fun RequestFileButton(
 @Composable
 fun UploadTranscriptPreview() {
     GPAiTheme {
-        val navController = rememberNavController()
-        UploadTranscriptScreen(navController = navController)
+        UploadTranscriptContent(
+            uploadState = UploadState.IDLE,
+            onFileSelected = {},
+            onNextClick = {}
+        )
     }
 }

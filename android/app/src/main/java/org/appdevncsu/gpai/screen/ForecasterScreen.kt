@@ -69,7 +69,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.launch
 import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.activity.scopedKoinViewModel
@@ -109,29 +108,40 @@ fun ForecasterScreen(navController: NavHostController) {
     val homeViewModel: HomeViewModel = scopedViewModel(navController)
     val viewModel: TranscriptRepository = scopedKoinViewModel(navController)
     val transcript = viewModel.transcript.collectAsState()
+    val expandedTerms by homeViewModel.expandedTerms.collectAsState()
 
-    var tempTranscript by remember {
-        mutableStateOf(
-            transcript.value ?: Transcript(
-                emptyList()
-            )
-        )
-    }
+    ForecasterContent(
+        transcript = transcript.value ?: Transcript(emptyList()),
+        expandedTerms = expandedTerms,
+        onToggleExpanded = { homeViewModel.toggleExpanded(it) },
+        onSaveChanges = { viewModel.updateTranscript(it) },
+        onExpandTerm = { homeViewModel.expand(it) }
+    )
+}
 
-    LaunchedEffect(transcript.value) {
-        if (transcript.value != null) {
-            tempTranscript = transcript.value!!
-        }
+@Composable
+fun ForecasterContent(
+    transcript: Transcript,
+    expandedTerms: Set<Int>,
+    onToggleExpanded: (Int) -> Unit,
+    onSaveChanges: suspend (Transcript) -> Unit,
+    onExpandTerm: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var tempTranscript by remember { mutableStateOf(transcript) }
+
+    LaunchedEffect(transcript) {
+        tempTranscript = transcript
     }
 
     LaunchedEffect(tempTranscript.terms.isNotEmpty()) {
-        tempTranscript.terms.lastOrNull()?.let { homeViewModel.expand(it.id) }
+        tempTranscript.terms.lastOrNull()?.let { onExpandTerm(it.id) }
     }
     var editingCourse by remember { mutableStateOf<CourseEditState?>(null) }
     var courseToDelete by remember { mutableStateOf<CourseDeleteState?>(null) }
     var showAddCourseDialog by remember { mutableStateOf(false) }
     var addingToTermIndex by remember { mutableIntStateOf(0) }
-    val hasUnsavedChanges = tempTranscript != transcript.value
+    val hasUnsavedChanges = tempTranscript != transcript
     var isSaving by remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
@@ -139,7 +149,7 @@ fun ForecasterScreen(navController: NavHostController) {
     val changesFailedMessage = stringResource(R.string.changes_failed)
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
@@ -153,7 +163,8 @@ fun ForecasterScreen(navController: NavHostController) {
             ) {
                 itemsIndexed(tempTranscript.terms) { termIndex, term ->
                     TermSection(
-                        viewModel = homeViewModel,
+                        isExpanded = expandedTerms.contains(term.id),
+                        onToggleExpanded = { onToggleExpanded(term.id) },
                         term = term,
                         isCurrentSemester = termIndex == tempTranscript.terms.size - 1,
                         onUpdateTerm = { newTerm ->
@@ -277,7 +288,7 @@ fun ForecasterScreen(navController: NavHostController) {
                     coroutineScope.launch {
                         isSaving = true
                         try {
-                            viewModel.updateTranscript(tempTranscript)
+                            onSaveChanges(tempTranscript)
                             snackbarHostState.showSnackbar(changesSavedMessage)
                         } catch (e: Exception) {
                             e.printStackTrace()
@@ -344,7 +355,8 @@ fun GPAHeader(gpa: Double) {
 
 @Composable
 fun TermSection(
-    viewModel: HomeViewModel,
+    isExpanded: Boolean,
+    onToggleExpanded: () -> Unit,
     term: Term,
     isCurrentSemester: Boolean,
     onUpdateTerm: (Term) -> Unit,
@@ -352,8 +364,6 @@ fun TermSection(
     onDeleteCourse: (Course) -> Unit,
     onAddCourse: () -> Unit
 ) {
-    val isExpanded = viewModel.expandedTerms.collectAsState().value.contains(term.id)
-
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -370,7 +380,7 @@ fun TermSection(
             modifier = Modifier
                 .fillMaxWidth()
                 .semantics(mergeDescendants = true) {}
-                .clickable { viewModel.toggleExpanded(term.id) },
+                .clickable { onToggleExpanded() },
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -390,7 +400,7 @@ fun TermSection(
                 )
             }
 
-            IconButton(onClick = { viewModel.toggleExpanded(term.id) }) {
+            IconButton(onClick = onToggleExpanded) {
                 Icon(
                     imageVector = if (isExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                     contentDescription = if (isExpanded) stringResource(R.string.collapse) else stringResource(R.string.expand),
@@ -775,7 +785,7 @@ fun CourseDialogWithTermSelection(
                         trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = gradeExpanded) },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .menuAnchor()
+                            .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                     )
 
                     ExposedDropdownMenu(
@@ -874,8 +884,30 @@ data class CourseDialogState(
 @Preview(showBackground = true)
 @Composable
 fun ForecasterPreview() {
-    val navController = rememberNavController()
+    val sampleTranscript = Transcript(
+        terms = listOf(
+            Term(
+                name = "Fall 2024",
+                courses = listOf(
+                    Course(courseCode = "CSC 316", courseName = "Data Structures", attempted = 3, earned = 3, points = 12.0, grade = "A"),
+                    Course(courseCode = "CSC 236", courseName = "Discrete Math", attempted = 3, earned = 3, points = 10.0, grade = "B+")
+                )
+            ),
+            Term(
+                name = "Spring 2025",
+                courses = listOf(
+                    Course(courseCode = "CSC 326", courseName = "Software Engineering", attempted = 3, earned = 3, points = 13.0, grade = "A+")
+                )
+            )
+        )
+    )
     GPAiTheme {
-        ForecasterScreen(navController)
+        ForecasterContent(
+            transcript = sampleTranscript,
+            expandedTerms = setOf(sampleTranscript.terms.last().id),
+            onToggleExpanded = {},
+            onSaveChanges = {},
+            onExpandTerm = {}
+        )
     }
 }
