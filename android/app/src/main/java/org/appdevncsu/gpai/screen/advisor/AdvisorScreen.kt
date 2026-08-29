@@ -92,7 +92,8 @@ private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
         canRetry = canRetry,
         isLoading = isLoading,
         onRetry = { viewModel.retry() },
-        onSendQuestion = { viewModel.askQuestion(it) }
+        onSendQuestion = { viewModel.askQuestion(it) },
+        onClearMessages = { viewModel.clearMessages() }
     )
 }
 
@@ -104,8 +105,31 @@ private fun AdvisorChatContent(
     isLoading: Boolean,
     onRetry: () -> Unit,
     onSendQuestion: (String) -> Unit,
+    onClearMessages: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showClearDialog by remember { mutableStateOf(false) }
+
+    if (showClearDialog) {
+        AlertDialog(
+            onDismissRequest = { showClearDialog = false },
+            title = { Text(stringResource(R.string.clear_conversation)) },
+            text = { Text(stringResource(R.string.clear_conversation_confirm)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showClearDialog = false
+                    onClearMessages()
+                }) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showClearDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
+    }
 
     Column(
         modifier = modifier
@@ -113,11 +137,13 @@ private fun AdvisorChatContent(
             .padding(16.dp)
             .testTag("advisor_screen"),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Bottom
     ) {
+        val visibleMessages = messages.filter { it.role != "system" && !it.isContext }
         AdvisorChatHistory(
-            messages.filter { it.role != "system" && !it.isContext },
-            Modifier.weight(0.9f)
+            messages = visibleMessages,
+            modifier = Modifier.weight(1f),
+            showClearButton = visibleMessages.any { it.role == "assistant" },
+            onClearConversation = { showClearDialog = true },
         )
         if (error != null) {
             Column(
@@ -255,7 +281,8 @@ fun AdvisorPreview() {
             canRetry = false,
             isLoading = false,
             onRetry = {},
-            onSendQuestion = {}
+            onSendQuestion = {},
+            onClearMessages = {},
         )
     }
 }
@@ -270,7 +297,8 @@ fun AdvisorErrorPreview() {
             canRetry = true,
             isLoading = false,
             onRetry = {},
-            onSendQuestion = {}
+            onSendQuestion = {},
+            onClearMessages = {}
         )
     }
 }

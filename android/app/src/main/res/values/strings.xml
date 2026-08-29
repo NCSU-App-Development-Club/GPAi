@@ -60,6 +60,8 @@
     <string name="send">Send</string>
     <string name="microphone">Microphone</string>
     <string name="retry">Retry</string>
+    <string name="clear_conversation">Clear conversation</string>
+    <string name="clear_conversation_confirm">Are you sure you want to clear the conversation? This cannot be undone.</string>
     <string name="speech_recognition_failed">Speech Recognition Failed</string>
     <string name="speech_recognition_error">Your device does not support speech recognition natively. You may be able to use dictation through your keyboard app for a similar experience.</string>
     <string name="dismiss">Dismiss</string>

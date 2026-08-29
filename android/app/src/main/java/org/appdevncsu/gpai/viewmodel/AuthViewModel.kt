@@ -11,15 +11,15 @@ import kotlinx.coroutines.launch
 import org.appdevncsu.gpai.api.AuthorizationInterceptor
 import org.appdevncsu.gpai.api.models.SignInRequest
 import org.appdevncsu.gpai.api.repositories.Repository
-import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import org.appdevncsu.gpai.models.User
 import org.appdevncsu.gpai.security.CredentialsStore
-import org.koin.java.KoinJavaComponent
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
 class AuthViewModel(
     private val credentialsStore: CredentialsStore,
     private val interceptor: AuthorizationInterceptor,
-) : ViewModel() {
+) : ViewModel(), KoinComponent {
 
     private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(true)
     val loading = _loading.asStateFlow()
@@ -33,7 +33,7 @@ class AuthViewModel(
     private val _clientId: MutableStateFlow<String?> = MutableStateFlow(null)
     val clientId = _clientId.asStateFlow()
 
-    private val repository: Repository by KoinJavaComponent.inject(RepositoryImpl::class.java)
+    private val repository: Repository by inject()
 
     init {
         load()

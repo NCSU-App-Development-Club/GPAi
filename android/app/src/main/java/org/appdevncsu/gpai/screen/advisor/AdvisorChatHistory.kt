@@ -12,16 +12,24 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.api.models.Message
 
 @Composable
-fun AdvisorChatHistory(messages: List<Message>, modifier: Modifier = Modifier) {
+fun AdvisorChatHistory(
+    messages: List<Message>,
+    modifier: Modifier = Modifier,
+    showClearButton: Boolean = false,
+    onClearConversation: () -> Unit = {},
+) {
     val listState = rememberLazyListState()
 
     LaunchedEffect(messages.size) {
@@ -39,6 +47,13 @@ fun AdvisorChatHistory(messages: List<Message>, modifier: Modifier = Modifier) {
         ) {
             items(messages) { message ->
                 ChatBubble(message = message)
+            }
+            if (showClearButton) {
+                item {
+                    TextButton(onClick = onClearConversation) {
+                        Text(stringResource(R.string.clear_conversation))
+                    }
+                }
             }
         }
     }

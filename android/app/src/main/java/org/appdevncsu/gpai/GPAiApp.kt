@@ -14,6 +14,7 @@ import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import org.appdevncsu.gpai.room.AppDatabase
 import org.appdevncsu.gpai.security.CredentialsStore
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
+import org.appdevncsu.gpai.viewmodel.ChatRepository
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
@@ -59,8 +60,10 @@ class GPAiApp : Application(), SingletonImageLoader.Factory {
                     val api: Api = get()
                     RepositoryImpl(api = api)
                 } bind Repository::class
+                single { AppDatabase.getDatabase(androidContext()) }
+                single { ChatRepository(get()) }
                 viewModel {
-                    TranscriptRepository(AppDatabase.getDatabase(androidContext()))
+                    TranscriptRepository(get())
                 }
                 single { CredentialsStore(androidContext()) }
                 viewModel {

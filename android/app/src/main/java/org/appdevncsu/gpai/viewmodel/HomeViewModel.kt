@@ -9,12 +9,13 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.appdevncsu.gpai.api.models.Message
 import org.appdevncsu.gpai.api.repositories.Repository
-import org.appdevncsu.gpai.api.repositories.RepositoryImpl
-import org.koin.java.KoinJavaComponent
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel : ViewModel(), KoinComponent {
 
-    private val repository: Repository by KoinJavaComponent.inject(RepositoryImpl::class.java)
+    private val repository: Repository by inject()
+    private val chatRepository: ChatRepository by inject()
 
     private val _messages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
     val messages = _messages.asStateFlow()
@@ -34,6 +35,19 @@ class HomeViewModel : ViewModel() {
      * A list of term IDs that have been expanded in the UI. All other terms should appear collapsed.
      */
     val expandedTerms = _expandedTerms.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            try {
+                val saved = chatRepository.loadMessages()
+                if (saved.isNotEmpty()) {
+                    _messages.value = saved
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 
     fun askQuestion(question: String) {
         _error.update { null }
@@ -61,6 +75,7 @@ class HomeViewModel : ViewModel() {
                     _error.update { "Something went wrong while getting a response. Please try again." }
                     _pendingRetry.update { question }
                 }
+                persistMessages()
             }
         }
     }
@@ -91,6 +106,14 @@ class HomeViewModel : ViewModel() {
             val withoutOldContext = list.filter { !it.isContext }
             listOf(contextMessage) + withoutOldContext
         }
+        persistMessages()
+    }
+
+    fun clearMessages() {
+        _messages.update { emptyList() }
+        _error.update { null }
+        _pendingRetry.update { null }
+        persistMessages()
     }
 
     fun expand(termId: Int) {
@@ -103,6 +126,16 @@ class HomeViewModel : ViewModel() {
                 it - termId
             } else {
                 it + termId
+            }
+        }
+    }
+
+    private fun persistMessages() {
+        viewModelScope.launch {
+            try {
+                chatRepository.saveMessages(_messages.value)
+            } catch (e: Exception) {
+                e.printStackTrace()
             }
         }
     }

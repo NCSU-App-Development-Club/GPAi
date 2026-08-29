@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import org.appdevncsu.gpai.api.models.Message
 
 @Entity(tableName = "terms")
 data class TermDTO(
@@ -62,6 +63,37 @@ data class CourseDTO(
             course.earned,
             course.points,
             course.grade
+        )
+    }
+}
+
+@Entity(tableName = "chat_messages")
+data class ChatMessageEntity(
+    @PrimaryKey
+    val id: String,
+    val role: String,
+    val content: String,
+    val isContext: Boolean = false,
+    val signature: String? = null,
+    /** Ordering column so messages are restored in the correct sequence. */
+    val position: Int = 0,
+) {
+    fun toMessage() = Message(
+        id = id,
+        role = role,
+        content = content,
+        isContext = isContext,
+        signature = signature,
+    )
+
+    companion object {
+        fun from(message: Message, position: Int) = ChatMessageEntity(
+            id = message.id,
+            role = message.role,
+            content = message.content,
+            isContext = message.isContext,
+            signature = message.signature,
+            position = position,
         )
     }
 }
