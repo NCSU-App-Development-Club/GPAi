@@ -142,7 +142,7 @@ app.post("/api/chat", requireAuth, async (c) => {
   const userId = c.get("userId");
 
   // Rate limiting
-  const rl = await checkChatRateLimit(userId);
+  const rl = await checkChatRateLimit(userId, c.env);
   if (!rl.allowed) {
     return c.json({ error: rl.error }, 429, {
       "Retry-After": String(rl.retryAfter ?? 60),

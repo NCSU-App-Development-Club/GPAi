@@ -1,5 +1,3 @@
-import { env } from "cloudflare:workers";
-
 const DAILY_LIMIT = 100;
 
 function dayKey(userId: string): string {
@@ -13,16 +11,16 @@ function endOfDayEpoch(): number {
   return Math.floor(d.getTime() / 1000);
 }
 
-async function getDailyCount(userId: string): Promise<number> {
+async function getDailyCount(userId: string, env: Env): Promise<number> {
   const value = await env.KV.get(dayKey(userId));
   return value ? parseInt(value, 10) || 0 : 0;
 }
 
-async function incDaily(userId: string): Promise<void> {
+async function incDaily(userId: string, env: Env): Promise<void> {
   const key = dayKey(userId);
   const now = Math.floor(Date.now() / 1000);
   const ttl = Math.max(60, endOfDayEpoch() - now);
-  const current = await getDailyCount(userId);
+  const current = await getDailyCount(userId, env);
   await env.KV.put(key, String(current + 1), { expirationTtl: ttl });
 }
 
@@ -38,24 +36,24 @@ export interface RateLimitResult {
  *  - a per-minute limit via the native Cloudflare Rate Limit binding (RATE_LIMITER_MIN), which is
  *    far cheaper and more accurate than a KV read/write on every request.
  */
-export async function checkChatRateLimit(userId: string): Promise<RateLimitResult> {
-  const dailyCount = await getDailyCount(userId);
+export async function checkChatRateLimit(userId: string, env: Env): Promise<RateLimitResult> {
+  const dailyCount = await getDailyCount(userId, env);
   if (dailyCount >= DAILY_LIMIT) {
     const retryAfter = Math.max(1, endOfDayEpoch() - Math.floor(Date.now() / 1000));
     return { allowed: false, retryAfter, error: "Daily request limit exceeded" };
   }
 
-  const minute = (await env.RATE_LIMITER_MIN.limit({
+  const minute = await env.RATE_LIMITER_MIN.limit({
     key: userId,
-  })) as { success: boolean; reset?: number };
+  });
   if (!minute.success) {
     return {
       allowed: false,
-      retryAfter: Math.max(1, (minute.reset ?? 0) - Math.floor(Date.now() / 1000)),
+      retryAfter: 60,
       error: "Rate limit exceeded",
     };
   }
 
-  await incDaily(userId);
+  await incDaily(userId, env);
   return { allowed: true };
 }
