@@ -7,7 +7,7 @@
     <string name="logo_description">Logo</string>
 
     <!-- Upload Screen -->
-    <string name="upload_transcript_prompt">Please upload your transcript</string>
+    <string name="upload_transcript_prompt">Upload your transcript</string>
     <string name="upload_transcript_idle">Click here to upload your transcript</string>
     <string name="upload_transcript_parsing">Reading transcript…</string>
     <string name="upload_transcript_success">Click here to upload a different transcript</string>

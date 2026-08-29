@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -132,8 +133,13 @@ fun UploadTranscriptContent(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.weight(1f)) // Spacer to add empty space above.
-                Text(text = stringResource(R.string.upload_transcript_prompt))
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = stringResource(R.string.upload_transcript_prompt),
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(24.dp))
 
                 RequestFileButton(
                     modifier = Modifier
@@ -142,6 +148,7 @@ fun UploadTranscriptContent(
                     onFileSelected = onFileSelected
                 )
 
+                Spacer(modifier = Modifier.weight(1f))
                 Button(
                     onClick = onNextClick,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
@@ -242,6 +249,42 @@ fun UploadTranscriptPreview() {
     GPAiTheme {
         UploadTranscriptContent(
             uploadState = UploadState.IDLE,
+            onFileSelected = {},
+            onNextClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun SuccessPreview() {
+    GPAiTheme {
+        UploadTranscriptContent(
+            uploadState = UploadState.SUCCESS,
+            onFileSelected = {},
+            onNextClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun FailurePreview() {
+    GPAiTheme {
+        UploadTranscriptContent(
+            uploadState = UploadState.ERROR,
+            onFileSelected = {},
+            onNextClick = {}
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ParsingPreview() {
+    GPAiTheme {
+        UploadTranscriptContent(
+            uploadState = UploadState.PARSING,
             onFileSelected = {},
             onNextClick = {}
         )
