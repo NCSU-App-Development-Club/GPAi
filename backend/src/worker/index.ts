@@ -59,7 +59,7 @@ const chatRequestSchema = z
     const total = val.messages.reduce((n, m) => n + m.content.length, 0);
     if (total > MAX_TOTAL_CHARS) {
       ctx.addIssue({
-        code: z.ZodIssueCode.custom,
+        code: "custom",
         message: "Request too long",
       });
     }

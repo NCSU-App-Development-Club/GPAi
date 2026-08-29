@@ -6,7 +6,7 @@ export const googlePayloadSchema = z.object({
   azp: z.string().min(1),
   aud: z.string().min(1),
   hd: z.string().min(1),
-  email_verified: z.literal(true).transform(() => true as boolean),
+  email_verified: z.literal(true).transform(() => true),
 });
 
 export const sessionDataSchema = z.object({
