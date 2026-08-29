@@ -16,6 +16,10 @@ class AuthorizationInterceptor : Interceptor {
         token = newToken
     }
 
+    fun clearToken() {
+        token = null
+    }
+
     override fun intercept(chain: Interceptor.Chain): Response {
         return if (token != null) {
             chain.proceed(

@@ -67,4 +67,17 @@ class RepositoryImpl(private val api: Api) : Repository {
             return Result.failure(e)
         }
     }
+
+    override suspend fun signOut(): Result<Unit> {
+        try {
+            val response = api.deleteSession()
+            return if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(RuntimeException(response.errorBody()?.string().toString()))
+            }
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
+    }
 }

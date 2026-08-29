@@ -7,6 +7,7 @@ import org.appdevncsu.gpai.api.models.SignInRequest
 import org.appdevncsu.gpai.api.models.SignInResponse
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Headers
 import retrofit2.http.POST
@@ -28,5 +29,8 @@ interface Api {
     @GET("/api/config")
     @Headers("Content-Type: application/json")
     suspend fun getConfig(): Response<GetConfigResponse>
+
+    @DELETE("/api/session")
+    suspend fun deleteSession(): Response<Unit>
 
 }

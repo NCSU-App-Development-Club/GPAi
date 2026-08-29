@@ -1,6 +1,10 @@
 package org.appdevncsu.gpai
 
 import android.app.Application
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import coil3.request.crossfade
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import okhttp3.OkHttpClient
 import org.appdevncsu.gpai.api.Api
@@ -19,7 +23,13 @@ import org.koin.dsl.module
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
-class GPAiApp : Application() {
+class GPAiApp : Application(), SingletonImageLoader.Factory {
+
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
+        return ImageLoader.Builder(context)
+            .crossfade(true)
+            .build()
+    }
 
     override fun onCreate() {
         super.onCreate()

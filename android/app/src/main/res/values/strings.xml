@@ -20,6 +20,14 @@
     <string name="forecaster_tab">Forecaster</string>
     <string name="advisor_tab">Advisor</string>
     <string name="upload_new_transcript">Upload New Transcript</string>
+    <string name="sign_out">Sign Out</string>
+
+    <!-- Profile Screen -->
+    <string name="profile">Profile</string>
+    <string name="profile_picture">Profile picture</string>
+    <string name="back">Back</string>
+    <string name="signed_out">You are signed out</string>
+    <string name="sign_in_to_chat">Sign in to access chat features.</string>
 
     <!-- Forecaster Screen -->
     <string name="cumulative_gpa">Cumulative GPA: %1$.2f</string>

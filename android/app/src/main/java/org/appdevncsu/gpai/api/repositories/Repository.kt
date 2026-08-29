@@ -22,4 +22,10 @@ interface Repository {
      * Gets configuration needed to send Google authorization requests (the Client ID)
      */
     suspend fun getConfig(): Result<GetConfigResponse>
+
+    /**
+     * Revokes the current server-side session. The local credentials must be
+     * cleared separately by the caller.
+     */
+    suspend fun signOut(): Result<Unit>
 }

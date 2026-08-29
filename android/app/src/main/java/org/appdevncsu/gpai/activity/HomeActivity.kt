@@ -13,15 +13,26 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -29,12 +40,15 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.screen.ForecasterScreen
 import org.appdevncsu.gpai.screen.GPAiAppBar
 import org.appdevncsu.gpai.screen.HomeViewToggle
+import org.appdevncsu.gpai.screen.ProfileScreen
 import org.appdevncsu.gpai.screen.advisor.AdvisorScreen
 import org.appdevncsu.gpai.screen.onboarding.IntroScreen
 import org.appdevncsu.gpai.screen.onboarding.UploadTranscriptScreen
+import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.koin.androidx.compose.koinViewModel
 
@@ -64,7 +78,28 @@ class HomeActivity : ComponentActivity() {
             Scaffold(
                 modifier = Modifier.fillMaxSize(), topBar = {
                     if (isHomeScreen) {
-                        GPAiAppBar(navController)
+                        val authViewModel: AuthViewModel = scopedKoinViewModel(navController)
+                        val user by authViewModel.user.collectAsState()
+                        GPAiAppBar(navController, photoURL = user?.photoURL)
+                    } else if (currentRoute == "profile") {
+                        TopAppBar(
+                            title = {
+                                Text(
+                                    text = stringResource(R.string.profile),
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 24.sp
+                                )
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = { navController.popBackStack() }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = stringResource(R.string.back),
+                                    )
+                                }
+                            },
+                            modifier = Modifier.height(104.dp)
+                        )
                     }
                 }
             ) { innerPadding ->
@@ -130,25 +165,41 @@ fun AppContainer(navController: NavHostController, modifier: Modifier = Modifier
         }
 
         navigation(startDestination = "forecaster", route = "home_graph") {
-            // Forecaster screen with slide-in/out animations
             composable(
                 "forecaster",
-                enterTransition = { slideInHorizontally(initialOffsetX = { -2000 }) + fadeIn() },
-                exitTransition = { slideOutHorizontally(targetOffsetX = { 2000 }) + fadeOut() },
-                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
-                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-                ForecasterScreen(navController) // Displays the Forecaster screen
+                enterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() }) {
+                ForecasterScreen(navController)
             }
 
-            // Advisor screen with slide-in/out animations
             composable(
                 "advisor",
-                enterTransition = { slideInHorizontally(initialOffsetX = { 2000 }) + fadeIn() },
-                exitTransition = { slideOutHorizontally(targetOffsetX = { -2000 }) + fadeOut() },
-                popEnterTransition = { slideInHorizontally(initialOffsetX = { -1000 }) + fadeIn() },
-                popExitTransition = { slideOutHorizontally(targetOffsetX = { 1000 }) + fadeOut() }) {
-                AdvisorScreen(navController) // Displays the Advisor screen
+                enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
+                exitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() },
+                popEnterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
+                popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }) {
+                AdvisorScreen(navController)
             }
+        }
+
+        composable(
+            "profile",
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }) + fadeIn() },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { -it }) + fadeOut() },
+            popEnterTransition = { slideInHorizontally(initialOffsetX = { -it }) + fadeIn() },
+            popExitTransition = { slideOutHorizontally(targetOffsetX = { it }) + fadeOut() }) {
+            val authViewModel: AuthViewModel = scopedKoinViewModel(navController)
+            val user by authViewModel.user.collectAsState()
+            ProfileScreen(
+                navController = navController,
+                userName = user?.name.orEmpty(),
+                userEmail = user?.email.orEmpty(),
+                photoURL = user?.photoURL,
+                isSignedIn = user != null,
+                onSignOut = { authViewModel.signOut() },
+            )
         }
     }
 }

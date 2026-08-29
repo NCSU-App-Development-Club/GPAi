@@ -97,7 +97,7 @@ class AuthViewModel(
         val idToken =
             credential.idToken // The token we need to send to the server to verify the user account
         val name = credential.displayName // The user's full name
-        val photoURL = credential.profilePictureUri?.toString().orEmpty()
+        val photoURL = credential.profilePictureUri?.toString()
 
         val signInResponse = repository.signIn(SignInRequest(idToken))
         if (signInResponse.isSuccess) {
@@ -117,5 +117,14 @@ class AuthViewModel(
 
     fun setError(error: Boolean) {
         _error.value = error
+    }
+
+    fun signOut() {
+        _user.value = null
+        viewModelScope.launch {
+            repository.signOut()
+            interceptor.clearToken()
+            credentialsStore.clear()
+        }
     }
 }

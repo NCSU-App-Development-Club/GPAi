@@ -22,6 +22,8 @@ navigationRuntimeKtx = "2.9.8"
 navigationCompose = "2.9.8"
 retrofit = "3.0.0"
 room = "2.8.4"
+coil = "3.2.0"
+coilNetworkOkhttp = "3.2.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -54,6 +56,8 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 androidx-room-common-jvm = { group = "androidx.room", name = "room-common-jvm", version.ref = "room" }
 androidx-room-runtime-android = { group = "androidx.room", name = "room-runtime-android", version.ref = "room" }
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+coil-compose = { module = "io.coil-kt.coil3:coil-compose", version.ref = "coil" }
+coil-network-okhttp = { module = "io.coil-kt.coil3:coil-network-okhttp", version.ref = "coilNetworkOkhttp" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

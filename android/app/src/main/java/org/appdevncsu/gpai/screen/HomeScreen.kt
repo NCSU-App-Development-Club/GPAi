@@ -12,13 +12,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -27,6 +27,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -41,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import coil3.compose.AsyncImage
 import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.ui.theme.BrandDarkPurple
 import org.appdevncsu.gpai.ui.theme.BrandPurple
@@ -51,7 +54,7 @@ import org.appdevncsu.gpai.ui.theme.BrandPurple
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun GPAiAppBar(navController: NavHostController) {
+fun GPAiAppBar(navController: NavHostController, photoURL: String? = null) {
     TopAppBar(
         title = {
             Text(
@@ -63,15 +66,22 @@ fun GPAiAppBar(navController: NavHostController) {
             )
         },
         actions = {
-            IconButton(
-                onClick = {
-                    // Send the user back to the onboarding screen
-                    navController.navigate("intro")
-                }
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .padding(end = 8.dp)
+                    .size(36.dp)
+                    .clip(CircleShape)
+                    .clickable { navController.navigate("profile") }
             ) {
-                Icon(
-                    imageVector = Icons.Default.Refresh,
-                    contentDescription = stringResource(R.string.upload_new_transcript),
+                AsyncImage(
+                    model = photoURL,
+                    contentDescription = stringResource(R.string.profile),
+                    contentScale = ContentScale.Crop,
+                    error = rememberVectorPainter(Icons.Default.Person),
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
                 )
             }
         },
