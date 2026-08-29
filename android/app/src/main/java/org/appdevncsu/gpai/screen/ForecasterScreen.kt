@@ -377,7 +377,7 @@ fun TermSection(
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = term.name + if (isCurrentSemester) stringResource(R.string.current_semester_suffix) else "",
+                    text = term.name + if (isCurrentSemester) " " + stringResource(R.string.current_semester_suffix) else "",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.Bold,
                     color = if (isCurrentSemester) BrandPurple else MaterialTheme.colorScheme.onSurface,

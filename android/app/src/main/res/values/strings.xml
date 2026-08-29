@@ -32,7 +32,7 @@
     <!-- Forecaster Screen -->
     <string name="cumulative_gpa">Cumulative GPA: %1$.2f</string>
     <string name="semester_gpa">Semester GPA: %1$.2f</string>
-    <string name="current_semester_suffix"> (Current)</string>
+    <string name="current_semester_suffix">(Current)</string>
     <string name="add_course">Add Course</string>
     <string name="edit_course">Edit Course</string>
     <string name="delete_course">Delete Course</string>
