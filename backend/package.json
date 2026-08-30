@@ -19,9 +19,9 @@
     "wrangler": "^4.127.1"
   },
   "scripts": {
-    "build": "tsc --noEmit && vite build",
+    "build": "tsc --noEmit",
     "cf-typegen": "wrangler types",
-    "check": "tsc --noEmit && vite build && wrangler deploy --dry-run",
+    "check": "tsc --noEmit && wrangler deploy --dry-run",
     "deploy": "wrangler deploy",
     "dev": "vite",
     "lint": "eslint .",

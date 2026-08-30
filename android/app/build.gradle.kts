@@ -30,7 +30,7 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-        buildConfigField("String", "BASE_URL", "\"https://gpai-backend.ncsuappdevelopmentclub.workers.dev/\"")
+        buildConfigField("String", "BASE_URL", "\"https://gpai.appdevncsu.org/\"")
     }
 
     signingConfigs {
@@ -60,12 +60,12 @@ android {
 
     buildTypes {
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://gpai-backend.ncsuappdevelopmentclub.workers.dev/\"")
+            buildConfigField("String", "BASE_URL", "\"https://gpai.appdevncsu.org/\"")
         }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            buildConfigField("String", "BASE_URL", "\"https://gpai-backend.ncsuappdevelopmentclub.workers.dev/\"")
+            buildConfigField("String", "BASE_URL", "\"https://gpai.appdevncsu.org/\"")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
