@@ -65,6 +65,16 @@
     <string name="speech_recognition_failed">Speech Recognition Failed</string>
     <string name="speech_recognition_error">Your device does not support speech recognition natively. You may be able to use dictation through your keyboard app for a similar experience.</string>
     <string name="dismiss">Dismiss</string>
+    <string name="report_message">Report</string>
+    <string name="report_message_description">Report this response</string>
+    <string name="report_reason_title">Why are you reporting this?</string>
+    <string name="report_reason_inaccurate">Inaccurate information</string>
+    <string name="report_reason_offensive">Offensive or inappropriate content</string>
+    <string name="report_reason_misleading">Misleading guidance</string>
+    <string name="report_reason_other">Other</string>
+    <string name="report_submitted">Thank you for your report</string>
+    <string name="report_failed">Failed to submit report. Please try again.</string>
+    <string name="report_already_flagged">Reported</string>
 
     <!-- Auth Gate -->
     <string name="auth_error_title">There was a problem signing you in</string>

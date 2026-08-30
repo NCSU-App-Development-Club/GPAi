@@ -66,6 +66,21 @@ To prevent abuse, we track the number of chat requests you make per day and per 
 This uses only your opaque Google user identifier and the current timestamp — no message
 content or personal information is stored for rate limiting.
 
+### Content Reports
+
+You may flag an AI-generated response as offensive, inaccurate, or misleading using the
+in-app report feature. When you submit a report, the following data is stored on our servers
+for up to 90 days:
+
+- The flagged message content
+- Your name, email address, and Google user identifier
+- The reason you selected for the report
+- A timestamp of when the report was submitted
+
+Reports are reviewed by the GPAi development team to improve AI safety and content quality.
+Flagged message content is not shared with third parties except as necessary for review by
+the development team.
+
 ## 2. How We Use Your Data
 
 We use your data for the following purposes only:
@@ -76,6 +91,8 @@ We use your data for the following purposes only:
 - **GPA Calculation** — computing your GPA from parsed transcript data entirely on your
   device.
 - **Abuse Prevention** — rate limiting to protect the service from excessive usage.
+- **Content Safety** — storing content reports to review and improve AI response quality
+  and safety.
 
 ## 3. Third-Party Services
 
@@ -103,6 +120,9 @@ We do not use any analytics, advertising, crash reporting, or telemetry services
 - **Server-side sessions** store your name, email, and Google user ID in Cloudflare Workers
   KV. Sessions are automatically deleted after 30 days. You can also sign out at any time,
   which immediately deletes your session from our servers.
+- **Content reports** are stored in Cloudflare Workers KV for up to 90 days. Reports include
+  the flagged message content, your name, email, Google user ID, and the report reason.
+  Reports are automatically deleted after 90 days.
 - **Chat messages and transcript data** are stored locally on your device. They are not
   retained on our servers after your session ends. However, messages sent to the AI advisor
   are processed by Google Gemini under their free-tier terms, meaning Google may retain

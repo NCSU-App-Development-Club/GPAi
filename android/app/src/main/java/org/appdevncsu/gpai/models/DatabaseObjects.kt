@@ -77,6 +77,7 @@ data class ChatMessageEntity(
     val signature: String? = null,
     /** Ordering column so messages are restored in the correct sequence. */
     val position: Int = 0,
+    val isFlagged: Boolean = false,
 ) {
     fun toMessage() = Message(
         id = id,
@@ -84,6 +85,7 @@ data class ChatMessageEntity(
         content = content,
         isContext = isContext,
         signature = signature,
+        isFlagged = isFlagged,
     )
 
     companion object {
@@ -94,6 +96,7 @@ data class ChatMessageEntity(
             isContext = message.isContext,
             signature = message.signature,
             position = position,
+            isFlagged = message.isFlagged,
         )
     }
 }

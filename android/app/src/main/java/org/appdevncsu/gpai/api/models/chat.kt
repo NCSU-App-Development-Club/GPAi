@@ -25,10 +25,18 @@ data class Message(
      * requests so it can verify the assistant message was not tampered with locally. `null` for
      * user messages.
      */
-    val signature: String? = null
+    val signature: String? = null,
+    val isFlagged: Boolean = false,
 )
 
 data class Answer(
     val message: String,
     val signature: String? = null
+)
+
+data class FlagRequest(
+    val messageId: String,
+    val content: String,
+    val signature: String,
+    val reason: String,
 )

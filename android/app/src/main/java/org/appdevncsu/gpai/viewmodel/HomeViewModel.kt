@@ -3,8 +3,10 @@ package org.appdevncsu.gpai.viewmodel
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.appdevncsu.gpai.api.models.Message
@@ -35,6 +37,9 @@ class HomeViewModel : ViewModel(), KoinComponent {
      * A list of term IDs that have been expanded in the UI. All other terms should appear collapsed.
      */
     val expandedTerms = _expandedTerms.asStateFlow()
+
+    private val _flagResult = Channel<Boolean>(Channel.BUFFERED)
+    val flagResult = _flagResult.receiveAsFlow()
 
     init {
         viewModelScope.launch {
@@ -126,6 +131,36 @@ class HomeViewModel : ViewModel(), KoinComponent {
                 it - termId
             } else {
                 it + termId
+            }
+        }
+    }
+
+    fun flagMessage(messageId: String, reason: String) {
+        val message = _messages.value.find { it.id == messageId } ?: return
+        if (message.isFlagged) return
+
+        _messages.update { list ->
+            list.map {
+                if (it.id == messageId) it.copy(isFlagged = true)
+                else it
+            }
+        }
+        persistMessages()
+
+        viewModelScope.launch {
+            val result = repository.flagMessage(message, reason)
+            if (result.isSuccess) {
+                _flagResult.send(true)
+            } else {
+                Log.e("HomeViewModel", "flagMessage failed", result.exceptionOrNull())
+                _messages.update { list ->
+                    list.map {
+                        if (it.id == messageId) it.copy(isFlagged = false)
+                        else it
+                    }
+                }
+                persistMessages()
+                _flagResult.send(false)
             }
         }
     }

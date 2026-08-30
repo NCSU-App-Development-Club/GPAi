@@ -1,6 +1,7 @@
 package org.appdevncsu.gpai.api
 
 import org.appdevncsu.gpai.api.models.Answer
+import org.appdevncsu.gpai.api.models.FlagRequest
 import org.appdevncsu.gpai.api.models.GetConfigResponse
 import org.appdevncsu.gpai.api.models.Question
 import org.appdevncsu.gpai.api.models.SignInRequest
@@ -32,5 +33,11 @@ interface Api {
 
     @DELETE("/api/session")
     suspend fun deleteSession(): Response<Unit>
+
+    @POST("/api/flag")
+    @Headers("Content-Type: application/json")
+    suspend fun flagMessage(
+        @Body request: FlagRequest
+    ): Response<Unit>
 
 }

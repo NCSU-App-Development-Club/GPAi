@@ -15,10 +15,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.api.models.Message
@@ -29,13 +33,25 @@ fun AdvisorChatHistory(
     modifier: Modifier = Modifier,
     showClearButton: Boolean = false,
     onClearConversation: () -> Unit = {},
+    onFlagMessage: (messageId: String, reason: String) -> Unit = { _, _ -> },
 ) {
     val listState = rememberLazyListState()
+    var flagTargetMessage by remember { mutableStateOf<Message?>(null) }
 
     LaunchedEffect(messages.size) {
         if (messages.isNotEmpty()) {
             listState.animateScrollToItem(messages.lastIndex)
         }
+    }
+
+    if (flagTargetMessage != null) {
+        FlagReasonDialog(
+            onDismiss = { flagTargetMessage = null },
+            onConfirm = { reason ->
+                flagTargetMessage?.let { onFlagMessage(it.id, reason) }
+                flagTargetMessage = null
+            }
+        )
     }
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -46,7 +62,12 @@ fun AdvisorChatHistory(
                 .padding(8.dp)
         ) {
             items(messages) { message ->
-                ChatBubble(message = message)
+                ChatBubble(
+                    message = message,
+                    onFlag = if (message.role == "assistant" && !message.isContext) {
+                        { flagTargetMessage = message }
+                    } else null,
+                )
             }
             if (showClearButton) {
                 item {
@@ -60,9 +81,13 @@ fun AdvisorChatHistory(
 }
 
 @Composable
-fun ChatBubble(message: Message) {
+fun ChatBubble(
+    message: Message,
+    onFlag: (() -> Unit)? = null,
+) {
     val isUser = message.role == "user"
     val alignment = if (isUser) Alignment.CenterEnd else Alignment.CenterStart
+    val horizontalAlignment = if (isUser) Alignment.End else Alignment.Start
 
     Box(
         modifier = Modifier
@@ -70,17 +95,26 @@ fun ChatBubble(message: Message) {
             .padding(vertical = 4.dp),
         contentAlignment = alignment
     ) {
-        Card(
-            colors = CardDefaults.cardColors(
-                containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
-            ),
-            modifier = Modifier.padding(horizontal = 8.dp)
-        ) {
-            Text(
-                text = message.content,
-                modifier = Modifier.padding(8.dp),
-                color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
-            )
+        Column(horizontalAlignment = horizontalAlignment) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                ),
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
+                Text(
+                    text = message.content,
+                    modifier = Modifier.padding(8.dp),
+                    color = if (isUser) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
+                )
+            }
+            if (!isUser && onFlag != null) {
+                FlagButton(
+                    isFlagged = message.isFlagged,
+                    onFlag = onFlag,
+                    modifier = Modifier.padding(start = 8.dp, top = 2.dp),
+                )
+            }
         }
     }
 }

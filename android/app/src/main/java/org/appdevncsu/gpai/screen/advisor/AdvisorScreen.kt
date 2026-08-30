@@ -20,6 +20,10 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -41,6 +45,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.flow.Flow
 import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.api.models.Message
 import org.appdevncsu.gpai.activity.scopedKoinViewModel
@@ -93,7 +98,9 @@ private fun AuthenticatedAdvisorScreen(navController: NavHostController) {
         isLoading = isLoading,
         onRetry = { viewModel.retry() },
         onSendQuestion = { viewModel.askQuestion(it) },
-        onClearMessages = { viewModel.clearMessages() }
+        onClearMessages = { viewModel.clearMessages() },
+        onFlagMessage = { messageId, reason -> viewModel.flagMessage(messageId, reason) },
+        flagResultFlow = viewModel.flagResult,
     )
 }
 
@@ -106,9 +113,23 @@ private fun AdvisorChatContent(
     onRetry: () -> Unit,
     onSendQuestion: (String) -> Unit,
     onClearMessages: () -> Unit,
+    onFlagMessage: (String, String) -> Unit,
+    flagResultFlow: Flow<Boolean>,
     modifier: Modifier = Modifier
 ) {
     var showClearDialog by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val successMessage = stringResource(R.string.report_submitted)
+    val failureMessage = stringResource(R.string.report_failed)
+
+    LaunchedEffect(Unit) {
+        flagResultFlow.collect { success ->
+            snackbarHostState.showSnackbar(
+                if (success) successMessage else failureMessage,
+                duration = SnackbarDuration.Short,
+            )
+        }
+    }
 
     if (showClearDialog) {
         AlertDialog(
@@ -131,39 +152,46 @@ private fun AdvisorChatContent(
         )
     }
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .testTag("advisor_screen"),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        val visibleMessages = messages.filter { it.role != "system" && !it.isContext }
-        AdvisorChatHistory(
-            messages = visibleMessages,
-            modifier = Modifier.weight(1f),
-            showClearButton = visibleMessages.any { it.role == "assistant" },
-            onClearConversation = { showClearDialog = true },
-        )
-        if (error != null) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp)
-            ) {
-                Text(
-                    text = error,
-                    color = MaterialTheme.colorScheme.error,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                if (canRetry) {
-                    TextButton(onClick = onRetry) {
-                        Text(stringResource(R.string.retry))
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = modifier,
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp)
+                .testTag("advisor_screen"),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            val visibleMessages = messages.filter { it.role != "system" && !it.isContext }
+            AdvisorChatHistory(
+                messages = visibleMessages,
+                modifier = Modifier.weight(1f),
+                showClearButton = visibleMessages.any { it.role == "assistant" },
+                onClearConversation = { showClearDialog = true },
+                onFlagMessage = onFlagMessage,
+            )
+            if (error != null) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp)
+                ) {
+                    Text(
+                        text = error,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    if (canRetry) {
+                        TextButton(onClick = onRetry) {
+                            Text(stringResource(R.string.retry))
+                        }
                     }
                 }
             }
+            ChatInput(isLoading = isLoading, onSend = onSendQuestion)
         }
-        ChatInput(isLoading = isLoading, onSend = onSendQuestion)
     }
 }
 
@@ -283,6 +311,8 @@ fun AdvisorPreview() {
             onRetry = {},
             onSendQuestion = {},
             onClearMessages = {},
+            onFlagMessage = { _, _ -> },
+            flagResultFlow = kotlinx.coroutines.flow.emptyFlow<Boolean>(),
         )
     }
 }
@@ -298,7 +328,9 @@ fun AdvisorErrorPreview() {
             isLoading = false,
             onRetry = {},
             onSendQuestion = {},
-            onClearMessages = {}
+            onClearMessages = {},
+            onFlagMessage = { _, _ -> },
+            flagResultFlow = kotlinx.coroutines.flow.emptyFlow<Boolean>(),
         )
     }
 }

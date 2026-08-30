@@ -1,5 +1,7 @@
 package org.appdevncsu.gpai.api.repositories
 
+import android.util.Log
+import org.appdevncsu.gpai.api.models.FlagRequest
 import org.appdevncsu.gpai.api.models.Message
 import org.appdevncsu.gpai.api.models.Question
 import org.appdevncsu.gpai.api.Api
@@ -77,6 +79,28 @@ class RepositoryImpl(private val api: Api) : Repository {
                 Result.failure(RuntimeException(response.errorBody()?.string().toString()))
             }
         } catch (e: Exception) {
+            return Result.failure(e)
+        }
+    }
+
+    override suspend fun flagMessage(message: Message, reason: String): Result<Unit> {
+        try {
+            val request = FlagRequest(
+                messageId = message.id,
+                content = message.content,
+                signature = message.signature ?: return Result.failure(
+                    RuntimeException("Cannot flag a message without a signature")
+                ),
+                reason = reason,
+            )
+            val response = api.flagMessage(request)
+            return if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(RuntimeException(response.errorBody()?.string().toString()))
+            }
+        } catch (e: Exception) {
+            Log.e("RepositoryImpl", "flagMessage failed", e)
             return Result.failure(e)
         }
     }

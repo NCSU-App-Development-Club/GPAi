@@ -1,8 +1,9 @@
 const DAILY_LIMIT = 100;
+const FLAG_DAILY_LIMIT = 3;
 
-function dayKey(userId: string): string {
+function dayKey(userId: string, prefix = ""): string {
   const day = new Date().toISOString().slice(0, 10); // YYYY-MM-DD (UTC)
-  return `ratelimit-day-${userId}-${day}`;
+  return `ratelimit-day-${prefix}${userId}-${day}`;
 }
 
 function endOfDayEpoch(): number {
@@ -11,16 +12,16 @@ function endOfDayEpoch(): number {
   return Math.floor(d.getTime() / 1000);
 }
 
-async function getDailyCount(userId: string, env: Env): Promise<number> {
-  const value = await env.KV.get(dayKey(userId));
+async function getDailyCount(userId: string, env: Env, prefix = ""): Promise<number> {
+  const value = await env.KV.get(dayKey(userId, prefix));
   return value ? parseInt(value, 10) || 0 : 0;
 }
 
-async function incDaily(userId: string, env: Env): Promise<void> {
-  const key = dayKey(userId);
+async function incDaily(userId: string, env: Env, prefix = ""): Promise<void> {
+  const key = dayKey(userId, prefix);
   const now = Math.floor(Date.now() / 1000);
   const ttl = Math.max(60, endOfDayEpoch() - now);
-  const current = await getDailyCount(userId, env);
+  const current = await getDailyCount(userId, env, prefix);
   await env.KV.put(key, String(current + 1), { expirationTtl: ttl });
 }
 
@@ -54,6 +55,21 @@ export async function checkChatRateLimit(userId: string, env: Env): Promise<Rate
     };
   }
 
-  await incDaily(userId, env);
+  await incDaily(userId, env, "chat-");
+  return { allowed: true };
+}
+
+/**
+ * Enforces a per-day quota for `/api/flag` via a KV counter, keyed separately from
+ * chat rate limits using the "flag-" prefix.
+ */
+export async function checkFlagRateLimit(userId: string, env: Env): Promise<RateLimitResult> {
+  const dailyCount = await getDailyCount(userId, env, "flag-");
+  if (dailyCount >= FLAG_DAILY_LIMIT) {
+    const retryAfter = Math.max(1, endOfDayEpoch() - Math.floor(Date.now() / 1000));
+    return { allowed: false, retryAfter, error: "Daily report limit exceeded" };
+  }
+
+  await incDaily(userId, env, "flag-");
   return { allowed: true };
 }

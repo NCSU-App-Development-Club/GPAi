@@ -28,4 +28,9 @@ interface Repository {
      * cleared separately by the caller.
      */
     suspend fun signOut(): Result<Unit>
+
+    /**
+     * Reports an assistant message as offensive or inappropriate.
+     */
+    suspend fun flagMessage(message: Message, reason: String): Result<Unit>
 }
