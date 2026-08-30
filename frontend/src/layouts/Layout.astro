@@ -1,0 +1,43 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title: string;
+  breadcrumbs?: string[];
+}
+
+const { title, breadcrumbs = [] } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <nav>
+      <a href="https://appdevncsu.org/" target="_blank" rel="noopener"
+        >NCSU App Development Club</a
+      >
+      <span aria-hidden="true">&gt;</span>
+      <a href="/">GPAi</a>
+      {
+        breadcrumbs.map((breadcrumb) => (
+          <>
+            <span aria-hidden="true">&gt;</span>
+            <span>{breadcrumb}</span>
+          </>
+        ))
+      }
+    </nav>
+    <slot />
+    <footer>
+      <a href="/privacy">Privacy Policy</a>
+    </footer>
+  </body>
+</html>

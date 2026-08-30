@@ -1,0 +1,11 @@
+{
+  "name": "gpai",
+  "private": true,
+  "workspaces": ["backend", "frontend"],
+  "scripts": {
+    "build": "npm run build --workspace=frontend && npm run build --workspace=gpai-backend",
+    "dev:backend": "npm run dev --workspace=gpai-backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "deploy": "npm run deploy --workspace=gpai-backend"
+  }
+}
