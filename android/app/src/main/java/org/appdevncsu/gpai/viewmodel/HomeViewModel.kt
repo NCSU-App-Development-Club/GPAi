@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.appdevncsu.gpai.api.models.Message
 import org.appdevncsu.gpai.api.repositories.Repository
+import org.appdevncsu.gpai.util.AnalyticsHelper
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -18,6 +19,7 @@ class HomeViewModel : ViewModel(), KoinComponent {
 
     private val repository: Repository by inject()
     private val chatRepository: ChatRepository by inject()
+    private val analytics: AnalyticsHelper by inject()
 
     private val _messages: MutableStateFlow<List<Message>> = MutableStateFlow(emptyList())
     val messages = _messages.asStateFlow()
@@ -60,6 +62,7 @@ class HomeViewModel : ViewModel(), KoinComponent {
             val userMessage = Message(role = "user", content = question)
             _messages.update { list -> list + userMessage }
             _loading.update { true }
+            analytics.logChatMessageSent()
 
             repository.askQuestion(
                 messages = messages.value,
@@ -150,6 +153,7 @@ class HomeViewModel : ViewModel(), KoinComponent {
         viewModelScope.launch {
             val result = repository.flagMessage(message, reason)
             if (result.isSuccess) {
+                analytics.logMessageFlagged(reason)
                 _flagResult.send(true)
             } else {
                 Log.e("HomeViewModel", "flagMessage failed", result.exceptionOrNull())

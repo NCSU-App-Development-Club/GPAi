@@ -40,9 +40,11 @@ import kotlinx.coroutines.withContext
 import org.appdevncsu.gpai.R
 import org.appdevncsu.gpai.ui.theme.LocalExtraColors
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
+import org.appdevncsu.gpai.util.AnalyticsHelper
 import org.appdevncsu.gpai.utils.PDFUtils
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 /**
  * Enum representing the current state of the file upload process.
@@ -61,6 +63,7 @@ enum class UploadState {
 fun UploadTranscriptScreen(navController: NavHostController) {
 
     val viewModel: TranscriptRepository = koinViewModel()
+    val analytics: AnalyticsHelper = koinInject()
 
     // State to track the upload process: IDLE, PARSING, SUCCESS, or ERROR.
     val uploadState = remember { mutableStateOf(UploadState.IDLE) }
@@ -90,6 +93,7 @@ fun UploadTranscriptScreen(navController: NavHostController) {
                         try {
                             viewModel.updateTranscript(transcript)
                             uploadState.value = UploadState.SUCCESS
+                            analytics.logTranscriptUploaded()
                         } catch (e: Exception) {
                             e.printStackTrace()
                             uploadState.value = UploadState.ERROR

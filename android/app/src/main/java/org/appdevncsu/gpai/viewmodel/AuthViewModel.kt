@@ -15,12 +15,14 @@ import org.appdevncsu.gpai.api.models.SignInRequest
 import org.appdevncsu.gpai.api.repositories.Repository
 import org.appdevncsu.gpai.models.User
 import org.appdevncsu.gpai.security.CredentialsStore
+import org.appdevncsu.gpai.util.AnalyticsHelper
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
 class AuthViewModel(
     private val credentialsStore: CredentialsStore,
     private val interceptor: AuthorizationInterceptor,
+    private val analytics: AnalyticsHelper,
 ) : ViewModel(), KoinComponent {
 
     private val _loading: MutableStateFlow<Boolean> = MutableStateFlow(true)
@@ -106,6 +108,7 @@ class AuthViewModel(
 
         val signInResponse = repository.signIn(SignInRequest(idToken))
         if (signInResponse.isSuccess) {
+            analytics.logSignIn()
             setCurrentUser(
                 User(
                     name ?: email,
@@ -125,6 +128,7 @@ class AuthViewModel(
     }
 
     fun signOut() {
+        analytics.logSignOut()
         _user.value = null
         viewModelScope.launch {
             repository.signOut()

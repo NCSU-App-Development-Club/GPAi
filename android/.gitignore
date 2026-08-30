@@ -66,3 +66,6 @@ lint/generated/
 keystore.properties
 keystore/
 *.jks
+
+# Firebase info (for Google Analytics)
+google-services.json

@@ -5,6 +5,7 @@ import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.request.crossfade
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import okhttp3.OkHttpClient
 import org.appdevncsu.gpai.api.Api
@@ -14,6 +15,7 @@ import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import org.appdevncsu.gpai.room.AppDatabase
 import org.appdevncsu.gpai.security.CredentialsStore
 import org.appdevncsu.gpai.security.PreferencesManager
+import org.appdevncsu.gpai.util.AnalyticsHelper
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.appdevncsu.gpai.viewmodel.ChatRepository
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
@@ -68,8 +70,9 @@ class GPAiApp : Application(), SingletonImageLoader.Factory {
                 }
                 single { CredentialsStore(androidContext()) }
                 single { PreferencesManager(androidContext()) }
+                single { AnalyticsHelper(FirebaseAnalytics.getInstance(this@GPAiApp)) }
                 viewModel {
-                    AuthViewModel(get(), get())
+                    AuthViewModel(get(), get(), get())
                 }
             })
         }

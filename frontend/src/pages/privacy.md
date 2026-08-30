@@ -4,7 +4,7 @@ title: "GPAi - Privacy Policy"
 breadcrumb: "Privacy Policy"
 ---
 
-<p class="effective">Effective date: August 29, 2026</p>
+<p class="effective">Effective date: August 30, 2026</p>
 
 GPAi ("we", "us", or "our") is an academic assistant app built for NC State University
 students by the [App Development Club at NC State](https://appdevncsu.org/). This Privacy
@@ -70,6 +70,29 @@ To prevent abuse, we track the number of chat requests you make per day and per 
 This uses only your opaque Google user identifier and the current timestamp — no message
 content or personal information is stored for rate limiting.
 
+### Analytics and Crash Reporting
+
+We use **Firebase Analytics** and **Firebase Crashlytics** to understand how the app is
+used and to diagnose crashes. These services collect:
+
+- **Device information** — device model, operating system version, screen resolution,
+  and language settings
+- **App usage events** — anonymous event data such as screens viewed, features used
+  (e.g., transcript upload, chat message sent, message flagged), and session duration
+- **Crash reports** — crash logs, stack traces, device state at the time of the crash,
+  and anonymous identifiers for grouping related crashes
+
+Firebase Analytics does **not** collect personal information such as your name, email,
+transcript data, or chat messages. Analytics events are associated with a randomly
+generated, anonymous identifier that is not linked to your Google account. Event-level
+analytics data is retained for 2 months, and user-level data is retained for 14 months.
+
+Firebase Crashlytics collects crash data necessary for debugging. Crash reports
+may include the screen you were on when the crash occurred, but never include
+your transcript data, chat messages, or personal information.
+
+For more details, see [Privacy and Security in Firebase](https://firebase.google.com/support/privacy/).
+
 ### Content Reports
 
 You may flag an AI-generated response as offensive, inaccurate, or misleading using the
@@ -97,6 +120,8 @@ We use your data for the following purposes only:
 - **Abuse Prevention** — rate limiting to protect the service from excessive usage.
 - **Content Safety** — storing content reports to review and improve AI response quality
   and safety.
+- **Analytics** — understanding how the app is used (e.g., which features are popular,
+  screen navigation patterns) and diagnosing crashes to improve stability.
 
 ## 3. Third-Party Services
 
@@ -119,8 +144,10 @@ We use the following third-party services in connection with your data:
 - **Discord** — we use a Discord webhook to receive notifications when content is flagged.
   The webhook receives only the flag reason and a unique ID associated with the report; it
   does not receive your name, email, chat message content, or other personal information.
-
-We do not use any analytics, advertising, crash reporting, or telemetry services.
+- **Firebase (Google)** — we use Firebase Analytics and Firebase Crashlytics for app usage
+  analytics and crash reporting. Firebase collects anonymous device and usage data as
+  described in the "Analytics and Crash Reporting" section above:
+  [Firebase Privacy and Security](https://firebase.google.com/support/privacy/).
 
 ## 4. Data Retention
 
@@ -136,6 +163,11 @@ We do not use any analytics, advertising, crash reporting, or telemetry services
   prompts and use them for product improvement. See
   [How Google Uses Your Data](https://ai.google.dev/gemini-api/terms) for specifics.
 - **Rate limit counters** expire at the end of each UTC day.
+- **Firebase Analytics data** — event-level data is retained for 2 months, and
+  user-level data is retained for 14 months. Anonymous analytics events (screens viewed,
+  features used) are not linked to your identity.
+- **Firebase Crashlytics data** is retained for 90 days. Crash reports are anonymous and
+  not linked to your Google account.
 - Transcript data and your past chat messages may be included in your device's cloud backups
   if you have Android backup enabled.
 

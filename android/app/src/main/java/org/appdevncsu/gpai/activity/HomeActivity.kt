@@ -52,11 +52,13 @@ import org.appdevncsu.gpai.screen.advisor.AdvisorScreen
 import org.appdevncsu.gpai.screen.onboarding.IntroScreen
 import org.appdevncsu.gpai.screen.onboarding.UploadTranscriptScreen
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
+import org.appdevncsu.gpai.util.AnalyticsHelper
 import org.appdevncsu.gpai.util.LocalSnackbarRunner
 import org.appdevncsu.gpai.util.SnackbarRunner
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.koin.androidx.compose.koinViewModel
+import org.koin.compose.koinInject
 
 /**
  * Main activity of the application that sets up the layout and navigation using Jetpack Compose.
@@ -79,10 +81,15 @@ class HomeActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val scope = rememberCoroutineScope()
                 val snackbarRunner = remember { SnackbarRunner(scope) }
+                val analytics: AnalyticsHelper = koinInject()
 
                 val currentBackStackEntry =
                     navController.currentBackStackEntryFlow.collectAsState(null)
                 val currentRoute = currentBackStackEntry.value?.destination?.route
+
+                LaunchedEffect(currentRoute) {
+                    currentRoute?.let { analytics.logScreenView(it) }
+                }
                 val isHomeScreen = currentRoute == "forecaster" || currentRoute == "advisor"
 
                 CompositionLocalProvider(LocalSnackbarRunner provides snackbarRunner) {
