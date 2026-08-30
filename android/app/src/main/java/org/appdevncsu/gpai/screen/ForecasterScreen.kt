@@ -41,8 +41,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -77,6 +75,7 @@ import org.appdevncsu.gpai.models.Course
 import org.appdevncsu.gpai.models.Term
 import org.appdevncsu.gpai.models.Transcript
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
+import org.appdevncsu.gpai.util.LocalSnackbarRunner
 import org.appdevncsu.gpai.viewmodel.HomeViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 
@@ -143,7 +142,7 @@ fun ForecasterContent(
     var addingToTermIndex by remember { mutableIntStateOf(0) }
     val hasUnsavedChanges = tempTranscript != transcript
     var isSaving by remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarRunner = LocalSnackbarRunner.current
     val coroutineScope = rememberCoroutineScope()
     val changesSavedMessage = stringResource(R.string.changes_saved)
     val changesFailedMessage = stringResource(R.string.changes_failed)
@@ -289,10 +288,10 @@ fun ForecasterContent(
                         isSaving = true
                         try {
                             onSaveChanges(tempTranscript)
-                            snackbarHostState.showSnackbar(changesSavedMessage)
+                            snackbarRunner.send(changesSavedMessage)
                         } catch (e: Exception) {
                             e.printStackTrace()
-                            snackbarHostState.showSnackbar(changesFailedMessage)
+                            snackbarRunner.send(changesFailedMessage)
                         } finally {
                             isSaving = false
                         }
@@ -318,11 +317,6 @@ fun ForecasterContent(
                 }
             }
         }
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier.align(Alignment.BottomCenter)
-        )
     }
 }
 

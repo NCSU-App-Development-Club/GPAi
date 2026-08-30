@@ -30,6 +30,12 @@ interface Repository {
     suspend fun signOut(): Result<Unit>
 
     /**
+     * Deletes the user's account and all associated server-side data.
+     * The local credentials must be cleared separately by the caller.
+     */
+    suspend fun deleteAccount(): Result<Unit>
+
+    /**
      * Reports an assistant message as offensive or inappropriate.
      */
     suspend fun flagMessage(message: Message, reason: String): Result<Unit>

@@ -43,7 +43,16 @@ const cfg = envSchema.parse(process.env);
 
 const SYSTEM_PROMPT =
   "You are an academic assistant. You want to help students with any questions they have. " +
-  "Keep discussion focused around school. Avoid inappropriate discussions.";
+  "Keep discussion focused around school. Avoid inappropriate discussions.\n\n" +
+  "You must never generate content that:\n" +
+  "- Promotes hate speech, discrimination, or violence against any individual or group\n" +
+  "- Contains sexual or sexually suggestive content, especially involving minors\n" +
+  "- Encourages self-harm, suicide, or eating disorders\n" +
+  "- Provides instructions for illegal activities\n" +
+  "- Generates misleading or deceptive information\n" +
+  "- Produces harassment, bullying, or threatening content\n" +
+  "- Contains profanity or extremely graphic descriptions of violence\n\n" +
+  "If a user requests such content, politely decline and redirect to an appropriate academic topic.";
 
 const MAX_MESSAGES = 100;
 const MAX_LLM_MESSAGES = 20;
@@ -158,6 +167,29 @@ app.delete("/api/session", requireAuth, async (c) => {
   return c.json({ ok: true }, 200);
 });
 
+app.delete("/api/account", requireAuth, async (c) => {
+  const token = c.get("token");
+  const userId = c.get("userId");
+
+  // Delete all reports filed by this user
+  let cursor: string | undefined;
+  do {
+    const result = await c.env.KV.list({
+      prefix: `${REPORT_KEY_PREFIX}${userId}-`,
+      cursor,
+    });
+    for (const key of result.keys) {
+      await c.env.KV.delete(key.name);
+    }
+    cursor = result.list_complete ? undefined : result.cursor;
+  } while (cursor);
+
+  // Delete session
+  await deleteSession(token, c.env);
+
+  return c.json({ ok: true }, 200);
+});
+
 app.post("/api/chat", requireAuth, async (c) => {
   const userId = c.get("userId");
 
@@ -255,6 +287,7 @@ app.post("/api/flag", requireAuth, async (c) => {
   const session = await getSession(token, c.env);
 
   const reportId = crypto.randomUUID();
+  const reportKey = `${REPORT_KEY_PREFIX}${userId}-${reportId}`;
   const report: ReportData = {
     messageId,
     content,
@@ -265,26 +298,17 @@ app.post("/api/flag", requireAuth, async (c) => {
     timestamp: Date.now(),
   };
 
-  await c.env.KV.put(
-    `${REPORT_KEY_PREFIX}${reportId}`,
-    JSON.stringify(report),
-    {
-      expirationTtl: cfg.REPORT_TTL,
-    },
-  );
+  await c.env.KV.put(reportKey, JSON.stringify(report), {
+    expirationTtl: cfg.REPORT_TTL,
+  });
 
-  const reportUrl = `${cfg.BASE_URL}/api/reports/${reportId}`;
+  const reportUrl = `${cfg.BASE_URL}/api/reports/${userId}/${reportId}`;
   const embed: Record<string, unknown> = {
     title: "Content Flagged",
     color: 0xff0000,
     fields: [
       { name: "Reason", value: reason },
-      {
-        name: "User",
-        value: `${session?.name ?? "unknown"} (${session?.email ?? "unknown"})`,
-      },
-      { name: "User ID", value: userId },
-      { name: "Message ID", value: messageId },
+      { name: "Report ID", value: reportId },
     ],
     url: reportUrl,
     timestamp: new Date().toISOString(),
@@ -300,11 +324,13 @@ app.post("/api/flag", requireAuth, async (c) => {
   return c.json({ ok: true, reportId });
 });
 
-app.get("/api/reports/:id", async (c) => {
-  const id = c.req.param("id");
-  const report = await c.env.KV.get<ReportData>(`${REPORT_KEY_PREFIX}${id}`, {
-    type: "json",
-  });
+app.get("/api/reports/:userId/:reportId", async (c) => {
+  const userId = c.req.param("userId");
+  const reportId = c.req.param("reportId");
+  const report = await c.env.KV.get<ReportData>(
+    `${REPORT_KEY_PREFIX}${userId}-${reportId}`,
+    { type: "json" },
+  );
 
   if (!report) {
     return c.json({ error: "Report not found" }, 404);

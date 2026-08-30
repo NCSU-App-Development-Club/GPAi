@@ -34,6 +34,9 @@ interface Api {
     @DELETE("/api/session")
     suspend fun deleteSession(): Response<Unit>
 
+    @DELETE("/api/account")
+    suspend fun deleteAccount(): Response<Unit>
+
     @POST("/api/flag")
     @Headers("Content-Type: application/json")
     suspend fun flagMessage(

@@ -13,11 +13,17 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,6 +48,7 @@ fun ProfileScreen(
     photoURL: String? = null,
     isSignedIn: Boolean = false,
     onSignOut: () -> Unit = {},
+    onDeleteAccount: () -> Unit = {},
 ) {
     ProfileScreenContent(
         userName = userName,
@@ -59,6 +66,13 @@ fun ProfileScreen(
                 launchSingleTop = true
             }
         },
+        onDeleteAccount = {
+            onDeleteAccount()
+            navController.navigate("forecaster") {
+                popUpTo("forecaster") { inclusive = true }
+                launchSingleTop = true
+            }
+        },
         onSignIn = { navController.navigate("advisor") },
     )
 }
@@ -71,8 +85,32 @@ private fun ProfileScreenContent(
     isSignedIn: Boolean = false,
     onUploadNewTranscript: () -> Unit = {},
     onSignOut: () -> Unit = {},
+    onDeleteAccount: () -> Unit = {},
     onSignIn: () -> Unit = {},
 ) {
+    var showDeleteDialog by remember { mutableStateOf(false) }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(stringResource(R.string.delete_account_title)) },
+            text = { Text(stringResource(R.string.delete_account_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showDeleteDialog = false
+                    onDeleteAccount()
+                }) {
+                    Text(stringResource(R.string.delete_account_confirm))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -139,6 +177,16 @@ private fun ProfileScreenContent(
 
             Button(onClick = onUploadNewTranscript) {
                 Text(stringResource(R.string.upload_new_transcript))
+            }
+        }
+
+        if (isSignedIn) {
+            Spacer(modifier = Modifier.height(16.dp))
+            TextButton(onClick = { showDeleteDialog = true }) {
+                Text(
+                    text = stringResource(R.string.delete_account),
+                    color = MaterialTheme.colorScheme.error,
+                )
             }
         }
     }

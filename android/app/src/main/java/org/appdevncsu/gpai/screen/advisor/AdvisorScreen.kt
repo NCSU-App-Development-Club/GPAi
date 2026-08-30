@@ -21,9 +21,6 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarDuration
-import androidx.compose.material3.SnackbarHost
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
@@ -51,6 +48,7 @@ import org.appdevncsu.gpai.api.models.Message
 import org.appdevncsu.gpai.activity.scopedKoinViewModel
 import org.appdevncsu.gpai.activity.scopedViewModel
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
+import org.appdevncsu.gpai.util.LocalSnackbarRunner
 import org.appdevncsu.gpai.viewmodel.HomeViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 
@@ -118,16 +116,14 @@ private fun AdvisorChatContent(
     modifier: Modifier = Modifier
 ) {
     var showClearDialog by remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarRunner = LocalSnackbarRunner.current
     val successMessage = stringResource(R.string.report_submitted)
     val failureMessage = stringResource(R.string.report_failed)
 
     LaunchedEffect(Unit) {
         flagResultFlow.collect { success ->
-            snackbarHostState.showSnackbar(
-                if (success) successMessage else failureMessage,
-                duration = SnackbarDuration.Short,
-            )
+            val message = if (success) successMessage else failureMessage
+            snackbarRunner.send(message)
         }
     }
 
@@ -153,14 +149,13 @@ private fun AdvisorChatContent(
     }
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = modifier,
     ) { paddingValues ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp)
+                .padding(horizontal = 16.dp)
                 .testTag("advisor_screen"),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {

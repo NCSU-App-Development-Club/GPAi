@@ -83,6 +83,19 @@ class RepositoryImpl(private val api: Api) : Repository {
         }
     }
 
+    override suspend fun deleteAccount(): Result<Unit> {
+        try {
+            val response = api.deleteAccount()
+            return if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                Result.failure(RuntimeException(response.errorBody()?.string().toString()))
+            }
+        } catch (e: Exception) {
+            return Result.failure(e)
+        }
+    }
+
     override suspend fun flagMessage(message: Message, reason: String): Result<Unit> {
         try {
             val request = FlagRequest(

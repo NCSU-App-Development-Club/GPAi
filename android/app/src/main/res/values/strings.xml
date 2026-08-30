@@ -26,6 +26,12 @@
     <string name="back">Back</string>
     <string name="signed_out">You are signed out</string>
     <string name="sign_in_to_chat">Sign in to access chat features.</string>
+    <string name="delete_account">Delete Account</string>
+    <string name="delete_account_title">Delete Account?</string>
+    <string name="delete_account_message">This will permanently delete your account and all associated data, including any content reports you have filed. This action cannot be undone.</string>
+    <string name="delete_account_confirm">Delete</string>
+    <string name="delete_account_success">Account deleted successfully.</string>
+    <string name="delete_account_error_message">Failed to delete account. Please check your connection and try again.</string>
 
     <!-- Forecaster Screen -->
     <string name="cumulative_gpa">Cumulative GPA: %1$.2f</string>

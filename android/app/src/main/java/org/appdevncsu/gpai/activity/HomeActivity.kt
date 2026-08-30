@@ -10,7 +10,6 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,12 +21,16 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +52,8 @@ import org.appdevncsu.gpai.screen.advisor.AdvisorScreen
 import org.appdevncsu.gpai.screen.onboarding.IntroScreen
 import org.appdevncsu.gpai.screen.onboarding.UploadTranscriptScreen
 import org.appdevncsu.gpai.ui.theme.GPAiTheme
+import org.appdevncsu.gpai.util.LocalSnackbarRunner
+import org.appdevncsu.gpai.util.SnackbarRunner
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 import org.koin.androidx.compose.koinViewModel
@@ -72,61 +77,77 @@ class HomeActivity : ComponentActivity() {
         setContent {
             GPAiTheme {
                 val navController = rememberNavController()
+                val scope = rememberCoroutineScope()
+                val snackbarRunner = remember { SnackbarRunner(scope) }
 
-            val currentBackStackEntry = navController.currentBackStackEntryFlow.collectAsState(null)
-            val currentRoute = currentBackStackEntry.value?.destination?.route
-            val isHomeScreen = currentRoute == "forecaster" || currentRoute == "advisor"
+                val currentBackStackEntry =
+                    navController.currentBackStackEntryFlow.collectAsState(null)
+                val currentRoute = currentBackStackEntry.value?.destination?.route
+                val isHomeScreen = currentRoute == "forecaster" || currentRoute == "advisor"
 
-            Scaffold(
-                modifier = Modifier.fillMaxSize(), topBar = {
-                    if (isHomeScreen) {
-                        val authViewModel: AuthViewModel = scopedKoinViewModel(navController)
-                        val user by authViewModel.user.collectAsState()
-                        GPAiAppBar(navController, photoURL = user?.photoURL)
-                    } else if (currentRoute == "profile") {
-                        TopAppBar(
-                            title = {
-                                Text(
-                                    text = stringResource(R.string.profile),
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 24.sp
+                CompositionLocalProvider(LocalSnackbarRunner provides snackbarRunner) {
+                    Scaffold(
+                        modifier = Modifier.fillMaxSize(),
+                        snackbarHost = { SnackbarHost(snackbarRunner.hostState) },
+                        topBar = {
+                            if (isHomeScreen) {
+                                val authViewModel: AuthViewModel =
+                                    scopedKoinViewModel(navController)
+                                val user by authViewModel.user.collectAsState()
+                                GPAiAppBar(navController, photoURL = user?.photoURL)
+                            } else if (currentRoute == "profile") {
+                                TopAppBar(
+                                    title = {
+                                        Text(
+                                            text = stringResource(R.string.profile),
+                                            fontWeight = FontWeight.Black,
+                                            fontSize = 24.sp
+                                        )
+                                    },
+                                    navigationIcon = {
+                                        IconButton(onClick = { navController.popBackStack() }) {
+                                            Icon(
+                                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                                contentDescription = stringResource(R.string.back),
+                                            )
+                                        }
+                                    },
+                                    modifier = Modifier.height(104.dp)
                                 )
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = { navController.popBackStack() }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = stringResource(R.string.back),
-                                    )
-                                }
-                            },
-                            modifier = Modifier.height(104.dp)
-                        )
+                            }
+                        }
+                    ) { innerPadding ->
+                        val authViewModel: AuthViewModel = scopedKoinViewModel(navController)
+                        val deleteSuccessMessage = stringResource(R.string.delete_account_success)
+                        val deleteFailureMessage =
+                            stringResource(R.string.delete_account_error_message)
+                        LaunchedEffect(Unit) {
+                            authViewModel.deleteAccountEvent.collect { success ->
+                                val message =
+                                    if (success) deleteSuccessMessage else deleteFailureMessage
+                                snackbarRunner.send(message)
+                            }
+                        }
+                        Column(modifier = Modifier.padding(innerPadding)) {
+                            AppContainer(
+                                navController,
+                                modifier = Modifier.weight(if (isHomeScreen) 0.9f else 1.0f)
+                            )
+
+                            if (isHomeScreen) {
+                                // Toggle button at the bottom of the screen to switch between views
+                                HomeViewToggle(
+                                    currentRoute = currentRoute,
+                                    navController = navController,
+                                    modifier = Modifier
+                                        .fillMaxWidth() // Takes full width
+                                        .weight(0.1f) // Takes up 10% of the screen height
+                                )
+
+                            }
+                        }
                     }
                 }
-            ) { innerPadding ->
-                Column(modifier = Modifier.padding(innerPadding)) {
-                    AppContainer(
-                        navController,
-                        modifier = Modifier.weight(if (isHomeScreen) 0.9f else 1.0f)
-                    )
-
-                    if (isHomeScreen) {
-                        Spacer(modifier = Modifier.padding(bottom = 16.dp)) // Adds space below the NavGraph
-
-                        // Toggle button at the bottom of the screen to switch between views
-                        HomeViewToggle(
-                            currentRoute = currentRoute,
-                            navController = navController,
-                            modifier = Modifier
-                                .fillMaxWidth() // Takes full width
-                                .weight(0.1f) // Takes up 10% of the screen height
-                        )
-
-                        Spacer(modifier = Modifier.padding(bottom = 16.dp)) // Adds space below the toggle
-                    }
-                }
-            }
             }
         }
     }
@@ -202,6 +223,7 @@ fun AppContainer(navController: NavHostController, modifier: Modifier = Modifier
                 photoURL = user?.photoURL,
                 isSignedIn = user != null,
                 onSignOut = { authViewModel.signOut() },
+                onDeleteAccount = { authViewModel.deleteAccount() },
             )
         }
     }

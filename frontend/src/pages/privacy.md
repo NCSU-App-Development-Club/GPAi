@@ -22,7 +22,9 @@ Google's identity verification:
 - Your Google user identifier (a unique, opaque ID)
 
 We restrict sign-in to **@ncsu.edu** email addresses only. We do not collect
-any Google profile photo, contacts, or other Google account data.
+any contacts or other Google account data. Your Google profile photo URL is included
+in the verification data from Google, but we do not store it on our servers. We only
+store it locally on your device to display it in the app.
 
 ### Academic Transcript Data
 
@@ -112,6 +114,9 @@ We use the following third-party services in connection with your data:
   [Gemini API Additional Terms of Service](https://ai.google.dev/gemini-api/terms) for
   details on how data submitted to the free tier is handled, and Google's
   [Privacy Policy](https://policies.google.com/privacy) for general privacy practices.
+- **Discord** — we use a Discord webhook to receive notifications when content is flagged.
+  The webhook receives only the flag reason and a unique ID associated with the report; it
+  does not receive your name, email, chat message content, or other personal information.
 
 We do not use any analytics, advertising, crash reporting, or telemetry services.
 
@@ -129,6 +134,8 @@ We do not use any analytics, advertising, crash reporting, or telemetry services
   prompts and use them for product improvement. See
   [How Google Uses Your Data](https://ai.google.dev/gemini-api/terms) for specifics.
 - **Rate limit counters** expire at the end of each UTC day.
+- Transcript data and your past chat messages may be included in your device's cloud backups
+  if you have Android backup enabled.
 
 ## 5. Data Security
 
@@ -146,6 +153,11 @@ We do not use any analytics, advertising, crash reporting, or telemetry services
   deletes your server-side session data (name, email, and session token). Your local
   transcript data and chat history will remain on your device until you clear app data
   or uninstall.
+- **Delete Account** — You can delete your account from the Profile tab. This permanently
+  deletes your server-side session and any content reports you have filed. Rate-limit
+  data expires automatically within 24 hours. You can also request account deletion
+  by visiting [gpai.appdevncsu.org/delete-account](https://gpai.appdevncsu.org/delete-account)
+  or by emailing ncsuappdevelopmentclub@gmail.com.
 - **Local Data** — All academic and chat data is stored on your device. You can clear it at
   any time through your device's app settings, or by uninstalling the app.
 

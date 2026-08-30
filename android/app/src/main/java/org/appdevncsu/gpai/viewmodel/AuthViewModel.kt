@@ -4,7 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -32,6 +34,9 @@ class AuthViewModel(
 
     private val _clientId: MutableStateFlow<String?> = MutableStateFlow(null)
     val clientId = _clientId.asStateFlow()
+
+    private val _deleteAccountEvent = MutableSharedFlow<Boolean>()
+    val deleteAccountEvent = _deleteAccountEvent.asSharedFlow()
 
     private val repository: Repository by inject()
 
@@ -125,6 +130,21 @@ class AuthViewModel(
             repository.signOut()
             interceptor.clearToken()
             credentialsStore.clear()
+        }
+    }
+
+    fun deleteAccount() {
+        viewModelScope.launch {
+            val result = repository.deleteAccount()
+            if (result.isSuccess) {
+                _user.value = null
+                interceptor.clearToken()
+                credentialsStore.clear()
+                _deleteAccountEvent.emit(true)
+            } else {
+                result.exceptionOrNull()?.printStackTrace()
+                _deleteAccountEvent.emit(false)
+            }
         }
     }
 }
