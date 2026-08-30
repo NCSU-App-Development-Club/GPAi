@@ -1,6 +1,7 @@
 ---
 layout: ../layouts/PrivacyLayout.astro
 title: "GPAi - Terms of Service"
+breadcrumb: "Terms of Service"
 ---
 
 <p class="effective">Effective date: August 29, 2026</p>

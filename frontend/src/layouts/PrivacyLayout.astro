@@ -3,13 +3,14 @@ import Layout from "./Layout.astro";
 
 interface Props {
   title: string;
-  frontmatter?: { title: string };
+  breadcrumb?: string;
+  frontmatter?: { title: string; breadcrumb?: string };
 }
 
-const { title } = Astro.props.frontmatter ?? Astro.props;
+const { title, breadcrumb } = Astro.props.frontmatter ?? Astro.props;
 ---
 
-<Layout title={title} breadcrumbs={["Privacy Policy"]}>
+<Layout title={title} breadcrumbs={[breadcrumb ?? title]}>
   <div class="page">
     <slot />
   </div>

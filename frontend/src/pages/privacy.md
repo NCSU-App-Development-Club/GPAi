@@ -1,6 +1,7 @@
 ---
 layout: ../layouts/PrivacyLayout.astro
 title: "GPAi - Privacy Policy"
+breadcrumb: "Privacy Policy"
 ---
 
 <p class="effective">Effective date: August 29, 2026</p>

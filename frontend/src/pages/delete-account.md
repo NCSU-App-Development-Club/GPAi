@@ -1,6 +1,7 @@
 ---
 layout: ../layouts/PrivacyLayout.astro
 title: "GPAi - Delete Account"
+breadcrumb: "Delete Account"
 ---
 
 ## Delete Your GPAi Account
