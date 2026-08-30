@@ -318,7 +318,9 @@ app.post("/api/flag", requireAuth, async (c) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ embeds: [embed] }),
-    }).catch(() => { /* fire-and-forget */ }),
+    }).catch(() => {
+      /* fire-and-forget */
+    }),
   );
 
   return c.json({ ok: true, reportId });
@@ -352,7 +354,7 @@ app.get("/api/reports/:userId/:reportId", async (c) => {
 <body>
   <h1>Flagged Content Report</h1>
   <dl>
-    <dt>Report ID</dt><dd>${id}</dd>
+    <dt>Report ID</dt><dd>${reportId}</dd>
     <dt>Reason</dt><dd>${report.reason}</dd>
     <dt>Reported by</dt><dd>${report.userName} (${report.userEmail})</dd>
     <dt>User ID</dt><dd>${report.userId}</dd>
