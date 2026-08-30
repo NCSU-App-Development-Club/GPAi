@@ -54,8 +54,10 @@ import org.appdevncsu.gpai.viewmodel.TranscriptRepository
 
 @Composable
 fun AdvisorScreen(navController: NavHostController) {
-    AuthGate(navController) {
-        AuthenticatedAdvisorScreen(navController)
+    TermsGate {
+        AuthGate(navController) {
+            AuthenticatedAdvisorScreen(navController)
+        }
     }
 }
 

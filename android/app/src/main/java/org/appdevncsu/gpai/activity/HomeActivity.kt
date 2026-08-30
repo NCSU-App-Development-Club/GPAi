@@ -117,18 +117,20 @@ class HomeActivity : ComponentActivity() {
                             }
                         }
                     ) { innerPadding ->
-                        val authViewModel: AuthViewModel = scopedKoinViewModel(navController)
-                        val deleteSuccessMessage = stringResource(R.string.delete_account_success)
-                        val deleteFailureMessage =
-                            stringResource(R.string.delete_account_error_message)
-                        LaunchedEffect(Unit) {
-                            authViewModel.deleteAccountEvent.collect { success ->
-                                val message =
-                                    if (success) deleteSuccessMessage else deleteFailureMessage
-                                snackbarRunner.send(message)
-                            }
+                val deleteSuccessMessage = stringResource(R.string.delete_account_success)
+                val deleteFailureMessage =
+                    stringResource(R.string.delete_account_error_message)
+                if (isHomeScreen || currentRoute == "profile") {
+                    val authViewModel: AuthViewModel = scopedKoinViewModel(navController)
+                    LaunchedEffect(Unit) {
+                        authViewModel.deleteAccountEvent.collect { success ->
+                            val message =
+                                if (success) deleteSuccessMessage else deleteFailureMessage
+                            snackbarRunner.send(message)
                         }
-                        Column(modifier = Modifier.padding(innerPadding)) {
+                    }
+                }
+                Column(modifier = Modifier.padding(innerPadding)) {
                             AppContainer(
                                 navController,
                                 modifier = Modifier.weight(if (isHomeScreen) 0.9f else 1.0f)

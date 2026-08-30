@@ -8,7 +8,8 @@ title: "GPAi - Privacy Policy"
 GPAi ("we", "us", or "our") is an academic assistant app built for NC State University
 students by the [App Development Club at NC State](https://appdevncsu.org/). This Privacy
 Policy explains what data we collect, how we use it, and your rights in relation to that
-data. By using GPAi, you agree to the practices described here.
+data. By using GPAi, you agree to the practices described here. Your use of GPAi is also
+governed by our [Terms of Service](/terms).
 
 ## 1. Data We Collect
 

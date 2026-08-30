@@ -1,6 +1,6 @@
 package org.appdevncsu.gpai.screen
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,13 +9,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material.icons.filled.DeleteForever
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.FileUpload
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,11 +35,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -89,6 +98,7 @@ private fun ProfileScreenContent(
     onSignIn: () -> Unit = {},
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
+    val uriHandler = LocalUriHandler.current
 
     if (showDeleteDialog) {
         AlertDialog(
@@ -115,16 +125,17 @@ private fun ProfileScreenContent(
         modifier = Modifier
             .fillMaxSize()
             .widthIn(max = 600.dp)
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp),
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
+        // Profile header
         Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
         ) {
             if (isSignedIn) {
                 AsyncImage(
@@ -133,62 +144,108 @@ private fun ProfileScreenContent(
                     contentScale = ContentScale.Crop,
                     error = rememberVectorPainter(Icons.Default.Person),
                     modifier = Modifier
-                        .size(96.dp)
+                        .size(56.dp)
                         .clip(CircleShape)
                 )
+                Spacer(modifier = Modifier.width(16.dp))
             }
 
-            Column(horizontalAlignment = if (isSignedIn) Alignment.Start else Alignment.CenterHorizontally) {
+            Column {
                 Text(
                     text = if (isSignedIn) userName else stringResource(R.string.signed_out),
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.SemiBold,
                 )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = if (isSignedIn) userEmail else stringResource(R.string.sign_in_to_chat),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
-            if (isSignedIn) {
-                Button(
-                    onClick = onSignOut,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.error
+                if (isSignedIn) {
+                    Text(
+                        text = userEmail,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
-                ) {
-                    Text(stringResource(R.string.sign_out))
+                } else {
+                    Text(
+                        text = stringResource(R.string.sign_in_to_chat),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
-            } else {
-                Button(onClick = onSignIn) {
-                    Text(stringResource(R.string.sign_in))
-                }
-            }
-
-            Button(onClick = onUploadNewTranscript) {
-                Text(stringResource(R.string.upload_new_transcript))
             }
         }
 
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        // Account actions
         if (isSignedIn) {
-            Spacer(modifier = Modifier.height(16.dp))
-            TextButton(onClick = { showDeleteDialog = true }) {
-                Text(
-                    text = stringResource(R.string.delete_account),
-                    color = MaterialTheme.colorScheme.error,
-                )
-            }
+            SettingsRow(
+                icon = Icons.Default.FileUpload,
+                label = stringResource(R.string.upload_new_transcript),
+                onClick = onUploadNewTranscript,
+            )
+            SettingsRow(
+                icon = Icons.AutoMirrored.Filled.Logout,
+                label = stringResource(R.string.sign_out),
+                onClick = onSignOut,
+            )
+        } else {
+            SettingsRow(
+                icon = Icons.Default.Person,
+                label = stringResource(R.string.sign_in),
+                onClick = onSignIn,
+            )
         }
+
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        // Legal
+        SettingsRow(
+            icon = Icons.Default.Security,
+            label = stringResource(R.string.privacy_policy),
+            onClick = { uriHandler.openUri("https://gpai.appdevncsu.org/privacy") },
+        )
+        SettingsRow(
+            icon = Icons.Default.Description,
+            label = stringResource(R.string.terms_of_service),
+            onClick = { uriHandler.openUri("https://gpai.appdevncsu.org/terms") },
+        )
+
+        // Danger zone
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+        SettingsRow(
+            icon = Icons.Default.DeleteForever,
+            label = stringResource(R.string.delete_account),
+            tint = MaterialTheme.colorScheme.error,
+            onClick = { showDeleteDialog = true },
+        )
+    }
+}
+
+@Composable
+private fun SettingsRow(
+    icon: ImageVector,
+    label: String,
+    tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
+    onClick: () -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = tint,
+            modifier = Modifier.size(24.dp),
+        )
+        Spacer(modifier = Modifier.width(20.dp))
+        Text(
+            text = label,
+            fontSize = 16.sp,
+            color = tint,
+        )
     }
 }
 

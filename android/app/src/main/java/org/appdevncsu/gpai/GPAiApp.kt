@@ -13,6 +13,7 @@ import org.appdevncsu.gpai.api.repositories.Repository
 import org.appdevncsu.gpai.api.repositories.RepositoryImpl
 import org.appdevncsu.gpai.room.AppDatabase
 import org.appdevncsu.gpai.security.CredentialsStore
+import org.appdevncsu.gpai.security.PreferencesManager
 import org.appdevncsu.gpai.viewmodel.AuthViewModel
 import org.appdevncsu.gpai.viewmodel.ChatRepository
 import org.appdevncsu.gpai.viewmodel.TranscriptRepository
@@ -66,6 +67,7 @@ class GPAiApp : Application(), SingletonImageLoader.Factory {
                     TranscriptRepository(get())
                 }
                 single { CredentialsStore(androidContext()) }
+                single { PreferencesManager(androidContext()) }
                 viewModel {
                     AuthViewModel(get(), get())
                 }
