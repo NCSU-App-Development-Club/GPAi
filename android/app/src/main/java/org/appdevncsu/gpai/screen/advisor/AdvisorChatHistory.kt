@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -96,10 +97,17 @@ fun ChatBubble(
         contentAlignment = alignment
     ) {
         Column(horizontalAlignment = horizontalAlignment) {
+            val bubbleShape = if (isUser) {
+                RoundedCornerShape(12.dp, 12.dp, 0.dp, 12.dp)
+            } else {
+                RoundedCornerShape(12.dp, 12.dp, 12.dp, 0.dp)
+            }
+
             Card(
                 colors = CardDefaults.cardColors(
                     containerColor = if (isUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                 ),
+                shape = bubbleShape,
                 modifier = Modifier.padding(horizontal = 8.dp)
             ) {
                 Text(
