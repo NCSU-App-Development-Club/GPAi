@@ -13,9 +13,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = BrandDarkPurple,
+    primary = BrandPurple,
     onPrimary = Color.White,
-    secondary = BrandPurple,
+    secondary = BrandMutedPurple,
     onSecondary = Color.White,
     onSurface = Color.White,
     onSurfaceVariant = Color.LightGray

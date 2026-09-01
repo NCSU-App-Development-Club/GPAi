@@ -6,6 +6,7 @@ import androidx.compose.ui.graphics.Color
 
 val BrandPurple = Color(0xFF7876ED)
 val BrandDarkPurple = Color(0xFF382540)
+val BrandMutedPurple = Color(0xFFA397B0)
 
 @Immutable
 data class ExtraColors(
