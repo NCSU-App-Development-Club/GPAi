@@ -8,6 +8,7 @@ import coil3.request.crossfade
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.tom_roush.pdfbox.android.PDFBoxResourceLoader
 import okhttp3.OkHttpClient
+import java.util.concurrent.TimeUnit
 import org.appdevncsu.gpai.api.Api
 import org.appdevncsu.gpai.api.AuthorizationInterceptor
 import org.appdevncsu.gpai.api.repositories.Repository
@@ -50,6 +51,9 @@ class GPAiApp : Application(), SingletonImageLoader.Factory {
                         .client(
                             OkHttpClient.Builder()
                                 .addInterceptor(interceptor)
+                                .connectTimeout(30, TimeUnit.SECONDS)
+                                .readTimeout(120, TimeUnit.SECONDS)
+                                .writeTimeout(60, TimeUnit.SECONDS)
                                 .build()
                         )
                         .addConverterFactory(GsonConverterFactory.create())
