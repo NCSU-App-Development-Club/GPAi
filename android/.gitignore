@@ -51,7 +51,6 @@ desktop.ini
 
 # Proguard and Logs
 proguard/
-proguard-rules.pro
 lint/intermediates/
 lint/generated/
 
